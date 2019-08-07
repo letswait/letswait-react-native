@@ -1,0 +1,13 @@
+{
+  "rules": {
+    "whitespace": [false],
+    "variable-name": [
+      false
+    ],
+    "ban": [
+      true,
+      {"name": "$", "message": "please don't"}
+    ],
+    "array-type": [true, "array-simple"]
+  }
+}

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Let&apos;s Wait requires background tracking to find local users</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>Lets Wait Dating</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.1</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.letswaitdating.letswait</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>letswaitdating</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>10</string>
+	<key>FacebookAppID</key>
+	<string>331108297584040</string>
+	<key>FacebookDisplayName</key>
+	<string>Lets Wait Dating</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+		<string>fbauth2</string>
+		<string>fbshareextension</string>
+	</array>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>localhost</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>This App will not access your Apple Music Library</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>This App does not utilize bluetooth peripherals</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>This App will not access your Calendar</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Let&apos;s Wait would like access the your Camera</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Let&apos;s Wait requires background tracking to find local users</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Let&apos;s Wait requires location tracking to find local users</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Let&apos;s Wait would like access to your Microphone for video recording</string>
+	<key>NSMotionUsageDescription</key>
+	<string>This App will not access your Motion and Fitness data</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Let&apos;s Wait would like access to your Camera Roll</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Let&apos;s Wait would like access to your Camera Roll</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This App will not access Speech Recognition</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>AntDesign.ttf</string>
+		<string>Entypo.ttf</string>
+		<string>EvilIcons.ttf</string>
+		<string>Feather.ttf</string>
+		<string>FontAwesome.ttf</string>
+		<string>FontAwesome5_Brands.ttf</string>
+		<string>FontAwesome5_Regular.ttf</string>
+		<string>FontAwesome5_Solid.ttf</string>
+		<string>Foundation.ttf</string>
+		<string>Ionicons.ttf</string>
+		<string>MaterialIcons.ttf</string>
+		<string>MaterialCommunityIcons.ttf</string>
+		<string>SimpleLineIcons.ttf</string>
+		<string>Octicons.ttf</string>
+		<string>Zocial.ttf</string>
+	</array>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>armv7</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
+</dict>
+</plist>
