@@ -1,5 +1,5 @@
 # Uncomment the next line to define a global platform for your project
-# platform :ios, '9.0'
+platform :ios, '9.3'
 
 target 'LetsWaitDating' do
   # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
@@ -7,22 +7,28 @@ target 'LetsWaitDating' do
 
   # Pods for LetsWaitDating
 
-  pod 'React', :path => '../node_modules/react-native', :subspecs => [
-    'Core',
-    'CxxBridge', # Include this for RN >= 0.47
-    'DevSupport', # Include this to enable In-App Devmenu if RN >= 0.43
-    'RCTActionSheet',
-    'RCTLinkingIOS',
-    'RCTCameraRoll',
-    'RCTGeolocation',
-    'RCTText',
-    'RCTNetwork',
-    'RCTPushNotification',
-    'RCTWebSocket', # Needed for debugging
-    'RCTImage',
-    'RCTAnimation', # Needed for FlatList and animations running on native UI thread
-    # Add any other subspecs you want to use in your project
-  ]
+  pod 'React', :path => '../node_modules/react-native/'
+  pod 'React-Core', :path => '../node_modules/react-native/React'
+  pod 'React-DevSupport', :path => '../node_modules/react-native/React'
+  pod 'React-fishhook', :path => '../node_modules/react-native/Libraries/fishhook'
+
+  pod 'React-RCTActionSheet', :path => '../node_modules/react-native/Libraries/ActionSheetIOS'
+  pod 'React-RCTAnimation', :path => '../node_modules/react-native/Libraries/NativeAnimation'
+  pod 'React-RCTBlob', :path => '../node_modules/react-native/Libraries/Blob'
+  pod 'React-RCTImage', :path => '../node_modules/react-native/Libraries/Image'
+  pod 'React-RCTLinking', :path => '../node_modules/react-native/Libraries/LinkingIOS'
+  pod 'React-RCTNetwork', :path => '../node_modules/react-native/Libraries/Network'
+  pod 'React-RCTSettings', :path => '../node_modules/react-native/Libraries/Settings'
+  pod 'React-RCTText', :path => '../node_modules/react-native/Libraries/Text'
+  pod 'React-RCTVibration', :path => '../node_modules/react-native/Libraries/Vibration'
+  pod 'React-RCTWebSocket', :path => '../node_modules/react-native/Libraries/WebSocket'
+  pod 'React-RCTCameraRoll', :path => '../node_modules/react-native/Libraries/CameraRoll'
+  pod 'React-RCTPushNotification', :path => '../node_modules/react-native/Libraries/PushNotificationIOS'
+
+  pod 'React-cxxreact', :path => '../node_modules/react-native/ReactCommon/cxxreact'
+  pod 'React-jsi', :path => '../node_modules/react-native/ReactCommon/jsi'
+  pod 'React-jsiexecutor', :path => '../node_modules/react-native/ReactCommon/jsiexecutor'
+  pod 'React-jsinspector', :path => '../node_modules/react-native/ReactCommon/jsinspector'
 
    # Third party deps podspec link
   pod 'yoga',
@@ -30,11 +36,11 @@ target 'LetsWaitDating' do
   pod 'DoubleConversion',
     :podspec => "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec",
     :inhibit_warnings => true
-  pod 'Folly',
-    :podspec => "../node_modules/react-native/third-party-podspecs/Folly.podspec",
-    :inhibit_warnings => true
   pod 'glog',
     :podspec => "../node_modules/react-native/third-party-podspecs/glog.podspec",
+    :inhibit_warnings => true
+  pod 'Folly',
+    :podspec => "../node_modules/react-native/third-party-podspecs/Folly.podspec",
     :inhibit_warnings => true
 
   pod 'react-native-camera', path: '../node_modules/react-native-camera'
@@ -45,12 +51,19 @@ target 'LetsWaitDating' do
   pod 'lottie-react-native', :path => '../node_modules/lottie-react-native'
 
   # pod 'react-native-video', :path => '../node_modules/react-native-video'
+  # Manually linking Background Geolocation
+  # Manually linking react-native-cookies
 
   pod 'react-native-safari-view', :podspec => '../node_modules/react-native-safari-view/react-native-safari-view.podspec'
 
-  pod 'react-native-fast-image', :path => '../node_modules/react-native-fast-image'
+  pod 'RNFastImage', :path => '../node_modules/react-native-fast-image'
 
   pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
+
+
+  # pod 'react-native-cookies', :path => '../node_modules/react-native-cookies'
+  
+  pod 'react-native-haptic', :path => '../node_modules/react-native-haptic'
 
   target 'LetsWaitDatingTests' do
     inherit! :search_paths

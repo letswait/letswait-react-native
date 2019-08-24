@@ -6,6 +6,10 @@ export const CHANGE_TOAST = 'CHANGE_TOAST'
 
 export type IStatusBarTheme = 'dark-content' | 'light-content' | 'default'
 
+export const SHOW_MODAL = 'SHOW_MODAL'
+export const DISMISS_MODAL = 'DISMISS_MODAL'
+export const PUSH_SPINNER = 'PUSH_SPINNER'
+
 export const changeStatusBarColor = (color: string = '') => ({
   color,
   type: CHANGE_STATUS_BAR_COLOR,

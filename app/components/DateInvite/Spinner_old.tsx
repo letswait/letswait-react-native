@@ -348,7 +348,8 @@ export default class Spinner extends React.PureComponent<IProps, IState> {
           />
           {this.props.segments.map((segment, i, arr) => (
             <SpinnerSegment
-              source={segment.image}
+              key={i}
+              source={segment.logo}
               position={i as SpinnerSegmentType}
             />
           ))}

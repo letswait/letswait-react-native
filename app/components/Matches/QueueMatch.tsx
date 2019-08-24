@@ -1,23 +1,42 @@
 import React from 'react'
 import {
   Animated,
-  Image,
   TouchableOpacity,
   View,
 } from 'react-native'
 
+import FastImage from 'react-native-fast-image'
+
 import { colors, spacing, type } from '../../../foundation'
 
 interface IProps {
-  source: string
+  source?: string
   onPress: () => any
+  enqueued?: boolean
 }
-export default class Match extends React.PureComponent<IProps> {
+export default class QueueMatch extends React.PureComponent<IProps> {
   constructor(props: IProps) {
     super(props)
   }
   public render() {
-    return (
+    return this.props.enqueued ?
+    (
+      <TouchableOpacity
+        onPress={() => this.props.onPress()}
+        style={style.queueWrapper}
+      >
+        <View style={style.imageWrapper}>
+          <View style={style.imageContainerEnqueued}>
+            {this.props.source ?
+              <FastImage
+                source={{ uri: this.props.source }}
+                style={style.image}
+              /> : null
+            }
+          </View>
+        </View>
+      </TouchableOpacity>
+    ) : (
       <TouchableOpacity
         onPress={() => this.props.onPress()}
         style={style.queueWrapper}
@@ -25,7 +44,7 @@ export default class Match extends React.PureComponent<IProps> {
         <View style={style.shadowHelper}/>
         <View style={style.imageWrapper}>
           <View style={style.imageContainer}>
-            <Image
+            <FastImage
               source={{ uri: this.props.source }}
               style={style.image}
             />
@@ -56,6 +75,15 @@ const style = {
     height: 75,
     borderRadius: 75/2,
     overflow: 'hidden' as 'hidden',
+  },
+  imageContainerEnqueued: {
+    width: 75,
+    height: 75,
+    borderRadius: 75/2,
+    overflow: 'hidden' as 'hidden',
+    borderWidth: 1,
+    borderColor: colors.lilac,
+    borderStyle: 'dashed' as 'dashed',
   },
   shadowHelper: {
     height: 55,

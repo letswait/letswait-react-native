@@ -71,10 +71,10 @@ const style = {
   },
   rightSwipe: {
     height,
-    width: 16,
+    width: 32,
   },
   leftSwipe: {
     height,
-    width: 16,
+    width: 32,
   },
 }

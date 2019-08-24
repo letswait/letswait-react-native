@@ -11,6 +11,8 @@ import {
 
 import Haptic from 'react-native-haptic'
 
+import FastImage from 'react-native-fast-image'
+
 import { colors, spacing, type } from '../../../foundation'
 import { SpinnerInfo, SpinnerSegmentType } from '../../types/spinner'
 
@@ -42,8 +44,10 @@ interface IState {
   spinnable: boolean
   rot: Animated.Value
   lastVelocity: string
+  centerScale: Animated.Value
+  hideImages: boolean
 }
-export default class Spinner extends React.PureComponent<IProps, IState> {
+export default class Spinner extends React.Component<IProps, IState> {
   private spinnerRef: any
   private spinnerValues: ISpinnerValues = {
     initialRotation: 0,
@@ -135,7 +139,9 @@ export default class Spinner extends React.PureComponent<IProps, IState> {
     this.state = {
       spinnable: true,
       rot: new Animated.Value(0),
+      centerScale: new Animated.Value(1),
       lastVelocity: '',
+      hideImages: false,
     }
   }
   private moveSpinner(origin: boolean = false) {
@@ -271,12 +277,13 @@ export default class Spinner extends React.PureComponent<IProps, IState> {
           if(0.005 > velocity && velocity > -0.005) {
             this.spinnerStyles.style.transform = [{ rotate: `${targetRot}rad` }]
             this.updateNativeStyles()
-            this.setState((prevState: IState): IState => {
-              return {
-                ...prevState,
-                spinnable: true,
-              }
-            })
+            this.animateResult()
+            // this.setState((prevState: IState): IState => {
+            //   return {
+            //     ...prevState,
+            //     spinnable: true,
+            //   }
+            // })
           } else {
             this.spinnerStyles.style.transform = [{ rotate: `${newRot}rad` }]
             this.updateNativeStyles()
@@ -329,6 +336,13 @@ export default class Spinner extends React.PureComponent<IProps, IState> {
   private updateNativeStyles() {
     return this.spinnerRef && this.spinnerRef.setNativeProps(this.spinnerStyles)
   }
+  private animateResult() {
+    this.setState({ hideImages: true })
+    Animated.timing(this.state.centerScale, {
+      toValue: 2.82,
+      duration: 500,
+    }).start(() => this.props.onFinish()) // Reveal Options
+  }
   public render() {
     return (
       <View
@@ -344,11 +358,13 @@ export default class Spinner extends React.PureComponent<IProps, IState> {
         >
           <Image
             style={style.spinnerImage}
-            source={require('../../../assets/images/spinner.png')}
+            source={require('../../assets/images/spinner.png')}
           />
           {this.props.segments.map((segment, i, arr) => (
             <SpinnerSegment
-              source={segment.image}
+              key={i}
+              source={segment.logo}
+              hideImage={!!this.state.hideImages}
               position={i as SpinnerSegmentType}
             />
           ))}
@@ -356,16 +372,33 @@ export default class Spinner extends React.PureComponent<IProps, IState> {
         <View style={style.innerWrapper} pointerEvents="none">
           <View style={style.tickerContainer}>
             <View style={style.ticker}/>
-            <View style={style.center}>
-              <Text>
-                {this.state.lastVelocity}
-              </Text>
-              {/* <Image/> */}
-              {/* <Text> */}
-
-              {/* </Text> */}
-            </View>
+            <Animated.View
+              style={{ ...style.center, transform: [
+                { scale: this.state.centerScale },
+              ]}}
+            />
           </View>
+          {this.props.result ?
+            <Animated.View
+              style={{
+                ...style.resultWrapper,
+                opacity: this.state.centerScale.interpolate({
+                  inputRange: [1, 1.5, 2.82],
+                  outputRange: [0, 0.2, 1],
+                  extrapolate: 'clamp',
+                }),
+              }}
+            >
+              <FastImage
+                source={{ uri: this.props.segments[this.props.result].logo }}
+                style={style.resultLogo}
+                resizeMode={'contain'}
+              />
+              <Text style={style.resultDeal}>
+                {this.props.segments[this.props.result].message}
+              </Text>
+            </Animated.View> : null
+          }
         </View>
       </View>
     )
@@ -391,6 +424,32 @@ const style = {
     position: 'absolute' as 'absolute',
     justifyContent: 'center' as 'center',
     alignItems: 'center' as 'center',
+  },
+  resultWrapper: {
+    left: '50%',
+    top: '50%',
+    width: 254,
+    height: 254,
+    position: 'absolute' as 'absolute',
+    transform: [
+      { translateX: 254/2 * -1 },
+      { translateY: 254/2 * -1 },
+    ],
+    display: 'flex' as 'flex',
+    flexDirection: 'column' as 'column',
+    alignItems: 'center' as 'center',
+    justifyContent: 'center' as 'center',
+  },
+  resultLogo: {
+    width: '100%',
+    height: 110,
+    marginBottom: spacing.small,
+  },
+  resultDeal: {
+    ...type.regular,
+    color: colors.lavender,
+    maxWidth: 150,
+    textAlign: 'center' as 'center',
   },
   tickerContainer: {
     width: 85,

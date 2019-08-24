@@ -135,7 +135,7 @@ export default class WelcomeScreen extends React.PureComponent<IProps,{}> {
         resizeMode="cover"
       >
         <LinearGradient
-          colors={[colors.transparent, 'rgba(255,255,255,81)', colors.white]}
+          colors={[colors.transparent, 'rgba(255,255,255, 0.8)', colors.white]}
           locations={[0, 0.45, 1]}
           angle={90}
           style={style.whiteGradient}

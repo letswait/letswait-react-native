@@ -6,12 +6,14 @@ import {
   Easing,
   Image,
   Linking,
+  Modal,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native'
 
 import BackgroundGeolocation from '@mauron85/react-native-background-geolocation'
+import FastImage from 'react-native-fast-image';
 import { isIphoneX } from 'react-native-iphone-x-helper'
 import LinearGradient from 'react-native-linear-gradient'
 import PushNotification from 'react-native-push-notification'
@@ -22,15 +24,20 @@ import SwipeNavigation from './SwipeNavigation'
 import config from '../../../config'
 import { colors, spacing, type } from '../../../foundation'
 import BackButton from '../../components/Buttons/BackButton'
-import { authedApi } from '../../lib/api'
+import { api, authedApi } from '../../lib/api'
 
 import { ObjectOf } from '../../types/helpers'
 import AppToast from './AppToast'
 
+import ChatComponent from './Chat/Chat'
 import FeedComponent from './Feed/Feed'
 import MatchesComponent from './Matches/Matches'
 import ProfileComponent from './Profile/Profile'
 import SettingsComponent from './Settings/Settings'
+
+import MatchMakerModal from '../MatchMakerModal/MatchMakerModalComponent';
+
+import { dismissModal } from '../../actions/navigation/modal';
 
 const { width, height } = Dimensions.get('window')
 
@@ -40,13 +47,19 @@ const feedIcon = require('../../assets/ui/feed-icon.png')
 interface IProps {
   changeThemeLight: () => any
   currentRoute: string
+  getMatches: () => any
+  pushChatMatch: (match: any) => any
   push: (route: string) => any
   showToast: (message: string, action: Function, duration?: number) => any
+  dismissModal: () => any
+  activeChat: any
   toast: {
     message: string
     duration: number
     action: Function,
-  }
+  },
+  spinner: any,
+  modal: string | null,
   user?: any
 }
 interface IState {
@@ -55,6 +68,11 @@ interface IState {
   location: 0 | 1 | 2,
   locationIsRunning: boolean
   notification: boolean,
+  activeMatch: {
+    user: any,
+    candidate: any,
+    match: any,
+  } | undefined
 }
 export default class AppRouter extends React.Component<IProps, IState> {
   public state: IState = {
@@ -63,6 +81,7 @@ export default class AppRouter extends React.Component<IProps, IState> {
     location: 0,
     locationIsRunning: false,
     notification: false,
+    activeMatch: undefined,
   }
   private profilePage: any
   private settingsPage: any
@@ -70,6 +89,7 @@ export default class AppRouter extends React.Component<IProps, IState> {
   private matchPage: any
   private chatPage: any
   public componentDidMount() {
+    this.props.getMatches()
     this.props.changeThemeLight()
     PushNotification.checkPermissions((permissions) => {
       this.setState({ notification: permissions.alert || false })
@@ -90,18 +110,18 @@ export default class AppRouter extends React.Component<IProps, IState> {
       distanceFilter: 50,
       notificationTitle: 'Background tracking',
       notificationText: 'enabled',
-      debug: true,
+      debug: false,
       startOnBoot: true,
       stopOnTerminate: false,
       locationProvider: BackgroundGeolocation.DISTANCE_FILTER_PROVIDER,
       interval: 10000,
       saveBatteryOnBackground: true,
-      url: `${config.api}/api/profile/post-geolocation`,
-      httpHeaders: Object.assign({}, authedApi.headers),
-      postTemplate: {
-        lat: '@latitude',
-        lon: '@longitude',
-      },
+      // url: `${config.api}/api/profile/post-geolocation`,
+      // httpHeaders: Object.assign({}, authedApi.headers),
+      // postTemplate: {
+      //   lat: '@latitude',
+      //   lon: '@longitude',
+      // },
     });
 
     BackgroundGeolocation.on('location', (location) => {
@@ -109,6 +129,19 @@ export default class AppRouter extends React.Component<IProps, IState> {
       // to perform long running operation on iOS
       // you need to create background task
       BackgroundGeolocation.startTask((taskKey) => {
+        const {
+          latitude,
+          longitude,
+          bearing,
+          accuracy,
+          altitude,
+          provider,
+          speed,
+          time,
+        } = location
+        if(speed <= 5) {
+          authedApi.post('/api/profile/post-geolocation', [longitude, latitude]).then()
+        }
         // execute long running task
         // eg. ajax post location
         // IMPORTANT: task has to be ended by endTask
@@ -174,10 +207,6 @@ export default class AppRouter extends React.Component<IProps, IState> {
   }
   public checkGeolocation() {
     BackgroundGeolocation.checkStatus((status) => {
-      console.log('[INFO] BackgroundGeolocation service is running', status.isRunning);
-      console.log('[INFO] BackgroundGeolocation services enabled', status.locationServicesEnabled);
-      console.log(`[INFO] BackgroundGeolocation auth status: ${status.authorization}`);
-
       this.setState({ location: status.authorization })
 
       if(status.authorization === BackgroundGeolocation.AUTHORIZED && status.locationServicesEnabled) {
@@ -254,7 +283,7 @@ export default class AppRouter extends React.Component<IProps, IState> {
       case '/app/profile': return 0.75
       case '/app': return 0.5
       case '/app/matches': return 0.25
-      case '/app/matches/chat': return 0
+      case '/app/chat': return 0
       default: return 0.5
     }
   }
@@ -264,7 +293,7 @@ export default class AppRouter extends React.Component<IProps, IState> {
       case 0.75: return '/app/profile'
       case 0.5: return '/app'
       case 0.25: return '/app/matches'
-      case 0: return '/app/matches/chat'
+      case 0: return '/app/chat'
       default: return '/app'
     }
   }
@@ -305,7 +334,7 @@ export default class AppRouter extends React.Component<IProps, IState> {
         { rotate: rotation },
       ],
     }
-    const navButtonWrapper = (n: number) => {
+    const navButtonWrapper = (n: number, hideOverflow: boolean = true) => {
       const stabalization = this.state.navRotation.interpolate({
         inputRange: [0, 0.25, 0.5, 0.75, 1],
         outputRange: [
@@ -318,6 +347,7 @@ export default class AppRouter extends React.Component<IProps, IState> {
       })
       return  {
         ...style.navButtonWrapper,
+        ...(hideOverflow ? null : { overflow: 'visible' as 'visible' }),
         transform: [
           { rotate: stabalization },
         ],
@@ -402,6 +432,15 @@ export default class AppRouter extends React.Component<IProps, IState> {
         ],
       }
     }
+
+    const matchedUser = this.props.activeChat ?
+      this.props.activeChat.userProfiles[0]._id === this.props.user._id ?
+        this.props.activeChat.userProfiles[1] :
+        this.props.activeChat.userProfiles[0] :
+      null
+
+    console.log(matchedUser)
+
     return (
       <View style={style.appWrapper}>
         <SwipeNavigation
@@ -442,22 +481,44 @@ export default class AppRouter extends React.Component<IProps, IState> {
             shouldUpdate={this.props.currentRoute.indexOf('/app/settings') !== -1}
           />
         </Animated.View>
+        <Animated.View
+          style={screen(-2)}
+          pointerEvents={this.props.currentRoute === '/app/chat' ? 'auto' : 'none'}
+        >
+          <ChatComponent
+            shouldUpdate={this.props.currentRoute.indexOf('/app/chat') !== -1}
+          />
+        </Animated.View>
         <View style={style.navContainer}>
           <Animated.View style={navBackground}>
             <View style={buttonPosition(-2)} pointerEvents="box-none">
-              <Animated.View style={navButtonWrapper(-2)} pointerEvents="box-none">
-                <TouchableOpacity
-                  onPress={() => this.props.push('/app/matches/chat')}
-                  style={style.navButton}
-                >
-                  <Feather
-                    name="message-circle"
-                    size={26}
-                    color={softwhite}
-                    style={{ width: 26 }}
-                  />
-                  <Animated.Text style={navText(-2)}>Chat</Animated.Text>
-                </TouchableOpacity>
+              <Animated.View style={navButtonWrapper(-2, false)} pointerEvents="box-none">
+                {this.props.currentRoute === '/app/chat' && !!matchedUser ?
+                  <TouchableOpacity
+                    onPress={() => this.props.push('/app/chat')}
+                    style={style.chatHeader}
+                  >
+                    <FastImage
+                      style={style.chatHeaderImage}
+                      source={{ uri: matchedUser.profile.images[0] }}
+                    />
+                    <Text style={style.chatHeaderText}>
+                      {matchedUser.name}
+                    </Text>
+                  </TouchableOpacity> : null
+                  // <TouchableOpacity
+                  //   onPress={() => this.props.push('/app/chat')}
+                  //   style={style.navButton}
+                  // >
+                  //   <Feather
+                  //     name="search"
+                  //     size={26}
+                  //     color={softwhite}
+                  //     style={{ width: 26 }}
+                  //   />
+                  //   <Animated.Text style={navText(-2)}>Search</Animated.Text>
+                  // </TouchableOpacity>
+                }
               </Animated.View>
             </View>
             <View style={buttonPosition(-1)} pointerEvents="box-none">
@@ -466,12 +527,20 @@ export default class AppRouter extends React.Component<IProps, IState> {
                   onPress={() => this.props.push('/app/matches')}
                   style={style.navButton}
                 >
-                  <Feather
-                    name="inbox"
-                    size={26}
-                    color={softwhite}
-                    style={{ width: 26 }}
-                  />
+                  {this.props.currentRoute === '/app/chat' ?
+                    <Feather
+                      name="chevron-left"
+                      size={26}
+                      color={softwhite}
+                      style={{ width: 26 }}
+                    /> :
+                    <Feather
+                      name="inbox"
+                      size={26}
+                      color={softwhite}
+                      style={{ width: 26 }}
+                    />
+                  }
                   <Animated.Text style={navText(-1)}>Matches</Animated.Text>
                 </TouchableOpacity>
               </Animated.View>
@@ -519,6 +588,15 @@ export default class AppRouter extends React.Component<IProps, IState> {
           </Animated.View>
         </View>
         <AppToast {...this.props.toast} />
+        <Modal visible={!!this.props.modal && this.props.modal !== 'null'} animationType={'slide'} transparent>
+          {this.props.modal && this.props.modal === 'spinner' && (
+            <MatchMakerModal
+              pushChat={(match: any, candidate: any) => this.props.pushChatMatch(match)}
+              dismiss={() => this.props.dismissModal()}
+              spinner={this.props.spinner}
+            />
+          )}
+        </Modal>
       </View>
     )
   }
@@ -605,5 +683,24 @@ const style = {
     padding: 16,
     paddingTop: isIphoneX ? 136 : 112,
     paddingBottom: 0,
+  },
+  chatHeader: {
+    display: 'flex' as 'flex',
+    flexDirection: 'column' as 'column',
+    alignItems: 'center' as 'center',
+    justifyContent: 'center' as 'center',
+  },
+  chatHeaderImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    overflow: 'hidden' as 'hidden',
+    marginBottom: 2,
+  },
+  chatHeaderText: {
+    ...type.small,
+    fontWeight: '600' as '600',
+    textAlign: 'center' as 'center',
+    color: colors.white,
   },
 }

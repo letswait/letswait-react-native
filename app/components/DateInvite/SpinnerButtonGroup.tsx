@@ -11,7 +11,7 @@ import SpinnerButtonSmall from './SpinnerButtonSmall'
 
 interface IProps {
   onDeny: () => any,
-  onRespin: () => any,
+  onRespin?: () => any,
   onAccept: () => any,
 }
 export default class SpinnerButtonGroup extends React.PureComponent<IProps> {
@@ -27,11 +27,16 @@ export default class SpinnerButtonGroup extends React.PureComponent<IProps> {
           icon={'x'}
         />
         <View style={{ width: 32 }}/>
-        <SpinnerButtonSmall
-          onPress={() => this.props.onRespin()}
-          backgroundColor={'rgb(74,144,226)'}
-          icon={'refresh-cw'}
-        />
+        <View
+          style={!this.props.onRespin ? { opacity: 0 } : { opacity: 1 }}
+          pointerEvents={!this.props.onRespin ? 'auto' : 'none'}
+        >
+          <SpinnerButtonSmall
+            onPress={() => !!this.props.onRespin && this.props.onRespin()}
+            backgroundColor={'rgb(74,144,226)'}
+            icon={'refresh-cw'}
+          />
+        </View>
         <View style={{ width: 32 }}/>
         <SpinnerButton
           onPress={() => this.props.onAccept()}

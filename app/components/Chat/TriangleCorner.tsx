@@ -8,20 +8,16 @@ import { colors, spacing } from '../../../foundation';
 interface IProps {
   direction: 'left' | 'right'
 }
-export default class TriangleCorner extends React.Component<IProps> {
+export default class TriangleCorner extends React.PureComponent<IProps> {
   public render() {
+    const position = { right: 8 }
+    const wrapperStyle = {
+      ...style.container,
+      ...position,
+    }
     return (
       <View
-        style={{
-          ...style.container,
-          ...(this.props.direction === 'left' ?
-            {
-              left: 2,
-            } : {
-              right: 2,
-            }
-          ),
-        }}
+        style={wrapperStyle}
       >
         <View
           style={{
@@ -57,7 +53,7 @@ const style = {
     width: 16,
     height: 16,
     position: 'absolute' as 'absolute',
-    bottom: 0,
+    bottom: 0.5,
   },
   triangle: {
     width: 0,

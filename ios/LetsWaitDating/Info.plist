@@ -2,12 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Let&apos;s Wait requires background tracking to find local users</string>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>location</string>
-	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -40,7 +34,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>10</string>
+	<string>12</string>
 	<key>FacebookAppID</key>
 	<string>331108297584040</string>
 	<key>FacebookDisplayName</key>
@@ -74,19 +68,21 @@
 	<key>NSCalendarsUsageDescription</key>
 	<string>This App will not access your Calendar</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Let&apos;s Wait would like access the your Camera</string>
+	<string>Let's Wait would like access the your Camera</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Let's Wait requires background tracking to find local users</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Let&apos;s Wait requires background tracking to find local users</string>
+	<string>Let's Wait requires background tracking to find local users</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Let&apos;s Wait requires location tracking to find local users</string>
+	<string>Let's Wait requires location tracking to find local users</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Let&apos;s Wait would like access to your Microphone for video recording</string>
+	<string>Let's Wait would like access to your Microphone for video recording</string>
 	<key>NSMotionUsageDescription</key>
 	<string>This App will not access your Motion and Fitness data</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Let&apos;s Wait would like access to your Camera Roll</string>
+	<string>Let's Wait would like access to your Camera Roll</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Let&apos;s Wait would like access to your Camera Roll</string>
+	<string>Let's Wait would like access to your Camera Roll</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>This App will not access Speech Recognition</string>
 	<key>UIAppFonts</key>
@@ -106,6 +102,10 @@
 		<string>SimpleLineIcons.ttf</string>
 		<string>Octicons.ttf</string>
 		<string>Zocial.ttf</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

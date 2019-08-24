@@ -1,8 +1,13 @@
 import { ApiResponse, ApisauceConfig, create } from 'apisauce'
 import { Platform } from 'react-native'
+// import CookieManager from 'react-native-cookies'
 import config from '../../config'
 import { IMediaReference } from '../types/photos'
 import { retrieveToken, storeToken } from './asyncStorage'
+
+// CookieManager.get(config.api).then((res: any) => {
+//   console.log(`CookieManager.get() => ${JSON.stringify(res)}`)
+// })
 
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -38,9 +43,29 @@ const api = create({
 } as ApisauceConfig)
 
 api.addAsyncRequestTransform(request => async () => {
+  // CookieManager.get(config.api).then((res: any) => {
+  //   console.log(`CookieManager.get() => ${res}`)
+  // })
   request.headers.uuid = await collectUUID()
   request.withCredentials = true
 })
+
+// api.addResponseTransform((res) => {
+  // if(!res.headers) return
+  // const cookies = (res as any).headers['set-cookie']
+  // if(!cookies || !cookies.length) return
+  // for(let i = cookies.length; i--;) {
+  //   CookieManager.setFromResponse(
+  //     config.api,
+  //     cookies[i],
+  //   ).then((didStoreCookie: boolean) => {
+  //     console.log(`CookieManager.setFromResponse(${cookies[i]}) => ${res}`)
+  //     CookieManager.get(config.api).then((res: any) => {
+  //       console.log(`CookieManager.get() => ${res}`)
+  //     })
+  //   })
+  // }
+// })
 
 const authedApi = create({
   baseURL: config.api,
@@ -48,6 +73,9 @@ const authedApi = create({
 })
 
 authedApi.addAsyncRequestTransform(request => async () => {
+  // CookieManager.get(config.api).then((res: any) => {
+  //   console.log(`CookieManager.get() => ${res}`)
+  // })
   request.headers.uuid = await collectUUID()
   request.withCredentials = true
   request.headers.authToken = await retrieveToken('authToken')
@@ -66,6 +94,9 @@ refreshApi.addAsyncRequestTransform(request => async () => {
 })
 
 export { api, authedApi, refreshApi }
+
+// function saveCookies() {
+// }
 
 interface IMediaUploadReturn {
   err: boolean,

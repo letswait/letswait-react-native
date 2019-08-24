@@ -8,6 +8,8 @@ import {
   View,
 } from 'react-native'
 
+import { ifIphoneX } from 'react-native-iphone-x-helper'
+
 import Feather from 'react-native-vector-icons/Feather'
 import { colors, spacing, type } from '../../../foundation'
 import { IMediaReference } from '../../types/photos';
@@ -136,6 +138,11 @@ const style = {
   container: {
     width: '100%',
     flexDirection: 'column' as 'column',
+    ...ifIphoneX({
+      marginBottom: 24,
+    },           {
+      marginBottom: 4,
+    }),
   },
   topBar: {
     height: 1,
@@ -168,7 +175,7 @@ const style = {
   },
   input: {
     ...type.small,
-    color: colors.wisteria,
+    color: colors.cosmos,
     margin: 7,
     marginTop: 2,
     marginLeft: spacing.tiny,

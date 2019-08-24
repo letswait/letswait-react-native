@@ -4,6 +4,9 @@ import {
   CHANGE_STATUS_BAR_COLOR,
   CHANGE_STATUS_BAR_THEME,
   CHANGE_TOAST,
+  DISMISS_MODAL,
+  PUSH_SPINNER,
+  SHOW_MODAL,
 } from '../actions/navigation'
 
 const initialStatusBarState = {
@@ -28,4 +31,19 @@ export const toast = (state = initialToastState, action: AnyAction) => {
   return action.type === CHANGE_TOAST ?
     { message: action.message, action: action.action, duration: action.duration } :
     { ...state }
+}
+
+export const modal = (state = null, action: AnyAction) => {
+  switch(action.type) {
+    case SHOW_MODAL: return action.modalType
+    case DISMISS_MODAL: return null
+    default: return `${state}`
+  }
+}
+
+export const spinner = (state: any | null = null, action: AnyAction) => {
+  switch(action.type) {
+    case PUSH_SPINNER: return action.spinner
+    default: return state !== null ? { ...state } : null
+  }
 }
