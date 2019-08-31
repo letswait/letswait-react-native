@@ -50,6 +50,8 @@ target 'LetsWaitDating' do
   pod 'lottie-ios', :path => '../node_modules/lottie-ios'
   pod 'lottie-react-native', :path => '../node_modules/lottie-react-native'
 
+  pod 'react-native-maps', :path => '../node_modules/react-native-maps'
+
   # pod 'react-native-video', :path => '../node_modules/react-native-video'
   # Manually linking Background Geolocation
   # Manually linking react-native-cookies
@@ -60,6 +62,7 @@ target 'LetsWaitDating' do
 
   pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
 
+  pod 'react-native-heic-converter', :path => '../node_modules/react-native-heic-converter'
 
   # pod 'react-native-cookies', :path => '../node_modules/react-native-cookies'
   
@@ -87,6 +90,11 @@ end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
+    if target.name == 'react-native-google-maps'
+      target.build_configurations.each do |config|
+        config.build_settings['CLANG_ENABLE_MODULES'] = 'No'
+      end
+    end
     if target.name == "React"
       target.remove_from_project
     end

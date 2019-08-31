@@ -1,8 +1,12 @@
 /* global __DEV__ */
 const config: any = {}
 
-// config.api = 'https://letswait.ngrok.io'
-config.api = 'https://lets-wait-staging.herokuapp.com'
+config.api = 'https://letswait.ngrok.io'
+// config.api = 'https://lets-wait-staging.herokuapp.com'
+config.socket = 'https://letswait.ngrok.io'
+// config.socket = 'lets-wait-staging.herokuapp.com'
+
+
 // config.api = 'https://lets-wait-staging.herokuapp.com'
 // if(__DEV__) {
   // config.api = 'https://letswait.ngrok.io'

@@ -12,11 +12,16 @@ export const PUSH_ENQUEUE = 'PUSH_ENQUEUE'
 export const PUSH_UNINITIALIZED = 'PUSH_UNINITIALIZED'
 export const PUSH_CHAT_MATCH = 'PUSH_CHAT_MATCH'
 
+export const PUSH_MATCHED_CHAT = 'PUSH_MATCHED_CHAT'
+export const PUSH_ENQUEUED_CHAT = 'PUSH_ENQUEUED_CHAT'
+
 import { ApiResponse } from 'apisauce'
 import { push } from 'connected-react-router'
 import { ThunkDispatch } from 'redux-thunk'
 
 import { authedApi } from '../../lib/api'
+import { storeToken } from '../../lib/asyncStorage';
+
 import { Alert } from 'react-native';
 
 export const setMatchMessage = (message: string = '') => ({
@@ -37,54 +42,18 @@ export function getMatches() {
   return (dispatch: ThunkDispatch<{},{}, any>) => {
     authedApi.get('/api/matches/get-matches').then((res: ApiResponse<any>) => {
       if(res.ok && res.data) {
-        dispatch(pushMatches(res.data))
-        dispatch(setMatchMessage(res.data.message))
+        const didStoreMatches = storeToken('matches', JSON.stringify(res.data))
+        if(didStoreMatches) {
+          dispatch(pushMatches(res.data))
+          dispatch(setMatchMessage(res.data.message))
+        } else {
+          Alert.alert('Could not save matches')
+        }
       } else {
         dispatch(resetMatches())
         dispatch(setMatchMessage('Could not Load Matches'))
       }
     })
-  }
-}
-
-export const changeActiveChat = (match: number) => ({
-  match,
-  type: PUSH_CHAT,
-})
-export function openChat(matchId: any) {
-  return (dispatch: ThunkDispatch<{},{}, any>, getState: Function) => {
-    const { enqueuedMatches, uninitializedMatches, chatMatches } = getState()
-    let chatMatch = null
-    if(!chatMatch && enqueuedMatches.length) {
-      for(let i = enqueuedMatches.length; i--;) {
-        if(enqueuedMatches[i]._id === matchId) {
-          chatMatch = enqueuedMatches[i]
-          break
-        }
-      }
-    }
-    if(!chatMatch && uninitializedMatches.length) {
-      for(let i = uninitializedMatches.length; i--;) {
-        if(uninitializedMatches[i]._id === matchId) {
-          chatMatch = uninitializedMatches[i]
-          break
-        }
-      }
-    }
-    if(!chatMatch && chatMatches.length) {
-      for(let i = chatMatches.length; i--;) {
-        if(chatMatches[i]._id === matchId) {
-          chatMatch = chatMatches[i]
-          break
-        }
-      }
-    }
-    if(!chatMatch) {
-      dispatch(push('/app/matches'))
-    } else {
-      dispatch(push('/app/chat'))
-      dispatch(changeActiveChat(chatMatch))
-    }
   }
 }
 

@@ -12,7 +12,7 @@ import StatusBar from './app/containers/StatusBar/StatusBar'
 import NotificationService from './app/lib/NotificationService'
 
 // Routing
-import { Alert } from 'react-native'
+import { Alert, Platform } from 'react-native'
 import { PushNotification } from 'react-native-push-notification'
 import AppRouter from './app/containers/AppRouter/AppRouter'
 import SetupRouter from './app/containers/SetupRouter/SetupRouter'
@@ -22,25 +22,31 @@ import { authedApi } from './app/lib/api'
 import { retrieveToken, storeToken } from './app/lib/asyncStorage'
 
 export default class App extends React.Component {
-  private onRegister = async (token: { os: string, token: string}) => {
+  constructor(props: any) {
+    super(props)
+    this.notificationService = new NotificationService(
+      this.onRegister.bind(this),
+      this.onNotification.bind(this),
+    )
+    this.notificationService.configure(
+      this.onRegister.bind(this),
+      this.onNotification.bind(this),
+    )
+  }
+  public onRegister = async ({ token, os }: { token: string, os: string }) => {
     const localToken = await retrieveToken('notificationToken')
-    if(!localToken || localToken !== token.token) {
-      const res: any = await authedApi.post(
-        `/api/user/post-sns-token?token=${token.token}&os=${token.os}`,
-      )
+    if(!localToken || localToken !== token) {
+      const res: any = await authedApi.post('/api/user/post-sns-token', { token, os })
       if(res.ok && res.data && res.data.accepted) {
-        const storedToken = await storeToken('notificationToken', token.token)
+        const storedToken = await storeToken('notificationToken', token)
         if(!storedToken) Alert.alert('Could Not Store Token')
       }
     }
   }
-  private onNotification = (notification: PushNotification) => {
+  public onNotification = (notification: PushNotification) => {
     console.log('Got Push Notification:', notification)
   }
-  private notificationService = new NotificationService(
-    this.onRegister,
-    this.onNotification,
-  )
+  public notificationService: any
   public render() {
     return (
       <Provider store={store}>

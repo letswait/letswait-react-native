@@ -2,6 +2,7 @@ import React from 'react'
 import {
   Animated,
   Easing,
+  Keyboard,
   Modal,
   TextInput,
   TouchableOpacity,
@@ -23,17 +24,49 @@ interface IProps {
 }
 interface IState {
   message: string
-  modalVisible: boolean,
+  modalVisible: boolean
   preparedModal: 'camera' | 'cameraRoll' | ''
+  keyboardVisible: Animated.Value
 }
 export default class ChatInput extends React.PureComponent<IProps, IState> {
+  public keyboardDidShowListener: any
+  public keyboardDidHideListener: any
   constructor(props: IProps) {
     super(props)
     this.state = {
       message: '',
       modalVisible: false,
       preparedModal: '',
+      keyboardVisible: new Animated.Value(0),
     }
+  }
+  public componentDidMount() {
+    this.keyboardDidShowListener = Keyboard.addListener(
+      'keyboardWillShow',
+      () => this.keyboardDidShow(),
+    );
+    this.keyboardDidHideListener = Keyboard.addListener(
+      'keyboardWillHide',
+      () => this.keyboardDidHide(),
+    );
+  }
+  public componentWillUnmount() {
+    this.keyboardDidShowListener.remove();
+    this.keyboardDidHideListener.remove();
+  }
+  public keyboardDidShow() {
+    Animated.timing(this.state.keyboardVisible, {
+      toValue: 1,
+      duration: 300,
+      easing: Easing.inOut(Easing.ease),
+    }).start()
+    // this.setState({ keyboardVisible: true })
+  }
+  public keyboardDidHide() {
+    Animated.timing(this.state.keyboardVisible, {
+      toValue: 0,
+      duration: 300,
+    }).start()
   }
   public openModal(name: 'camera' | 'cameraRoll' | '') {
     if(!this.state.modalVisible && name && !!name.length) {
@@ -70,9 +103,36 @@ export default class ChatInput extends React.PureComponent<IProps, IState> {
       }
     })
   }
+  public onSend() {
+    if(this.state.message) {
+      this.props.onSend(this.state.message)
+      this.setState({ message: '' })
+    }
+  }
   public render() {
+    const sendIconWrapper = {
+      ...style.sendIconWrapper,
+      opacity: this.state.message ? 1 : 0.4,
+    }
+    const container = {
+      ...style.container,
+      ...ifIphoneX({
+        marginBottom: this.state.keyboardVisible.interpolate({
+          inputRange: [0, 1],
+          outputRange: [40, 0],
+          extrapolate: 'clamp',
+        }),
+        // marginBottom: this.state.keyboardVisible ? 12 : 40,
+      },           {
+        marginBottom: this.state.keyboardVisible.interpolate({
+          inputRange: [0, 1],
+          outputRange: [12, 0],
+          extrapolate: 'clamp',
+        }),
+      }),
+    }
     return (
-      <View style={style.container}>
+      <Animated.View style={container}>
         <View style={style.topBar}/>
         <View style={style.contentWrapper}>
           <TouchableOpacity
@@ -87,7 +147,7 @@ export default class ChatInput extends React.PureComponent<IProps, IState> {
           >
             <Feather name="image" color={colors.white} size={20}/>
           </TouchableOpacity>
-          <View style={style.inputContainer}>
+          <View style={style.inputContainer} pointerEvents="box-none">
             <TextInput
               style={style.input}
               value={this.state.message}
@@ -96,12 +156,12 @@ export default class ChatInput extends React.PureComponent<IProps, IState> {
               numberOfLines={1}
             />
             <TouchableOpacity
-              style={style.sendIconWrapper}
-              onPress={() => this.props.onSend(this.state.message)}
+              style={sendIconWrapper}
+              onPress={() => this.onSend()}
             >
               <Feather
                 name="send"
-                color={colors.wisteria}
+                color={'#A372E2'}
                 size={spacing.base}
               />
             </TouchableOpacity>
@@ -129,7 +189,7 @@ export default class ChatInput extends React.PureComponent<IProps, IState> {
             ),
           } as any)[this.state.preparedModal]}
         </Modal>
-      </View>
+      </Animated.View>
     )
   }
 }
@@ -138,11 +198,6 @@ const style = {
   container: {
     width: '100%',
     flexDirection: 'column' as 'column',
-    ...ifIphoneX({
-      marginBottom: 24,
-    },           {
-      marginBottom: 4,
-    }),
   },
   topBar: {
     height: 1,
@@ -156,10 +211,10 @@ const style = {
     alignItems: 'flex-end' as 'flex-end',
   },
   actionButtonContainer: {
-    width: 40,
+    width: 46,
     height: 34,
     borderRadius: 17,
-    backgroundColor: colors.wisteria,
+    backgroundColor: '#A372E2',
     justifyContent: 'center' as 'center',
     alignItems: 'center' as 'center',
     marginRight: spacing.tiny,
@@ -168,7 +223,7 @@ const style = {
     borderRadius: 17,
     flex: 1,
     backgroundColor: colors.white,
-    borderColor: colors.wisteria,
+    borderColor: '#A372E2',
     borderWidth: 1,
     flexDirection: 'row' as 'row',
     alignItems: 'flex-end' as 'flex-end',
@@ -184,8 +239,8 @@ const style = {
     maxHeight: 300,
   },
   sendIconWrapper: {
-    margin: 4,
-    marginLeft: 0,
-    marginRight: spacing.tiny,
+    padding: 4,
+    paddingRight: 8,
+    zIndex: 1,
   },
 }

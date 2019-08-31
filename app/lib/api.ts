@@ -9,6 +9,10 @@ import { retrieveToken, storeToken } from './asyncStorage'
 //   console.log(`CookieManager.get() => ${JSON.stringify(res)}`)
 // })
 
+// import io from 'socket.io-client'
+
+// const socket = io.connect(config.api)
+
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     // tslint:disable-next-line: no-bitwise

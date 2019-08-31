@@ -26,24 +26,31 @@ interface IProps {
   uninitializedMatches: any[]
   chatMatches: any[]
   message: string
+  disablePrerender?: boolean
   getMatches: () => any
   openChat: (matchId: string) => any
 }
-const matchQueue = [
-  // tslint:disable-next-line: max-line-length
-  { img: 'https://letswait-development.s3.amazonaws.com/uploads/profile/72tPYUE9FEif2sXIrTPyQesN162SAY3gF6t1BFUgYyNVkEwnAYNMMHzmU5CzGxYd.jpg' },
-]
+interface IState {
+  prerendered: boolean
+}
 
-export default class MatchesComponent extends React.Component<IProps> {
+export default class MatchesComponent extends React.Component<IProps, IState> {
+  public state: IState = {
+    prerendered: false,
+  }
   constructor(props: IProps) {
     super(props)
   }
   public shouldComponentUpdate() {
-    return this.props.shouldUpdate
+    if(!this.state.prerendered && !this.props.disablePrerender) {
+      this.setState({ prerendered: true })
+      return true
+    }
+    return !!this.props.shouldUpdate
   }
-  public componentDidMount() {
-    this.props.getMatches()
-  }
+  // public componentDidMount() {
+  //   this.props.getMatches()
+  // }
   public render() {
     return (
       <View style={style.matchWrapper}>
@@ -97,7 +104,7 @@ export default class MatchesComponent extends React.Component<IProps> {
               match.userProfiles[0]
             let lastChatMessage: string = ''
             const lastChatOwned: boolean = lastChat && lastChat.user === this.props.user._id
-            if(!!lastChat) {
+            if(!!lastChat && !!lastChat.message) {
               if(!!lastChat.message.location) {
                 lastChatMessage =
                   // tslint:disable-next-line: max-line-length

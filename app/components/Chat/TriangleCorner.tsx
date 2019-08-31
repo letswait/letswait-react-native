@@ -10,7 +10,7 @@ interface IProps {
 }
 export default class TriangleCorner extends React.PureComponent<IProps> {
   public render() {
-    const position = { right: 8 }
+    const position = this.props.direction === 'left' ? { left: 6 } : { right: 6 }
     const wrapperStyle = {
       ...style.container,
       ...position,
@@ -26,18 +26,18 @@ export default class TriangleCorner extends React.PureComponent<IProps> {
               {
                 transform: [
                   { rotate: '180deg' },
-                  { translateY: -0.33 },
+                  // { translateY: -0.33 },
                 ],
                 borderTopColor: colors.lilac,
-                borderRightWidth: spacing.small,
+                borderRightWidth: 24,
                 borderRightColor: 'transparent',
               } : {
                 transform: [
                   { rotate: '180deg' },
-                  { translateY: -0.33 },
+                  // { translateY: -0.33 },
                 ],
                 borderTopColor: colors.lavender,
-                borderLeftWidth: spacing.small,
+                borderLeftWidth: 24,
                 borderLeftColor: 'transparent',
               }
             ),
@@ -50,16 +50,16 @@ export default class TriangleCorner extends React.PureComponent<IProps> {
 
 const style = {
   container: {
-    width: 16,
-    height: 16,
+    width: 24,
+    height: 24,
     position: 'absolute' as 'absolute',
-    bottom: 0.5,
+    bottom: 0,
   },
   triangle: {
     width: 0,
     height: 0,
     backgroundColor: 'transparent',
     borderStyle: 'solid' as 'solid',
-    borderTopWidth: spacing.small,
+    borderTopWidth: 24,
   },
 }

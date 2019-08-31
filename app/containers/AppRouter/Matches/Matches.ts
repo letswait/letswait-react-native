@@ -3,7 +3,8 @@ import { ThunkDispatch } from 'redux-thunk'
 
 import MatchesComponent from './MatchesComponent'
 
-import { getMatches, openChat } from '../../../actions/matches';
+import { getMatches } from '../../../actions/matches'
+import { openChat } from '../../../actions/matches/chat'
 
 const mapStateToProps = (state: any) => {
   return {

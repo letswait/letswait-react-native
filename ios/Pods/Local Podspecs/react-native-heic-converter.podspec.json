@@ -1,0 +1,22 @@
+{
+  "name": "react-native-heic-converter",
+  "version": "1.3.0",
+  "summary": "React Native Component for converts HEIC files on iOS.",
+  "license": "MIT",
+  "authors": "Maxim Kolesnikov <mxklsn@gmail.com>",
+  "homepage": "git+https://github.com/maxim-kolesnikov/react-native-heic-converter",
+  "platforms": {
+    "ios": "9.0",
+    "tvos": "10.0"
+  },
+  "source": {
+    "git": "https://github.com/maxim-kolesnikov/react-native-heic-converter.git",
+    "tag": "v1.3.0"
+  },
+  "source_files": "ios/**/*.{h,m}",
+  "dependencies": {
+    "React": [
+
+    ]
+  }
+}

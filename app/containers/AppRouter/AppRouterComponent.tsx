@@ -2,6 +2,7 @@ import React from 'react'
 import {
   Alert,
   Animated,
+  AppState,
   Dimensions,
   Easing,
   Image,
@@ -13,6 +14,7 @@ import {
 } from 'react-native'
 
 import BackgroundGeolocation from '@mauron85/react-native-background-geolocation'
+// import { AuthorizationStatus } from '../../../node_modules/@mauron85/react-native-background-geolocation/index'
 import FastImage from 'react-native-fast-image';
 import { isIphoneX } from 'react-native-iphone-x-helper'
 import LinearGradient from 'react-native-linear-gradient'
@@ -44,12 +46,17 @@ const { width, height } = Dimensions.get('window')
 // tslint:disable-next-line: no-var-requires
 const feedIcon = require('../../assets/ui/feed-icon.png')
 
+import io from 'socket.io-client'
+import { ReduxStore } from '../../types/models';
+// import config from '../../../config'
+
 interface IProps {
   changeThemeLight: () => any
   currentRoute: string
   getMatches: () => any
   pushChatMatch: (match: any) => any
   push: (route: string) => any
+  pushChange: (change: ReduxStore.User) => void,
   showToast: (message: string, action: Function, duration?: number) => any
   dismissModal: () => any
   activeChat: any
@@ -60,26 +67,32 @@ interface IProps {
   },
   spinner: any,
   modal: string | null,
-  user?: any
+  user?: ReduxStore.User
 }
 interface IState {
   navRotation: Animated.Value
   swipeRotation: Animated.Value
-  location: 0 | 1 | 2,
+  location: -1 | 0 | 1 | 2,
   locationIsRunning: boolean
+  locationServicesEnabled: boolean,
   notification: boolean,
+  suggestedLocation: boolean
+  loadingMatches: boolean
   activeMatch: {
     user: any,
     candidate: any,
     match: any,
   } | undefined
 }
-export default class AppRouter extends React.Component<IProps, IState> {
+export default class AppRouter extends React.PureComponent<IProps, IState> {
   public state: IState = {
     navRotation: new Animated.Value(this.getRouteRotation(this.props.currentRoute)),
     swipeRotation: new Animated.Value(0),
-    location: 0,
+    location: -1,
+    loadingMatches: true,
     locationIsRunning: false,
+    suggestedLocation: false,
+    locationServicesEnabled: false,
     notification: false,
     activeMatch: undefined,
   }
@@ -89,19 +102,27 @@ export default class AppRouter extends React.Component<IProps, IState> {
   private matchPage: any
   private chatPage: any
   public componentDidMount() {
+    // const socket = io(config.socket)
+    // socket.connect()
+    // socket.on('connect', () => {
+    //   // call the server-side function 'adduser' and send one parameter (value of prompt)
+    //   Alert.alert('Connected to socket!')
+    //   // socket.emit('adduser', prompt("What's your name?"));
+    // })
+    AppState.addEventListener('change', this.appStateChange);
     this.props.getMatches()
+    setTimeout(() => this.setState({ loadingMatches: false }), 10000)
     this.props.changeThemeLight()
     PushNotification.checkPermissions((permissions) => {
       this.setState({ notification: permissions.alert || false })
-      if(permissions.alert === false) {
+      if(!permissions.alert) {
+        this.requestNotification()
         this.props.showToast('Open Settings to turn on Notifications', async () => {
           const canOpen = await Linking.canOpenURL('app-settings:')
           if(canOpen) {
             Linking.openURL('app-settings:')
           }
         })
-      } else if(permissions.alert === undefined) {
-        this.requestNotification()
       }
     })
     BackgroundGeolocation.configure({
@@ -160,7 +181,7 @@ export default class AppRouter extends React.Component<IProps, IState> {
 
     BackgroundGeolocation.on('start', () => {
       console.log('[INFO] BackgroundGeolocation service has been started');
-      this.setState({ locationIsRunning: true, location: 1 });
+      this.setState({ locationIsRunning: true });
     });
 
     BackgroundGeolocation.on('stop', () => {
@@ -169,16 +190,9 @@ export default class AppRouter extends React.Component<IProps, IState> {
     });
 
     BackgroundGeolocation.on('authorization', (status) => {
-      console.log(`[INFO] BackgroundGeolocation authorization status: ${status}`);
-        // we need to set delay after permission prompt or otherwise alert will not be shown
-      if (status !== BackgroundGeolocation.AUTHORIZED) {
-        // we need to set delay or otherwise alert may not be shown
-        setTimeout(() =>
-          Alert.alert('App requires location tracking permission', 'Would you like to open app settings?', [
-            { text: 'Yes', onPress: () => BackgroundGeolocation.showAppSettings() },
-            { text: 'No', onPress: () => console.log('No Pressed'), style: 'cancel' },
-          ]),      1000);
-      }
+      // status === BackgroundGeolocation.
+      // console.log(`[INFO] BackgroundGeolocation authorization status: ${status}`);
+      // we need to set delay after permission prompt or otherwise alert will not be shown
     });
 
     BackgroundGeolocation.on('background', () => {
@@ -205,13 +219,23 @@ export default class AppRouter extends React.Component<IProps, IState> {
     this.requestGeolocation(false, true)
     // this.checkGeolocation()
   }
-  public checkGeolocation() {
+  public checkGeolocation(silent = false) {
     BackgroundGeolocation.checkStatus((status) => {
-      this.setState({ location: status.authorization })
+      // if(!permissions.alert) {
+      // }
+      this.setState({
+        location: status.authorization,
+        locationServicesEnabled: status.locationServicesEnabled,
+        suggestedLocation: status.authorization === 1 ? false : this.state.suggestedLocation,
+      })
 
-      if(status.authorization === BackgroundGeolocation.AUTHORIZED && status.locationServicesEnabled) {
+      if(status.authorization === 1 && status.locationServicesEnabled) {
         if(!status.isRunning) {
           BackgroundGeolocation.start(); // triggers start on start event
+        }
+      } else {
+        if(!silent) {
+          BackgroundGeolocation.start()
         }
       }
     });
@@ -223,38 +247,60 @@ export default class AppRouter extends React.Component<IProps, IState> {
       }
     }
   }
-  private requestGeolocation(toggle = false, silent?: boolean) {
+  private appStateChange = (nextAppState: string) => {
+    if(nextAppState === 'active' && !this.state.suggestedLocation) {
+      this.requestGeolocation(true, false)
+    }
+  }
+  private requestGeolocation(toggle = false, silent: boolean = false) {
     BackgroundGeolocation.checkStatus(({ isRunning, locationServicesEnabled, authorization }) => {
       if(isRunning) {
         if(toggle) BackgroundGeolocation.stop()
         return
       }
-      // Background Location Denied
-      if(!locationServicesEnabled) {
-        Alert.alert(
-          'Location services disabled',
-          'Would you like to open location settings?',
-          [
-            {
-              text: 'Yes',
-              onPress: () => BackgroundGeolocation.showLocationSettings(),
-            },
-            {
-              text: 'No',
-              onPress: () => console.log('No Pressed'),
-              style: 'cancel',
-            },
-          ],
-        )
-        return
+      // Background Location Denied, OnPress
+      if(!silent) {
+        // BackgroundGeolocation.start()
+        if(locationServicesEnabled && authorization !== 1) {
+          if(toggle) {
+            if(!this.state.suggestedLocation) {
+              this.setState({ suggestedLocation: true })
+              this.props.showToast('For the best experience, Turn on Background Location', async () => {
+                const canOpen = await Linking.canOpenURL('app-settings:')
+                if(canOpen) {
+                  Linking.openURL('app-settings:')
+                }
+              })
+            }
+          } else {
+            Alert.alert(
+              'Location services disabled',
+              'Would you like to open location settings?',
+              [
+                {
+                  text: 'Yes',
+                  onPress: async () => {
+                    const canOpen = await Linking.canOpenURL('app-settings:')
+                    if(canOpen) {
+                      Linking.openURL('app-settings:')
+                    } else {
+                      this.props.showToast('Could not open settings', () => console.log('clicked item'))
+                    }
+                  },
+                },
+                {
+                  text: 'No',
+                  onPress: () => console.log('No Pressed'),
+                  style: 'cancel',
+                },
+              ],
+            )
+          }
+          return
+        }
       }
-      if (authorization === 0) {
-        BackgroundGeolocation.start();
-      } else if (authorization === BackgroundGeolocation.AUTHORIZED) {
-        BackgroundGeolocation.start()
-      } else if(!silent) {
-        BackgroundGeolocation.start()
-      }
+      this.checkGeolocation(silent)
+      // BackgroundGeolocation.start()
     })
   }
   private requestNotification() {
@@ -314,6 +360,7 @@ export default class AppRouter extends React.Component<IProps, IState> {
     BackgroundGeolocation.events.forEach((event) => {
       BackgroundGeolocation.removeAllListeners(event)
     });
+    AppState.removeEventListener('change', this.appStateChange);
   }
   public render() {
     const buttonPosition = (n: number) => {
@@ -434,7 +481,7 @@ export default class AppRouter extends React.Component<IProps, IState> {
     }
 
     const matchedUser = this.props.activeChat ?
-      this.props.activeChat.userProfiles[0]._id === this.props.user._id ?
+      this.props.activeChat.userProfiles[0]._id === this.props.user!._id ?
         this.props.activeChat.userProfiles[1] :
         this.props.activeChat.userProfiles[0] :
       null
@@ -453,6 +500,7 @@ export default class AppRouter extends React.Component<IProps, IState> {
           <FeedComponent
             shouldUpdate={this.props.currentRoute === '/app'}
             geolocation={this.state.location}
+            locationServicesEnabled={this.state.locationServicesEnabled}
             onGeolocation={() => this.requestGeolocation()}
           />
         </Animated.View>
@@ -461,7 +509,7 @@ export default class AppRouter extends React.Component<IProps, IState> {
           pointerEvents={this.props.currentRoute === '/app/matches' ? 'auto' : 'none'}
         >
           <MatchesComponent
-            shouldUpdate={this.props.currentRoute.indexOf('/app/matches') !== -1}
+            shouldUpdate={this.props.currentRoute === '/app/matches' || this.state.loadingMatches}
           />
         </Animated.View>
         <Animated.View
@@ -469,8 +517,9 @@ export default class AppRouter extends React.Component<IProps, IState> {
           pointerEvents={this.props.currentRoute === '/app/profile' ? 'auto' : 'none'}
         >
           <ProfileComponent
-            shouldUpdate={this.props.currentRoute.indexOf('/app/profile') !== -1}
+            shouldUpdate={this.props.currentRoute === '/app/profile'}
             ref={c => this.profilePage = c}
+            setUser={(newUser: ReduxStore.User) => this.props.pushChange(newUser)}
           />
         </Animated.View>
         <Animated.View
@@ -478,7 +527,8 @@ export default class AppRouter extends React.Component<IProps, IState> {
           pointerEvents={this.props.currentRoute === '/app/settings' ? 'auto' : 'none'}
         >
           <SettingsComponent
-            shouldUpdate={this.props.currentRoute.indexOf('/app/settings') !== -1}
+            shouldUpdate={this.props.currentRoute === '/app/settings'}
+            setUser={(newUser: ReduxStore.User) => this.props.pushChange(newUser)}
           />
         </Animated.View>
         <Animated.View
@@ -486,7 +536,7 @@ export default class AppRouter extends React.Component<IProps, IState> {
           pointerEvents={this.props.currentRoute === '/app/chat' ? 'auto' : 'none'}
         >
           <ChatComponent
-            shouldUpdate={this.props.currentRoute.indexOf('/app/chat') !== -1}
+            shouldUpdate={this.props.currentRoute === '/app/chat'}
           />
         </Animated.View>
         <View style={style.navContainer}>
@@ -555,8 +605,8 @@ export default class AppRouter extends React.Component<IProps, IState> {
                   <Animated.Text style={navText(0)}>Feed</Animated.Text> */}
                   <Image
                     source={feedIcon}
-                    width={29}
-                    height={29}
+                    width={32}
+                    height={32}
                   />
                 </TouchableOpacity>
               </Animated.View>

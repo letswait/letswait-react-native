@@ -21,9 +21,6 @@ interface IProps {
 export default class AppToast extends React.PureComponent<IProps,{}> {
   private progress = new Animated.Value(0)
   private translateYBase = isIphoneX ? 100 : 72
-  public componentDidMount() {
-    this.animate()
-  }
   public componentDidUpdate() {
     this.animate()
   }

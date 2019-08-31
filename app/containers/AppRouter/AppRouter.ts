@@ -10,6 +10,8 @@ import AppRouter from './AppRouterComponent'
 
 import { getMatches, pushEnqueuedMatch } from '../../actions/matches'
 import { dismissModal } from '../../actions/navigation/modal'
+import { pushChange } from '../../actions/user/settings'
+import { ReduxStore } from '../../types/models';
 
 const mapStateToProps = (state: any) => {
   return {
@@ -27,6 +29,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{},{},any>) => ({
   changeThemeLight: () => dispatch(changeStatusBarTheme('light-content')),
   push: (route: string) => dispatch(push(route)),
   dismissModal: () => dispatch(dismissModal()),
+  pushChange: (change: ReduxStore.User) => dispatch(pushChange(change)),
   getMatches: () => dispatch(getMatches()),
   pushChatMatch: (match: any) => dispatch(pushEnqueuedMatch(match)),
   showToast: (message: string, action: Function, duration = 3000) =>

@@ -24,9 +24,11 @@ const noGeolocation = require('../../../assets/ui/ui-geolocation.png')
 
 interface IProps {
   shouldUpdate: boolean
-  geolocation: 0 | 1 | 2
+  geolocation: -1 | 0 | 1 | 2
   user: any,
   currentRoute: any,
+  disablePrerender?: boolean
+  locationServicesEnabled: boolean,
   onGeolocation: () => any
   revealSpinner: (spinner: {
     match: any,
@@ -48,6 +50,7 @@ interface IProps {
 }
 interface IState {
   feed: any[]
+  prerendered: boolean
   activeCard: number
   matchMap?: ObjectOf<string>,
   cardSize: {
@@ -56,11 +59,13 @@ interface IState {
     x: number | undefined,
     y: number | undefined,
   }
+  feedMessage: string,
 }
 export default class FeedComponent extends React.Component<IProps, IState> {
   public state: IState = {
     feed: [],
     activeCard: 0,
+    prerendered: false,
     matchMap: undefined,
     cardSize: {
       width: undefined,
@@ -68,6 +73,7 @@ export default class FeedComponent extends React.Component<IProps, IState> {
       x: undefined,
       y: undefined,
     },
+    feedMessage: 'Loading Matches...',
   }
   public nextCard: any | null = null
   public currentCard: any | null = null
@@ -75,24 +81,32 @@ export default class FeedComponent extends React.Component<IProps, IState> {
     super(props)
   }
   public componentDidMount() {
-    if(this.props.geolocation) this.requestFeed()
+    if(this.props.geolocation > 0) this.requestFeed()
   }
   public componentDidUpdate(prevProps: IProps) {
-    if(this.props.geolocation && !prevProps.geolocation) {
+    if(this.props.geolocation > 0 && prevProps.geolocation !== 1) {
       this.requestFeed()
     }
   }
   public requestFeed() {
     authedApi.get('/api/feed/get-feed').then((res: ApiResponse<any>) => {
       if(!res.ok) {
-        Alert.alert('couldnt get feed')
+        this.setState({ feedMessage: 'Could not load Matches' })
       } else {
-        this.setState({ feed: res.data.feed, matchMap: res.data.matchMap })
+        this.setState({
+          feed: res.data.feed,
+          matchMap: res.data.matchMap,
+          feedMessage: 'No More Matches\n\nPlease Check Again Later',
+        })
       }
     })
   }
   public shouldComponentUpdate() {
-    return this.props.shouldUpdate
+    if(!this.state.prerendered && !this.props.disablePrerender) {
+      this.setState({ prerendered: true })
+      return true
+    }
+    return !!this.props.shouldUpdate
   }
   public postAction(candidate: any, userId: string, action: 'rejected' | 'accepted') {
     if(!this.state.matchMap) return
@@ -131,7 +145,7 @@ export default class FeedComponent extends React.Component<IProps, IState> {
     }
   }
   public render() {
-    return this.props.geolocation === 1 ? (
+    return this.props.geolocation === 1 || this.props.geolocation === -1 ? (
       <View style={style.contentWrapper}>
         <View
           style={{
@@ -141,7 +155,7 @@ export default class FeedComponent extends React.Component<IProps, IState> {
           onLayout={event => this.setState({ cardSize: event.nativeEvent.layout })}
         >
           <Text style={style.displayText}>
-            {'No Matches\nAvailable'}
+            {this.state.feedMessage}
           </Text>
         </View>
         {this.state.feed.length > this.state.activeCard + 1 ? (
@@ -169,16 +183,15 @@ export default class FeedComponent extends React.Component<IProps, IState> {
       </View>
     ) : (
       <View style={style.noGeolocationWrapper}>
-        <Text>{(() => {
-          switch(this.props.geolocation) {
-            // case 'restricted': return 'Geolocation not allowed by administrators'
-            case 2: return 'Change Location Settings in Settings'
-            default: return 'Allow Location to view Nearby Matches'
+        <Text>
+          {false ?
+            'Change Location Settings in Settings' :
+            'Allow Location to view Nearby Matches'
           }
-        })()}</Text>
+        </Text>
         <Image source={noGeolocation} />
           <WisteriaButton onPress={() => this.props.onGeolocation()}>
-            {this.props.geolocation === 2 ?
+            {false ?
               'Go to Settings' :
               'Turn on Location'
             }

@@ -7,6 +7,7 @@ import {
   PanResponderCallbacks,
   Text,
   View,
+  TouchableWithoutFeedback,
 } from 'react-native'
 
 import Haptic from 'react-native-haptic'
@@ -100,21 +101,26 @@ export default class Spinner extends React.Component<IProps, IState> {
       const time = evt.nativeEvent.timestamp
 
       // const velocity = (newRot - this.spinnerValues.rotation) / (time - this.spinnerValues.time)
-      this.velocityQueue.enqueue(this.getAngularVelocity(evt, gestureState))
-      let velocitySum = 0
-      let velocityCount = 0
-      while(!this.velocityQueue.isEmpty()) {
-        velocitySum = this.velocityQueue.dequeue()!
-        velocityCount++
+      if(gestureState.dx < 1 && gestureState.dy < 1) {
+        this.forceSpin()
+        return
       }
-      const velocity = velocitySum / velocityCount
+      const velocity = this.getAngularVelocity(evt, gestureState)
+      // this.velocityQueue.enqueue(this.getAngularVelocity(evt, gestureState))
+      // let velocitySum = 0
+      // let velocityCount = 0
+      // while(!this.velocityQueue.isEmpty()) {
+      //   velocitySum = this.velocityQueue.dequeue()!
+      //   velocityCount++
+      // }
+      // const velocity = velocitySum / velocityCount
       this.spinnerValues.velocity = velocity
       this.spinnerValues.time = time
       this.spinnerValues.rotation = newRot
       this.spinnerValues.lastRotation = newRot
       const shouldSpin =
-        (velocity > 0 && velocity >= 0.5) ||
-        (velocity < 0 && velocity <= -0.5)
+        velocity >= 0.5 ||
+        velocity <= -0.5
       this.setState((prevState: IState): IState => {
         return {
           ...prevState,
@@ -144,7 +150,12 @@ export default class Spinner extends React.Component<IProps, IState> {
       hideImages: false,
     }
   }
-  private moveSpinner(origin: boolean = false) {
+  private moveSpinner(origin: boolean = false, customVelocity: number = 0) {
+    if(customVelocity) {
+      this.setState({ spinnable: false })
+      this.props.onSpin()
+      this.spinnerValues.velocity = customVelocity
+    }
     setTimeout(
       () => {
         // Change Rotation
@@ -218,7 +229,7 @@ export default class Spinner extends React.Component<IProps, IState> {
       max: Math.abs(this.normalizeAngle(targetRot + (cMaxDegree * Math.PI/180))), // 50deg
     }
     console.log('Counter Clockwise Radians', ccRadian, 'Clockwise Radians', cRadian)
-    const moveSpinner = () => {
+    const moveSpinner = (customVelocity?: number) => {
       setTimeout(
         () => {
           // Change Rotation
@@ -275,6 +286,7 @@ export default class Spinner extends React.Component<IProps, IState> {
           }
 
           if(0.005 > velocity && velocity > -0.005) {
+            // const transformRotation = velocity > 0 ? Math.min(0.002,)
             this.spinnerStyles.style.transform = [{ rotate: `${targetRot}rad` }]
             this.updateNativeStyles()
             this.animateResult()
@@ -342,6 +354,10 @@ export default class Spinner extends React.Component<IProps, IState> {
       toValue: 2.82,
       duration: 500,
     }).start(() => this.props.onFinish()) // Reveal Options
+  }
+  private forceSpin() {
+    const goRight = !!Math.round(Math.random()) // Randomly Generated True/False
+    this.moveSpinner(false, goRight ? 0.6 : -0.6)
   }
   public render() {
     return (

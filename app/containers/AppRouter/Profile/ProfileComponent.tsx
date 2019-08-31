@@ -23,11 +23,12 @@ import LinearGradient from 'react-native-linear-gradient'
 
 import { photoUpload } from '../../../lib/api'
 
-import MultiSlider from '@ptomasroos/react-native-multi-slider'
+// import MultiSlider from '@ptomasroos/react-native-multi-slider'
 import { isIphoneX } from 'react-native-iphone-x-helper'
 import { colors, spacing, type } from '../../../../foundation'
 import SelectPhoto from '../../../components/Buttons/SelectPhoto'
 import FeatherButton from '../../../components/Camera/CameraButton'
+import { ObjectOf } from '../../../types/helpers';
 import { IMediaReference } from '../../../types/photos'
 const { width, height } = Dimensions.get('screen')
 
@@ -35,6 +36,16 @@ const { width, height } = Dimensions.get('screen')
  * @todo this needs to be cleaned up and turned into its own component. but for now it works, but its disorganized
  * @todo I need to size this to other screens, it should work for most, but shorter screens need an option
  */
+
+import RNHeicConverter from 'react-native-heic-converter';
+import { ReduxStore } from '../../../types/models';
+import AddImage from './AddImage';
+
+type Question =
+  'Favorite Hobbies...'
+| 'The actor who would play me in a movie about my life...'
+| 'What drives me...'
+| 'Listener or talker...'
 
 const bubbleCanvasWidth = Math.max(width - 32, 320)
 const bubbleCanvasCenter = bubbleCanvasWidth / 2
@@ -94,6 +105,8 @@ interface IProps {
   currentRoute: string
   disablePrerender?: boolean
   changeSearchSettings: (changes: any) => any
+  showToast: (text: string) => void
+  setUser: (user: ReduxStore.User) => void,
 }
 interface IState {
   scrollY: Animated.Value
@@ -108,13 +121,12 @@ interface IState {
   disableCanvas: boolean
   beenScrolled: boolean
   scrollEnabled: boolean
-  searchRadius: number,
-  searchAgeRange: [number, number],
-  photos: Array<IMediaReference | undefined>
   photoProgress: number[]
-  profileFood: string[]
-  profileAboutMe: string
-  profileQuestions: Array<[string, string]>
+  settings: {
+    profile: ReduxStore.IUserProfile,
+    // searchSettings: ReduxStore.IUserSearchSettings,
+    // hideUser: boolean,
+  }
 }
 export default class ProfileComponent extends React.Component<IProps, IState> {
   private scrollView: any
@@ -127,22 +139,19 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
     disableCanvas: false,
     beenScrolled: false,
     scrollEnabled: true,
-    searchRadius: this.props.user && this.props.user.searchSettings ?
-      this.props.user.searchSettings.radius || 50 : 50,
-    searchAgeRange: this.props.user && this.props.user.searchSettings ?
-      this.props.user.searchSettings.ageRange || [18, 25] : [18, 25],
-    photos: this.props.user && this.props.user.profile && this.props.user.profile.images ?
-      new Array(6).fill(undefined).map((val, i, arr) => {
-        return this.props.user.profile.images[i] ? { uri: this.props.user.profile.images[i] } : undefined
-      }) :
-      new Array(6).fill(undefined),
+    settings: {
+      profile: {
+        ...this.props.user.profile,
+        aboutMe: this.props.user.profile.aboutMe || '',
+        questions: this.props.user.profile.questions || {
+          'Favorite Hobbies...': '',
+          'The actor who would play me in a movie about my life...': '',
+          'What drives me...': '',
+          'Listener or talker...': '',
+        },
+      },
+    },
     photoProgress: new Array(6).fill(0),
-    profileFood: this.props.user && this.props.user.profile ?
-      this.props.user.profile.food : [],
-    profileAboutMe: this.props.user && this.props.user.profile ?
-      this.props.user.profile.aboutMe : null,
-    profileQuestions: this.props.user && this.props.user.profile && this.props.user.profile.questions ?
-      this.props.user.profile.questions : [],
   }
   constructor(props: IProps) {
     super(props)
@@ -176,45 +185,35 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
       }
     })
   }
-  public commitChanges() {
-
+  public commitChanges(cb: (shouldRefreshAppState: boolean) => any) {
+    // Meant to be called by parent AppRouterComponent
+    // Checks for any changes to profile and returns true/false if a change has been requested.
+    // It makes the request and thunks the new user object in
+    // true/false response allows app to rerequest things like feed
   }
   public shouldComponentUpdate() {
     if(!this.state.prerendered && !this.props.disablePrerender) {
       this.setState({ prerendered: true })
       return true
     }
-    if(this.props.shouldUpdate) {
-      return true
-    }
-    if(this.props.currentRoute.indexOf('/app/profile') === -1 && this.state.beenScrolled) {
-      this.scrollView.getNode().scrollTo({ y: 0, animated: false })
-      return true
-    }
-    return false
+    return !!this.props.shouldUpdate
   }
-  public createTransition(bubble: number) {
+  private createTransition(bubble: number) {
     const inputRange = [15, maxScroll]
     const translateX = this.state.scrollY.interpolate({
       inputRange,
       outputRange: [endCoords[bubble].x, 0],
       extrapolate: 'clamp',
-      // easing: t => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
     })
-    const overscrollY = endCoords[bubble].y >= 0 ?
-      endCoords[bubble].y - (endCoords[bubble].y * 0.3) :
-      endCoords[bubble].y + (endCoords[bubble].y * 0.3)
     const translateY = this.state.scrollY.interpolate({
       inputRange: [15, maxScroll],
       outputRange: [endCoords[bubble].y, offsetY],
       extrapolate: 'clamp',
-      // easing: t => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
     })
     const scale = this.state.scrollY.interpolate({
       inputRange,
       outputRange: [endCoords[bubble].s, 1],
       extrapolate: 'clamp',
-      // easing: t => Math.sin(t * (Math.PI / 2)),
     })
     return {
       transform: [
@@ -224,83 +223,108 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
       ],
     }
   }
-  public changeSearchSettings(change: any) {
-    this.enableScroll()
-    this.setState((prevState) => {
-      return {
-        ...prevState,
-        ...(change.radius ? { searchRadius: change.radius } : null),
-        ...(change.ageRange ? { searchAgeRange: change.ageRange } : null),
-      }
-    })
-  }
-  public changeProfile(change: any) {
-    this.setState((prevState) => {
-      return {
-        ...prevState,
-        // ...(change.food ? { profileFood: change.food } : null),
-        ...(change.aboutMe ? { profileAboutMe: change.aboutMe } : null),
-        ...(change.photos ? { photos: change.images } : null),
-        ...(change.questions ? { profileQuestions: change.questions } : null),
-        // work
-        // Education
-        // Tags
-      }
-    })
-  }
-  public enableScroll() {
-    this.setState({ scrollEnabled: true })
-  }
-  public disableScroll() {
-    this.setState({ scrollEnabled: false })
-  }
-  public scrollDown() {
+  private scrollDown() {
     this.scrollView.getNode().scrollTo({ y: maxScroll, animated: true })
   }
   private postPhotos(photo: IMediaReference, index: number) {
-    photoUpload(
-      '/api/upload/image/profile',
-      [photo],
-      true,
-      (progress, event) => {
-        this.setState((prevState) => {
-          return {
-            ...prevState,
-            photoProgress: Object.assign(
-              [],
-              prevState.photoProgress,
-              { [index]: progress },
-            ),
-          }
-        })
-        console.log('photo upload progress: ', progress)
-      }).then(({ err, errorMessage, urls }) => {
-        if(err || !urls || !urls.length) {
-          Alert.alert('Could not finish uploading Photos, try again later.')
-        } else {
-          this.setPhoto({ uri: urls[0] }, index)
-        }
+    // if(photo.type === 'image/heic') {
+    RNHeicConverter
+      .convert({ // options
+        path: photo.uri,
       })
+      .then((result: any) => {
+        this.props.showToast(`Converted HEIC: ${result} ${photo}`)
+        photoUpload(
+          '/api/upload/image/profile',
+          [{ uri: result.path, type: 'image/jpeg' }] ,
+          true,
+          (progress, event) => {
+            this.setState((prevState) => {
+              return {
+                ...prevState,
+                photoProgress: Object.assign(
+                  [],
+                  prevState.photoProgress,
+                  { [index]: progress },
+                ),
+              }
+            })
+            console.log('photo upload progress: ', progress)
+          }).then(({ err, errorMessage, urls }) => {
+            if(err || !urls || !urls.length) {
+              Alert.alert('Could not finish uploading Photos, try again later.')
+            } else {
+              this.pushPhoto({ uri: urls[0] }, index)
+            }
+          })
+      });
   }
-  private setPhoto(photo: IMediaReference, index: number) {
-    this.setState((prevProps) => {
-      const { photos } = prevProps
-      photos[index] = photo
-      return {
-        ...prevProps,
-        photos,
-      }
+  private pushPhoto(photo: { uri: string }, index: number) {
+    const images = [...this.props.user.profile.images]
+    images[index] = photo.uri
+    this.props.setUser({
+      ...this.props.user,
+      profile: {
+        ...this.props.user.profile,
+        images,
+      },
     })
   }
   private clearPhoto(index: number) {
-    console.log('clearing photo: ', index)
-    this.setState((prevProps) => {
-      const { photos } = prevProps
-      photos[index] = undefined
-      return {
-        ...prevProps,
-        photos,
-      }
+    const images = [
+      ...this.props.user.profile.images.slice(0, index),
+      ...this.props.user.profile.images.slice(index + 1),
+    ]
+    this.props.setUser({
+      ...this.props.user,
+      profile: {
+        ...this.props.user.profile,
+        images,
+      },
+    })
+  }
+  private changeAboutMe(text: string) {
+    this.setState({
+      settings: {
+        ...this.props.user,
+        profile: {
+          ...this.props.user.profile,
+          aboutMe: text,
+        },
+      },
+    })
+  }
+  private pushAboutMe(text: string) {
+    this.props.setUser({
+      ...this.props.user,
+      profile: {
+        ...this.props.user.profile,
+        aboutMe: text,
+      },
+    })
+  }
+  private changeQA(question: Question, answer: string) {
+    const questions = { ...this.state.settings.profile.questions }
+    questions[question] = answer
+    this.setState({
+      settings: {
+        ...this.props.user,
+        profile: {
+          ...this.props.user.profile,
+          questions,
+        },
+      },
+    })
+  }
+  private pushQA(question: Question, answer: string) {
+    const questions = { ...this.state.settings.profile.questions }
+    questions[question] = answer
+    this.props.setUser({
+      ...this.props.user,
+      profile: {
+        ...this.props.user.profile,
+        questions,
+      },
     })
   }
   public render() {
@@ -332,20 +356,6 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
       outputRange: [1, 0],
       extrapolate: 'clamp',
     })
-    const searchSettings = {
-      ...style.searchSettings,
-      opacity: this.state.scrollY.interpolate({
-        inputRange: [15, 60],
-        outputRange: [1, 0],
-        extrapolate: 'clamp',
-      }),
-      transform: [{
-        translateY: this.state.scrollY.interpolate({
-          inputRange: [0, 15, 60],
-          outputRange: [0, -5, -30],
-        }),
-      }],
-    }
     const cardSwipeText = {
       ...style.cardSwipeText,
       opacity: this.state.scrollY.interpolate({
@@ -361,8 +371,9 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
         }),
       }],
     }
+    const images = this.state.settings.profile.images
     return (
-      <KeyboardAvoidingView behavior="position" style={{ height, width }}>
+      <KeyboardAvoidingView behavior="padding" style={{ height, width }}>
         <Animated.ScrollView
           style={style.profileWrapper}
           contentContainerStyle={style.profileContainer}
@@ -388,7 +399,10 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
                     <View key={i} style={imageWrapper}>
                       <Animated.View style={{ ...style.imageContainer, ...transformBubbles[i] }}>
                         <SelectPhoto
-                          source={this.state.photos[i] ? this.state.photos[i] : undefined}
+                          source={this.state.settings.profile.images[i] ?
+                            { uri: this.state.settings.profile.images[i] } as IMediaReference :
+                            undefined
+                          }
                           uploadProgress={0.4}
                           overWhite
                           hideEditButton={this.state.hideEditButton}
@@ -413,52 +427,6 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
                 />
               </TouchableWithoutFeedback>
             </View>
-
-            <Animated.View style={searchSettings} pointerEvents={this.state.disableCanvas ? 'none' : 'auto'}>
-              <Text style={{ ...type.small, color: '#7B5394' }}>Search Settings</Text>
-              <View style={style.searchSliderContainer}>
-                <Text style={{ ...type.small, color: '#7B5394', opacity: 0.5 }}>Distance</Text>
-                <Text
-                  style={{
-                    ...type.regular,
-                    color: '#7B5394',
-                  }}
-                >
-                  Up to {this.state.searchRadius} miles away
-                </Text>
-                <MultiSlider
-                  values={[this.state.searchRadius]}
-                  min={10}
-                  max={100}
-                  sliderLength={230}
-                  onValuesChangeStart={() => this.disableScroll()}
-                  onValuesChange={(values: number[]) => this.setState({ searchRadius: values[0] })}
-                  onValuesChangeFinish={(values: number[]) => this.changeSearchSettings({ radius: values[0] })}
-                />
-              </View>
-              <View style={style.searchSliderContainer}>
-                <Text style={{ ...type.small, color: '#7B5394', opacity: 0.5 }}>Age</Text>
-                <Text
-                  style={{
-                    ...type.regular,
-                    color: '#7B5394',
-                    opacity: 1,
-                  }}
-                >
-                  Between {this.state.searchAgeRange[0]} and {this.state.searchAgeRange[1]}
-                </Text>
-                {/* <MultiSlider
-                  values={this.state.searchAgeRange}
-                  min={18}
-                  max={100}
-                  sliderLength={230}
-                  onValuesChangeStart={() => this.disableScroll()}
-                  onValuesChange={(values: any) => this.setState({ searchAgeRange: values })}
-                  onValuesChangeFinish={(values: any) => this.changeSearchSettings({ ageRange: values })}
-                /> */}
-              </View>
-            </Animated.View>
-
           </View>
           <View style={style.cardContainer}>
             <View style={style.cardSwipeWrapper}>
@@ -481,8 +449,8 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
 
             {/* Place Profile Here*/}
             <View style={style.profile.header}>
-              <Image
-                source={{ uri: this.state.photos[0]!.uri }}
+              <FastImage
+                source={{ uri: this.state.settings.profile.images[0] }}
                 style={style.profile.headerImage}
                 resizeMode="cover"
               />
@@ -502,8 +470,9 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
               <TextInput
                 style={style.profile.sectionParagraph}
                 placeholder="About Me..."
-                value={this.state.profileAboutMe}
-                onChangeText={(text: string) => this.setState({ profileAboutMe: text })}
+                value={this.state.settings.profile.aboutMe}
+                onChangeText={(text: string) => this.changeAboutMe(text)}
+                onBlur={e => this.pushAboutMe(e.nativeEvent.text)}
                 multiline
                 numberOfLines={4}
               />
@@ -513,44 +482,116 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
                * @todo Add toggling edit/save button to each section container to make exiting keyboard easier
                */
             }
-            {this.state.photos[1] && <Image
-              source={{ uri: this.state.photos[1]!.uri }}
-              style={style.profile.image}
-              resizeMode="cover"
-            />}
+            <AddImage
+              source={images[1]}
+              onPhoto={(photo: IMediaReference) => this.postPhotos(photo, 1)}
+              onDelete={() => this.clearPhoto(1)}
+            />
             <View style={style.profile.sectionContainer}>
               <Text style={style.profile.sectionTitle}>
-                What are some of your favorite Hobbies?
+                Favorite Hobbies...
               </Text>
               <TextInput
                 style={style.profile.sectionParagraph}
-                placeholder="My Hobbies Are.."
-                value={this.state.profileAboutMe}
-                onChangeText={(text: string) => this.setState({ profileAboutMe: text })}
+                placeholder="Add Answer..."
+                value={
+                  this.state.settings.profile.questions &&
+                  this.state.settings.profile.questions['Favorite Hobbies...'] || ''}
+                onChangeText={(text: string) => this.changeQA('Favorite Hobbies...', text)}
+                onBlur={e => this.pushQA('Favorite Hobbies...', e.nativeEvent.text)}
                 multiline
                 numberOfLines={4}
               />
             </View>
-            {this.state.photos[2] && <Image
-              source={{ uri: this.state.photos[2]!.uri }}
+            <AddImage
+              source={images[2]}
+              onPhoto={(photo: IMediaReference) => this.postPhotos(photo, 2)}
+              onDelete={() => this.clearPhoto(2)}
+            />
+            {/* {this.state.settings.profile.images[2] && <FastImage
+              source={{ uri: this.state.settings.profile.images[2] }}
               style={style.profile.image}
               resizeMode="cover"
-            />}
-            {this.state.photos[3] && <Image
-              source={{ uri: this.state.photos[3]!.uri }}
+            />} */}
+            <View style={style.profile.sectionContainer}>
+              <Text style={style.profile.sectionTitle}>
+                The actor who would play me in a movie about my life...
+              </Text>
+              <TextInput
+                style={style.profile.sectionParagraph}
+                placeholder="Add Answer..."
+                // tslint:disable-next-line: max-line-length
+                value={
+                  this.state.settings.profile.questions &&
+                  this.state.settings.profile.questions['The actor who would play me in a movie about my life...']
+                || ''}
+                // tslint:disable-next-line: max-line-length
+                onChangeText={(text: string) => this.changeQA('The actor who would play me in a movie about my life...', text)}
+                onBlur={e => this.pushQA('The actor who would play me in a movie about my life...', e.nativeEvent.text)}
+                multiline
+                numberOfLines={4}
+              />
+            </View>
+            <AddImage
+              source={images[3]}
+              onPhoto={(photo: IMediaReference) => this.postPhotos(photo, 3)}
+              onDelete={() => this.clearPhoto(3)}
+            />
+            {/* {this.state.settings.profile.images[3] && <FastImage
+              source={{ uri: this.state.settings.profile.images[3] }}
               style={style.profile.image}
               resizeMode="cover"
-            />}
-            {this.state.photos[4] && <Image
-              source={{ uri: this.state.photos[4]!.uri }}
+            />} */}
+            <View style={style.profile.sectionContainer}>
+              <Text style={style.profile.sectionTitle}>
+                What drives me...
+              </Text>
+              <TextInput
+                style={style.profile.sectionParagraph}
+                placeholder="Add Answer..."
+                value={this.state.settings.profile.questions &&
+                  this.state.settings.profile.questions['What drives me...'] || ''}
+                onChangeText={(text: string) => this.changeQA('What drives me...', text)}
+                onBlur={e => this.pushQA('What drives me...', e.nativeEvent.text)}
+                multiline
+                numberOfLines={4}
+              />
+            </View>
+            <AddImage
+              source={images[4]}
+              onPhoto={(photo: IMediaReference) => this.postPhotos(photo, 4)}
+              onDelete={() => this.clearPhoto(4)}
+            />
+            {/* {this.state.settings.profile.images[4] && <FastImage
+              source={{ uri: this.state.settings.profile.images[4] }}
               style={style.profile.image}
               resizeMode="cover"
-            />}
-            {this.state.photos[5] && <Image
-              source={{ uri: this.state.photos[5]!.uri }}
+            />} */}
+            <View style={style.profile.sectionContainer}>
+              <Text style={style.profile.sectionTitle}>
+                Listener or talker...
+              </Text>
+              <TextInput
+                style={style.profile.sectionParagraph}
+                placeholder="Add Answer..."
+                value={this.state.settings.profile.questions &&
+                  this.state.settings.profile.questions['Listener or talker...'] || ''}
+                onChangeText={(text: string) => this.changeQA('Listener or talker...', text)}
+                onBlur={e => this.pushQA('Listener or talker...', e.nativeEvent.text)}
+                multiline
+                numberOfLines={4}
+              />
+            </View>
+            <AddImage
+              source={images[5]}
+              onPhoto={(photo: IMediaReference) => this.postPhotos(photo, 5)}
+              onDelete={() => this.clearPhoto(5)}
+            />
+            {/* {this.state.settings.profile.images[5] && <FastImage
+              source={{ uri: this.state.settings.profile.images[5] }}
               style={style.profile.image}
               resizeMode="cover"
-            />}
+            />} */}
           </View>
         </Animated.ScrollView>
       </KeyboardAvoidingView>
@@ -620,17 +661,6 @@ const style = {
     position: 'absolute' as 'absolute',
     left: 0,
     top: 0,
-  },
-  searchSettings: {
-    flex: 1,
-    flexDirection: 'column' as 'column',
-    alignItems: 'center' as 'center',
-    backgroundColor: colors.transparent,
-  },
-  searchSliderContainer: {
-    flexDirection: 'column' as 'column',
-    alignItems: 'flex-start' as 'flex-start',
-    justifyContent: 'center' as 'center',
   },
   cardContainer: {
     marginTop: height - (bubbleCanvasWidth + startY) - 96,
@@ -714,10 +744,6 @@ const style = {
     sectionParagraph: {
       ...type.title3,
       color: colors.white,
-    },
-    image: {
-      width: '100%',
-      height: maxScroll,
     },
   },
 }

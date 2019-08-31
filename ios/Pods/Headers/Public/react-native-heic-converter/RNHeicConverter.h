@@ -1,0 +1,1 @@
+../../../../../node_modules/react-native-heic-converter/ios/RNHeicConverter.h
