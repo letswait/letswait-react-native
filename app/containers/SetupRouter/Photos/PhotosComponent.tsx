@@ -11,7 +11,7 @@ import DatePicker from 'react-native-datepicker'
 import ActionButton from '../../../components/Buttons/ActionButton'
 
 import Feather from 'react-native-vector-icons/Feather'
-import { colors, spacing, type } from '../../../../foundation'
+import { colors, type } from '../../../../new_foundation'
 
 import SetupWrapper from '../SetupWrapperComponent'
 
@@ -161,7 +161,7 @@ export default class BirthdayComponent extends React.Component<IProps, IState> {
             onDelete={() => this.clearPhoto(5)}
           />
         </View>
-        <View style={style.tipWrapper}>
+        {/* <View style={style.tipWrapper}>
           <View style={style.tipContainer}>
             <View style={style.textBody}>
               <Text style={style.header}>
@@ -189,7 +189,7 @@ export default class BirthdayComponent extends React.Component<IProps, IState> {
               </Text>
             </View>
           </View>
-        </View>
+        </View> */}
         <ActionButton
           onPress={() => this.postPhotos()}
           disabled={this.state.disabled}
@@ -203,10 +203,10 @@ export default class BirthdayComponent extends React.Component<IProps, IState> {
 
 const style = {
   title: {
-    ...type.title3,
+    ...type.large,
     color: colors.white,
-    marginTop: spacing.base,
-    marginBottom: spacing.base+spacing.small,
+    marginTop: 24,
+    marginBottom: 40,
   },
   contentWrapper: {
     flex: 1,
@@ -221,7 +221,7 @@ const style = {
   featherIcon: {
     lineHeight: 40,
     height: 40,
-    marginRight: spacing.small,
+    marginRight: 16,
   },
   selectPhoto: {
     flexGrow: 0.33,
@@ -229,7 +229,7 @@ const style = {
     alignItems: 'center' as 'center',
   },
   firstRow: {
-    marginBottom: spacing.small,
+    marginBottom: 16,
   },
   tipWrapper: {
     flex: 0,
@@ -239,8 +239,7 @@ const style = {
   tipContainer: {
     borderRadius: 12,
     width: 331,
-    backgroundColor: 'rgba(131, 99, 173, 0.7)',
-    borderColor: '#AC8DD5',
+    backgroundColor: colors.white,
     borderWidth: 2,
     padding: 8,
     paddingLeft: 16,
@@ -257,12 +256,12 @@ const style = {
     ...type.regular,
     fontWeight: '600' as '600',
     flex: 0,
-    color: colors.white,
+    color: colors.cosmos,
   },
   text: {
     ...type.small,
     fontWeight: '400' as '400',
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: colors.shadow,
     flex: 0,
   },
 }

@@ -21,7 +21,9 @@ import FastImage from 'react-native-fast-image'
 import LinearGradient from 'react-native-linear-gradient';
 import Section from './CardSection'
 
-import { colors, spacing, type } from '../../../../foundation'
+import { colors, type } from '../../../../new_foundation'
+
+import { ifIphoneX } from 'react-native-iphone-x-helper';
 
 interface IProps {
   _id: string,
@@ -43,11 +45,15 @@ interface IProps {
   cardSwipe: any,
   onLeft?: (id: string, candidate: any) => any,
   onRight?: (id: string, candidate: any) => any,
+  onScrollUp?: () => any,
+  onScrollDown?: () => any,
 }
 interface IState {
   swipeAnimation: Animated.Value,
   scrollEnabled: boolean,
   touchEnabled: boolean,
+  lastScrollLoc: number,
+  scrolling: boolean,
 }
 export default class Card extends React.Component<IProps, IState> {
   public getNode: Function | undefined
@@ -58,6 +64,8 @@ export default class Card extends React.Component<IProps, IState> {
     swipeAnimation: new Animated.Value(0),
     scrollEnabled: true,
     touchEnabled: !!this.props.onLeft && !!this.props.onRight,
+    lastScrollLoc: 0, // all cards start at top
+    scrolling: false,
   }
   public _panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: (evt, gestureState) => {
@@ -70,6 +78,9 @@ export default class Card extends React.Component<IProps, IState> {
           this.swipeDirection = 'horizontal'
           return true
         }
+        // if(gestureState.dy < 0) {
+        // } else {
+        // }
         this.swipeDirection = 'vertical'
         return false
       }
@@ -155,22 +166,24 @@ export default class Card extends React.Component<IProps, IState> {
   public resetCard() {
     this.state.swipeAnimation.setValue(0)
     this.forceUpdate()
-    if(this.scrollView) this.scrollView.scrollTo({ x: 0, y: 0, animated: false })
+    if(this.scrollView) {
+      this.scrollView.scrollTo({ x: 0, y: 0, animated: false })
+    }
   }
-  private scrollView: any
+  private scrollView: ScrollView | null = null
   private swipeDirection: 'vertical' | 'horizontal' | null = null
   public render() {
     // const images = this.props.profile.images.reverse()
     const imageProps = { style: {
-      width: this.props.layout!.width,
-      height: this.props.layout!.width,
+      width,
+      height: width,
       marginTop: 1,
     }}
     const transform = this.state.touchEnabled ? [
       { translateX: this.state.swipeAnimation },
       { rotate: this.state.swipeAnimation.interpolate({
         inputRange: [0, 1],
-        outputRange: ['0deg', '0.1deg'],
+        outputRange: ['0deg', '0.05deg'],
       })},
     ] : [{
       scale: this.state.swipeAnimation.interpolate({
@@ -179,6 +192,10 @@ export default class Card extends React.Component<IProps, IState> {
         extrapolate: 'clamp',
       }),
     }]
+    const titleContainer = {
+      ...style.titleContainer,
+      backgroundColor: this.props.profile.gender === 'male' ? colors.coralBlue : colors.coralPink,
+    }
     return (
       <Animated.View
         style={{
@@ -191,23 +208,46 @@ export default class Card extends React.Component<IProps, IState> {
         <ScrollView
           style={style.cardWrapper}
           contentContainerStyle={style.cardContainer}
+          bounces={false}
           showsVerticalScrollIndicator={false}
-          ref={c => this.scrollView = c}
+          scrollEventThrottle={50}
+          ref={(c: ScrollView) => {
+            this.scrollView = c
+          }}
+          // tslint:disable-next-line: max-line-length
+          onScrollBeginDrag={event => this.setState({ lastScrollLoc: event.nativeEvent.contentOffset.y, scrolling: true })}
+          onScrollEndDrag={event => this.setState({ scrolling: false })}
+          onScroll={(event) => {
+
+            const diff = event.nativeEvent.contentOffset.y - this.state.lastScrollLoc
+            if(diff > 50) {
+              if(this.state.scrolling) this.props.onScrollDown!()
+            } else if(diff < -50) {
+              if(this.state.scrolling) this.props.onScrollUp!()
+            } else {
+              return
+            }
+            this.setState({ lastScrollLoc: event.nativeEvent.contentOffset.y })
+          }}
         >
-          <View style={style.header} pointerEvents="none">
-            <FastImage
-              style={{ width: this.props.layout!.width!, height: this.props.layout!.height! }}
-              source={{ uri: this.props.profile.images[0] }}
-            />
-            <View style={style.headerInfoContainer}>
-              <LinearGradient
-                colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.9)', 'rgba(0, 0, 0, 1)']}
-                style={style.headerGradient}
-              />
-              <Text style={style.headerText}>
-                {`${this.props.name}${this.props.age ? ', ' : ''}${this.props.age || ''}`}
-              </Text>
-            </View>
+          <FastImage
+            style={style.headerImage}
+            source={{ uri: this.props.profile.images[0] }}
+          />
+          <LinearGradient
+            colors={[
+              'rgba(33, 33, 33, 1)',
+              'rgba(17, 17, 17, 0.63)',
+              'rgba(0, 0, 0, 0.25)',
+              'rgba(0, 0, 0, 0.10)',
+              'rgba(0, 0, 0, 0)',
+            ]}
+            style={style.headerGradient}
+          />
+          <View style={titleContainer}>
+            <Text style={style.titleText}>
+              {`${this.props.name}${this.props.age ? ', ' : ''}${this.props.age || ''}`.toUpperCase()}
+            </Text>
           </View>
           <Section>
             {this.props.profile.aboutMe}
@@ -217,24 +257,6 @@ export default class Card extends React.Component<IProps, IState> {
           {this.props.profile.images[3] && <FastImage {...imageProps} source={{ uri: this.props.profile.images[3] }} />}
           {this.props.profile.images[4] && <FastImage {...imageProps} source={{ uri: this.props.profile.images[4] }} />}
           {this.props.profile.images[5] && <FastImage {...imageProps} source={{ uri: this.props.profile.images[5] }} />}
-          {/*
-            // Bio
-            //  - About me
-            //  - Quick Facts
-            //    - Height
-            //    - Starsign
-            //    - Activity Level
-            // Image 2
-            // Question 1
-            // Image 3
-            // Question 2
-            // Image 4
-            // Question 3
-            // Image 5
-            // Instagram
-            // Image 6
-            // Location + Like/Dislike
-          */}
         </ScrollView>
       </Animated.View>
     )
@@ -243,12 +265,12 @@ export default class Card extends React.Component<IProps, IState> {
 
 const style = {
   scrollWrapper: {
-    width: '100%',
-    height: '100%',
+    width,
+    height,
     position: 'absolute' as 'absolute',
-    top: 8,
-    left: 8,
-    shadowColor: colors.lavender,
+    top: 0,
+    left: 0,
+    shadowColor: colors.shadow,
     shadowOffset: {
       height: 1,
       width: 0,
@@ -257,48 +279,46 @@ const style = {
     shadowRadius: 3,
   },
   cardWrapper: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 16,
+    width,
+    height,
+    // borderRadius: 16,
     overflow: 'hidden' as 'hidden',
     backgroundColor: colors.white,
   },
   cardContainer: {
-    backgroundColor: '#9372BE',
-    minHeight: '100%',
-    borderRadius: 16,
-    overflow: 'hidden' as 'hidden',
-  },
-  header: {
-    width: '100%',
+    // backgroundColor: '#9372BE',
+    minHeight: height,
+    // borderRadius: 16,
+    // overflow: 'hidden' as 'hidden',
   },
   headerImage: {
-    width: '100%',
+    width,
+    height: height - ifIphoneX(250, 200),
   },
-  headerInfoContainer: {
-    width: '100%',
-    height: 100,
-    bottom: 0,
-    left: 0,
-    position: 'absolute' as 'absolute',
+  titleContainer: {
+    width,
+    height: 50,
+    flexGrow: 0,
+    flex: 0,
     display: 'flex' as 'flex',
     flexDirection: 'row' as 'row',
     alignItems: 'center' as 'center',
   },
   headerGradient: {
-    width: '100%',
-    height: 100,
-    bottom: 0,
+    width,
+    height: 200,
+    top: 0,
     left: 0,
-    opacity: 0.4,
+    opacity: 0.75,
     position: 'absolute' as 'absolute',
     display: 'flex' as 'flex',
     flexDirection: 'row' as 'row',
     alignItems: 'center' as 'center',
   },
-  headerText: {
-    color: 'rgba(255, 255, 255, 1)',
+  titleText: {
     ...type.title2,
-    marginLeft: 20,
+    color: colors.white,
+    marginLeft: 24,
+    marginRight: 24,
   },
 }

@@ -4,7 +4,7 @@ import {
 } from 'react-native'
 
 import Feather from 'react-native-vector-icons/Feather'
-import { colors, spacing, type } from '../../../foundation'
+import { colors } from '../../../new_foundation'
 
 import MatchImage from './MatchImage'
 
@@ -21,8 +21,8 @@ export default class Date extends React.Component<IProps> {
         <MatchImage source={this.props.sources[0]}/>
         <Feather
           name="plus"
-          size={24}
-          color={colors.lilac}
+          size={32}
+          color={colors.white}
           style={style.icon}
         />
         <MatchImage source={this.props.sources[1]}/>
@@ -36,8 +36,9 @@ const style = {
     flexDirection: 'row' as 'row',
     justifyContent: 'center' as 'center',
     alignItems: 'center' as  'center',
+    marginBottom: 4,
   },
   icon: {
-    margin: spacing.tiny,
+    margin: 8,
   },
 }

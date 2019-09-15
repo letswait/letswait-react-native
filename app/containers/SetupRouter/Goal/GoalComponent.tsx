@@ -6,7 +6,7 @@ import {
 
 import ActionButton from '../../../components/Buttons/ActionButton'
 
-import { colors, spacing, type } from '../../../../foundation'
+import { colors, type } from '../../../../new_foundation'
 
 import ToggleButton from '../../../components/Buttons/ToggleButton'
 import Input from '../../../components/Inputs/Input'
@@ -103,10 +103,10 @@ export default class GoalComponent extends React.PureComponent<IProps, IState> {
 
 const style = {
   title: {
-    ...type.title3,
+    ...type.title2,
     color: colors.white,
-    marginTop: spacing.small+spacing.base,
-    marginBottom: spacing.large,
+    marginTop: 40,
+    marginBottom: 48,
   },
   contentWrapper: {
     flex: 1,

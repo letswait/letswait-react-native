@@ -16,7 +16,7 @@ import CameraModal from '../Camera/Camera'
 import CameraRollModal from '../CameraRoll/CameraRoll'
 
 import Feather from 'react-native-vector-icons/Feather'
-import { colors, spacing, type } from '../../../foundation'
+import { colors } from '../../../new_foundation'
 import { IMediaReference } from '../../types/photos';
 
 interface IProps {
@@ -48,7 +48,7 @@ export default class SelectPhoto extends React.PureComponent<IProps, IState> {
       animationProgress: new Animated.Value(!!this.props.source ? 1 : 0),
       modalVisible: false,
       preparedModal: '',
-      borderColor: props.overWhite ? colors.lilac : colors.white,
+      borderColor: props.overWhite ? colors.capri : colors.white,
     }
   }
   public componentDidUpdate(prevProps: IProps, oldState: IState) {
@@ -159,7 +159,7 @@ export default class SelectPhoto extends React.PureComponent<IProps, IState> {
   public render() {
     const borderColor = this.state.animationProgress.interpolate({
       inputRange: [0, 1],
-      outputRange: [colors.lilac, this.state.borderColor],
+      outputRange: [colors.capri, this.state.borderColor],
     })
     return (
       <View style={{ ...style.wrapper, ...this.props.style }}>
@@ -173,7 +173,7 @@ export default class SelectPhoto extends React.PureComponent<IProps, IState> {
               borderColor,
             }}
           >
-          <Feather name="plus" size={24} color={colors.magnolia}/>
+          <Feather name="plus" size={24} color={colors.white}/>
           {this.state.selectedPhoto ? (
             <Animated.View
               style={{
@@ -209,7 +209,7 @@ export default class SelectPhoto extends React.PureComponent<IProps, IState> {
               opacity: this.state.animationProgress,
             }}
           >
-            <Feather name="edit-3" size={16} color={colors.lilac}/>
+            <Feather name="edit-3" size={16} color={colors.coralBlue}/>
           </Animated.View>
         </TouchableOpacity>
         <Modal
@@ -245,7 +245,7 @@ const style = {
   container: {
     justifyContent: 'center' as 'center',
     alignItems: 'center' as  'center',
-    backgroundColor: colors.transparent,
+    backgroundColor: 'transparent',
     borderWidth: 2,
     borderRadius: 85/2,
     height: 85,
@@ -270,10 +270,10 @@ const style = {
   badge: {
     borderWidth: 1,
     backgroundColor: colors.white,
-    borderColor: colors.saffron,
-    height: spacing.base,
-    width: spacing.base,
-    borderRadius: spacing.base/2,
+    borderColor: colors.turmeric,
+    height: 24,
+    width: 24,
+    borderRadius: 24,
     justifyContent: 'center' as  'center',
     alignItems: 'center' as 'center',
   },

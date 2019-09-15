@@ -8,6 +8,8 @@ import {
   View,
 } from 'react-native'
 
+import { colors, type } from '../../../../new_foundation'
+
 interface IProps {
   value: boolean
   onChange: (value: boolean) => void
@@ -32,18 +34,14 @@ export default class InputSlider extends React.PureComponent<IProps, IState> {
       ...style.track,
       backgroundColor: this.state.toggleState.interpolate({
         inputRange: [0, 1],
-        outputRange: ['rgba(163, 114, 226, 0.15)', 'rgba(182, 127, 255, 0.5)'],
+        outputRange: [colors.cloud, colors.seafoam],
       }),
     }
     const slideStyle = {
       ...style.slide,
-      backgroundColor: this.state.toggleState.interpolate({
-        inputRange: [0, 1],
-        outputRange: ['#DFAFFF', '#CA8BF4'],
-      }),
       left: this.state.toggleState.interpolate({
         inputRange: [0, 1],
-        outputRange: [0, 20],
+        outputRange: [0, 18],
       }),
     }
     return (
@@ -64,36 +62,38 @@ export default class InputSlider extends React.PureComponent<IProps, IState> {
 
 const style = {
   container: {
-    marginLeft: 8,
-    marginRight: 8,
     flexDirection: 'row' as 'row',
-    height: 48,
+    height: 20,
     justifyContent: 'center' as 'center',
     alignItems: 'center' as 'center',
   },
   text: {
-    lineHeight: 20,
-    fontSize: 14,
-    fontWeight: '500' as '500',
-    flexGrow: 1,
-    flex: 1,
-    color: '#A372E2',
+    ...type.input,
+    flex: 0,
   },
   track: {
-    width: 48,
-    height: 20,
-    borderRadius: 10,
+    width: 36,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: colors.cloud,
   },
   slide: {
-    width: 28,
-    height: 28,
+    width: 18,
+    height: 18,
     position: 'absolute' as 'absolute',
-    borderRadius: 14,
-    top: 10,
+    borderRadius: 9,
+    backgroundColor: colors.white,
+    shadowColor: colors.cosmos,
+    shadowOpacity: 0.24,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 2,
   },
   buttonWrapper: {
-    width: 48,
-    height: 48,
+    width: 36,
+    height: 18,
+    marginLeft: 8,
+    marginTop: 1,
+    marginBottom: 1,
     flexGrow: 0,
     flex: 0,
     justifyContent: 'center' as 'center',

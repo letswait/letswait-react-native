@@ -11,6 +11,7 @@ interface IProps {
   size: number
   color: string
   style?: any
+
 }
 export default class FeatherButton extends React.Component<IProps> {
   constructor(props: IProps) {

@@ -4,7 +4,7 @@ import BaseButton from './BaseButton'
 
 import { Food } from '../../types/helpers'
 
-import { colors, spacing, type } from '../../../foundation'
+import { colors } from '../../../new_foundation'
 
 interface IProps {
   onPress: () => any
@@ -67,7 +67,7 @@ const style = {
   buttonDefault: {
     container: {
       backgroundColor: colors.white,
-      borderColor: colors.transparent,
+      borderColor: 'transparent',
       width: 82,
       height: 82,
       flexDirection: 'column-reverse' as 'column-reverse',
@@ -78,8 +78,7 @@ const style = {
   },
   buttonDisabled: {
     container: {
-      backgroundColor: colors.transparent,
-      borderColor: colors.lilac,
+      backgroundColor: colors.shadow,
       alignItems: 'center' as 'center',
       width: 82,
       height: 82,

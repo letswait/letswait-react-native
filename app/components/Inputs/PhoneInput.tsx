@@ -10,7 +10,7 @@ import {
 
 import { AsYouType, parsePhoneNumberFromString } from 'libphonenumber-js'
 import Feather from 'react-native-vector-icons/Feather'
-import { colors, spacing, type } from '../../../foundation'
+import { colors, type } from '../../../new_foundation'
 
 // tslint:disable-next-line: no-var-requires
 const countryCodeSymbols = require('../../lib/countryCodes.json')
@@ -157,7 +157,7 @@ export default class Input extends React.Component<IProps, IState> {
         <View
           style={{
             flex: 1,
-            height: spacing.large,
+            height: 48,
             flexDirection: 'row' as 'row',
           }}
         >
@@ -166,7 +166,7 @@ export default class Input extends React.Component<IProps, IState> {
               <Text style={style.icon}>
                 {countryCodeSymbols[this.state.countryCode]}
             </Text> :
-            <Feather name="phone" size={spacing.base} color={colors.white}/>
+            <Feather name="phone" size={24} color={colors.white}/>
             }
           </View>
           <Animated.View
@@ -228,14 +228,14 @@ const style = {
     maxWidth: '100%',
   },
   iconContainer: {
-    width: spacing.base,
+    width: 24,
     height: 28,
-    marginRight: spacing.tiny,
+    marginRight: 8,
     justifyContent: 'center' as 'center',
   },
   icon: {
-    fontSize: spacing.base,
-    lineHeight: spacing.base,
+    fontSize: 24,
+    lineHeight: 24,
   },
   titleWrapper: {
     height: 25,
@@ -252,7 +252,7 @@ const style = {
   countryCodeWrapper: {
     flex: 0,
     width: 32,
-    marginRight: spacing.tiny,
+    marginRight: 8,
   },
   input: {
     ...type.large,
@@ -261,12 +261,12 @@ const style = {
     width: '100%',
     maxWidth: 223-32,
     height: 28,
-    marginRight: spacing.tiny,
-    marginLeft: spacing.tiny,
+    marginRight: 8,
+    marginLeft: 8,
   },
   bottomBorder: {
     width: '100%',
     height: 2,
-    backgroundColor: colors.lilac,
+    backgroundColor: colors.white,
   },
 }

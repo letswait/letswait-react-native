@@ -3,8 +3,9 @@ import { ThunkDispatch } from 'redux-thunk'
 
 import MatchesComponent from './MatchesComponent'
 
-import { getMatches } from '../../../actions/matches'
+import { getMatches, previewDate } from '../../../actions/matches'
 import { openChat } from '../../../actions/matches/chat'
+import { ReduxStore } from '../../../types/models'
 
 const mapStateToProps = (state: any) => {
   return {
@@ -20,6 +21,7 @@ const mapStateToProps = (state: any) => {
 const mapDispatchToProps = (dispatch: ThunkDispatch<{},{},any>) => ({
   getMatches: () => dispatch(getMatches()),
   openChat: (matchId: string) => dispatch(openChat(matchId)),
+  previewDate: (match: ReduxStore.Match) => dispatch(previewDate(match)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(MatchesComponent)

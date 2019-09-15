@@ -12,7 +12,7 @@ import { CameraType, FlashMode, RNCamera } from 'react-native-camera'
 import CameraButton from './CameraButton'
 
 import { ifIphoneX } from 'react-native-iphone-x-helper'
-import { colors, spacing, type } from '../../../foundation'
+import { colors } from '../../../new_foundation'
 import { IMediaReference } from '../../types/photos'
 
 const { width, height } = Dimensions.get('window')
@@ -152,14 +152,14 @@ export default class CameraModalIos extends React.Component<IProps, IState> {
               style={style.aperture}
               name={'x'}
               size={48}
-              color={'rgba(236, 30, 34, 1)'}
+              color={colors.duckbill}
               onPress={() => this.denyPicture()}
             />
             <CameraButton
               style={style.aperture}
               name={'check'}
               size={48}
-              color={'rgba(26, 204, 56, 1)'}
+              color={colors.seafoam}
               onPress={() => this.approvePicture()}
             />
           </View>
@@ -248,7 +248,7 @@ const style = {
         paddingBottom: 5,
       },
     ),
-    backgroundColor: 'rgba(0,0,0,1)',
+    backgroundColor: 'black',
     width: '100%',
     display: 'flex' as 'flex',
     height: '100%',

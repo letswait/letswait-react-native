@@ -5,6 +5,7 @@ import {
   Text,
   TouchableHighlight,
   View,
+  Alert,
 } from 'react-native'
 
 import FastImage from 'react-native-fast-image'
@@ -13,17 +14,51 @@ import MapView, { LatLng, Marker } from 'react-native-maps'
 import LeftMessageContainer from './LeftMessageContainer'
 import RightMesssageContainer from './RightMessageContainer'
 
-import { colors, spacing, type } from '../../../foundation';
+import { colors, type } from '../../../new_foundation';
 import { ReduxStore } from '../../types/models'
 
-interface IProps extends ReduxStore.IChat {
-  direction: 'left' | 'right'
-  key?: number | string,
-}
-// interface IState {
+import { IMediaReference } from 'app/types/photos'
+import moment from 'moment';
 
-// }
-export default class Message extends React.PureComponent<IProps> {
+interface IProps extends ReduxStore.IChat {
+  direction: 'left' | 'right' | null
+  lastDirection: 'left' | 'right' | null
+  nextTimestamp?: Date
+  lastTimestamp?: Date
+  source: IMediaReference
+  key: number | string,
+}
+interface IState {
+  displayTime?: string
+  groupChat: boolean
+}
+export default class Message extends React.PureComponent<IProps, IState> {
+  public state: IState = {
+    displayTime: undefined,
+    groupChat: false,
+  }
+  constructor(props: IProps) {
+    super(props)
+    // if(props.source && props.)
+    let prefix: 'Sent' | 'Read' = 'Sent'
+    const newMoment = (() => {
+      if(props.readTimestamp) {
+        prefix = 'Read'
+        return props.readTimestamp
+      }
+      return props.sentTimestamp
+    })()
+    this.state.displayTime =
+    this.props.lastDirection !== this.props.direction ?
+      `${prefix} ${moment(newMoment).format('ddd MMM DD, hh:mmA')}` :
+      undefined
+    const diff = moment(props.sentTimestamp).diff(moment(props.nextTimestamp), 'minutes')
+    if(diff < 5) {
+      this.state.groupChat = true
+    } else {
+      this.state.displayTime = `${prefix} ${moment(newMoment).format('ddd MMM DD, hh:mmA')}`
+    }
+  }
   public renderMessage() {
     const { text, image, cloudfront, location, campaignId } = this.props.message
 
@@ -95,19 +130,68 @@ export default class Message extends React.PureComponent<IProps> {
     )
   }
   public render() {
-    return this.props.direction === 'left' ? (
-      <LeftMessageContainer>
-        {this.renderMessage()}
-      </LeftMessageContainer>
-    ) : (
-      <RightMesssageContainer>
-        {this.renderMessage()}
-      </RightMesssageContainer>
+    const messageWrapper = {
+      ...style.messageWrapper,
+      flexDirection: this.props.direction === 'right' ?
+        'row-reverse' as 'row-reverse' :
+        'row' as 'row',
+      marginTop: this.state.groupChat ? 2 : 13,
+      paddingBottom: this.state.displayTime ? 11 : 0,
+    }
+    const MessageContainer = this.props.direction === 'right' ?
+      RightMesssageContainer :
+      LeftMessageContainer
+
+    const displayTime = {
+      ...style.displayTime,
+      left: 52,
+      textAlign: 'left' as 'left',
+    }
+    return (
+      <View style={messageWrapper}>
+        <View
+          style={{
+            width: 52,
+            height: 43,
+            // backgroundColor: colors.seafoam,
+          }}
+        >
+          {this.props.source && this.state.displayTime ? (
+            <FastImage
+              source={this.props.source}
+              style={{
+                width: 43,
+                height: 43,
+                borderRadius: 12,
+                marginLeft: 4,
+                marginRight: 5,
+              }}
+            />
+          ) : null}
+        </View>
+        <MessageContainer>
+          {this.renderMessage()}
+        </MessageContainer>
+        {this.state.displayTime && this.state.displayTime.length ? (
+          <Text style={displayTime}>
+            {this.state.displayTime}
+          </Text>
+        ): null}
+      </View>
     )
   }
 }
 
 const style = {
+  displayTime: {
+    position: 'absolute' as 'absolute',
+    bottom: 0,
+    ...type.micro,
+    color: colors.shadow,
+  },
+  messageWrapper: {
+    alignItems: 'flex-end' as 'flex-end',
+  },
   messageMetadataContainer: {
     display: 'flex' as 'flex',
     flexDirection: 'column' as 'column',
@@ -131,8 +215,9 @@ const style = {
     marginBottom: 4,
   },
   messageText: {
-    ...type.small,
-    color: 'white',
+    ...type.regular,
+    color: colors.cosmos,
+    opacity:  0.75,
     fontWeight: '500' as '500',
     flex: 1,
     textAlign: 'left' as 'left',

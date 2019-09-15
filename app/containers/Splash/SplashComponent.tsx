@@ -5,7 +5,7 @@ import {
   View,
 } from 'react-native'
 
-import { colors, spacing, type } from '../../../foundation'
+import { colors, type } from '../../../new_foundation'
 
 interface IProps {
   authenticate: () => any
@@ -18,7 +18,7 @@ export default class SplashScreen extends React.Component<IProps,{}> {
     return (
       <View style={style.screen}>
         <Image
-          source={require('../../assets/images/logo.png')}
+          source={{ uri: 'logo' }}
           style={style.logo}
         />
         <View style={style.titleLine}>
@@ -32,7 +32,7 @@ export default class SplashScreen extends React.Component<IProps,{}> {
 
 const style = {
   screen: {
-    backgroundColor: colors.wisteria,
+    backgroundColor: colors.capri,
     alignItems: 'center' as 'center',
     justifyContent: 'center' as 'center',
     width: '100%' as '100%',
@@ -43,7 +43,7 @@ const style = {
     height: 100,
   },
   titleLine: {
-    paddingTop: spacing.tiny,
+    paddingTop: 8,
     flexDirection: 'row' as 'row',
   },
   smallType: {

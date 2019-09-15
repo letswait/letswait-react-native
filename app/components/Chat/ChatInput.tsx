@@ -1,75 +1,105 @@
 import React from 'react'
 import {
   Animated,
+  Dimensions,
   Easing,
   Keyboard,
   Modal,
   TextInput,
   TouchableOpacity,
   View,
+  TouchableWithoutFeedback,
 } from 'react-native'
 
 import { ifIphoneX } from 'react-native-iphone-x-helper'
 
 import Feather from 'react-native-vector-icons/Feather'
-import { colors, spacing, type } from '../../../foundation'
+import { colors, type } from '../../../new_foundation'
 import { IMediaReference } from '../../types/photos';
 
 import CameraModal from '../Camera/Camera'
 import CameraRollModal from '../CameraRoll/CameraRoll'
 
+import FeatherButton from '../Camera/CameraButton'
+
+const { height, width } = Dimensions.get('window')
+
 interface IProps {
   onSend: (message: string) => any,
   onSendImage: (photo: IMediaReference) => any,
+  keyboardWillHide: () => void
+  keyboardWillShow: () => void
 }
 interface IState {
   message: string
   modalVisible: boolean
   preparedModal: 'camera' | 'cameraRoll' | ''
-  keyboardVisible: Animated.Value
+  toolbarSlideout: Animated.Value
+  toolbarVisible: boolean
+  keyboardVisible: boolean
+  height: number
 }
 export default class ChatInput extends React.PureComponent<IProps, IState> {
-  public keyboardDidShowListener: any
-  public keyboardDidHideListener: any
+  public keyboardWillShowListener: any
+  public keyboardWillHideListener: any
   constructor(props: IProps) {
     super(props)
     this.state = {
       message: '',
       modalVisible: false,
       preparedModal: '',
-      keyboardVisible: new Animated.Value(0),
+      toolbarSlideout: new Animated.Value(0),
+      toolbarVisible: true,
+      keyboardVisible: false,
+      height: 0,
     }
   }
   public componentDidMount() {
-    this.keyboardDidShowListener = Keyboard.addListener(
+    this.keyboardWillShowListener = Keyboard.addListener(
       'keyboardWillShow',
-      () => this.keyboardDidShow(),
+      () => this.keyboardWillShow(),
     );
-    this.keyboardDidHideListener = Keyboard.addListener(
+    this.keyboardWillHideListener = Keyboard.addListener(
       'keyboardWillHide',
-      () => this.keyboardDidHide(),
+      () => this.keyboardWillHide(),
     );
   }
   public componentWillUnmount() {
-    this.keyboardDidShowListener.remove();
-    this.keyboardDidHideListener.remove();
+    this.keyboardWillShowListener.remove();
+    this.keyboardWillHideListener.remove();
   }
-  public keyboardDidShow() {
-    Animated.timing(this.state.keyboardVisible, {
-      toValue: 1,
+  public keyboardWillShow() {
+    if(this.props.keyboardWillShow) this.props.keyboardWillShow()
+    this.hideToolbar()
+  }
+  public keyboardWillHide() {
+    if(this.props.keyboardWillHide) this.props.keyboardWillHide()
+    this.showToolbar()
+  }
+  public toggleToolbar() {
+    if(this.state.toolbarVisible) {
+      this.hideToolbar()
+    } else {
+      this.showToolbar()
+    }
+  }
+  public showToolbar() {
+    this.setState({ toolbarVisible: true })
+    Animated.timing(this.state.toolbarSlideout, {
+      toValue: 0,
       duration: 300,
       easing: Easing.inOut(Easing.ease),
     }).start()
-    // this.setState({ keyboardVisible: true })
   }
-  public keyboardDidHide() {
-    Animated.timing(this.state.keyboardVisible, {
-      toValue: 0,
+  public hideToolbar() {
+    this.setState({ toolbarVisible: false })
+    Animated.timing(this.state.toolbarSlideout, {
+      toValue: 1,
       duration: 300,
     }).start()
   }
   public openModal(name: 'camera' | 'cameraRoll' | '') {
-    if(!this.state.modalVisible && name && !!name.length) {
+    if (!this.state.modalVisible && name && !!name.length) {
       this.setState((prevState: IState): IState => {
         return {
           ...prevState,
@@ -80,7 +110,7 @@ export default class ChatInput extends React.PureComponent<IProps, IState> {
     }
   }
   public closeModal() {
-    if(this.state.modalVisible) {
+    if (this.state.modalVisible) {
       this.setState((prevState) => {
         return {
           ...prevState,
@@ -104,7 +134,7 @@ export default class ChatInput extends React.PureComponent<IProps, IState> {
     })
   }
   public onSend() {
-    if(this.state.message) {
+    if (this.state.message) {
       this.props.onSend(this.state.message)
       this.setState({ message: '' })
     }
@@ -112,48 +142,66 @@ export default class ChatInput extends React.PureComponent<IProps, IState> {
   public render() {
     const sendIconWrapper = {
       ...style.sendIconWrapper,
-      opacity: this.state.message ? 1 : 0.4,
+      opacity: this.state.message ? 0.4 : 1,
     }
-    const container = {
-      ...style.container,
-      ...ifIphoneX({
-        marginBottom: this.state.keyboardVisible.interpolate({
-          inputRange: [0, 1],
-          outputRange: [40, 0],
-          extrapolate: 'clamp',
-        }),
-        // marginBottom: this.state.keyboardVisible ? 12 : 40,
-      },           {
-        marginBottom: this.state.keyboardVisible.interpolate({
-          inputRange: [0, 1],
-          outputRange: [12, 0],
-          extrapolate: 'clamp',
-        }),
+    const toolbar = {
+      ...style.toolbar,
+      maxWidth: this.state.toolbarSlideout.interpolate({
+        inputRange: [0, 1],
+        outputRange: [102, 0],
       }),
     }
+    const summonToolbarBackground = {
+      ...style.summonToolbarBackground,
+      backgroundColor: this.state.toolbarSlideout.interpolate({
+        inputRange: [0, 1],
+        outputRange: [colors.shadow, colors.turmeric],
+      }),
+    }
+    const input = {
+      ...style.input,
+      height: this.state.height,
+    }
     return (
-      <Animated.View style={container}>
-        <View style={style.topBar}/>
+      <View>
         <View style={style.contentWrapper}>
-          <TouchableOpacity
-            style={style.actionButtonContainer}
-            onPress={() => this.openModal('camera')}
-          >
-            <Feather name="camera" color={colors.white} size={20}/>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={style.actionButtonContainer}
-            onPress={() => this.openModal('cameraRoll')}
-          >
-            <Feather name="image" color={colors.white} size={20}/>
-          </TouchableOpacity>
+          <Animated.View style={toolbar}>
+            <TouchableOpacity
+              style={style.actionButtonContainer}
+              onPress={() => this.openModal('camera')}
+            >
+              <Feather name="camera" color={colors.white} size={31} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={style.actionButtonContainer}
+              onPress={() => this.openModal('cameraRoll')}
+            >
+              <Feather name="image" color={colors.white} size={31} />
+            </TouchableOpacity>
+          </Animated.View>
           <View style={style.inputContainer} pointerEvents="box-none">
+            <View style={style.summonToolbar}>
+              <Animated.View style={summonToolbarBackground}/>
+              <FeatherButton
+                name={this.state.toolbarVisible ? 'chevron-left' : 'chevron-right'}
+                color={colors.white}
+                size={25}
+                onPress={() => this.toggleToolbar()}
+                style={{
+                  position: 'absolute' as 'absolute',
+                }}
+              />
+            </View>
             <TextInput
-              style={style.input}
+              style={input}
               value={this.state.message}
               onChangeText={(text: string) => this.onChange(text)}
               multiline
               numberOfLines={1}
+              onContentSizeChange={(event) => {
+                this.setState({ height: event.nativeEvent.contentSize.height + 24 })
+              }}
+              blurOnSubmit={false}
             />
             <TouchableOpacity
               style={sendIconWrapper}
@@ -161,8 +209,8 @@ export default class ChatInput extends React.PureComponent<IProps, IState> {
             >
               <Feather
                 name="send"
-                color={'#A372E2'}
-                size={spacing.base}
+                color={colors.mustard}
+                size={25}
               />
             </TouchableOpacity>
           </View>
@@ -173,13 +221,13 @@ export default class ChatInput extends React.PureComponent<IProps, IState> {
           animationType="slide"
         >
           {({
-            camera:(
+            camera: (
               <CameraModal
                 onClose={() => this.closeModal()}
                 onSelect={(photo: IMediaReference) => this.receiveImages(photo)}
               />
             ),
-            cameraRoll:(
+            cameraRoll: (
               <CameraRollModal
                 onClose={() => this.closeModal()}
                 onSelect={(photo: IMediaReference) => this.receiveImages(photo)}
@@ -189,58 +237,74 @@ export default class ChatInput extends React.PureComponent<IProps, IState> {
             ),
           } as any)[this.state.preparedModal]}
         </Modal>
-      </Animated.View>
+      </View>
     )
   }
 }
 
 const style = {
-  container: {
-    width: '100%',
-    flexDirection: 'column' as 'column',
-  },
-  topBar: {
-    height: 1,
-    width: '100%',
-    backgroundColor: colors.lilac,
-  },
   contentWrapper: {
-    padding: spacing.tiny,
+    marginTop: 8,
+    marginLeft: 12,
+    marginRight: 12,
+    width: width - 24,
     flexDirection: 'row' as 'row',
-    width: '100%',
     alignItems: 'flex-end' as 'flex-end',
   },
   actionButtonContainer: {
-    width: 46,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: '#A372E2',
+    width: 43,
+    height: 43,
+    borderRadius: 10,
+    backgroundColor: colors.mustard,
     justifyContent: 'center' as 'center',
     alignItems: 'center' as 'center',
-    marginRight: spacing.tiny,
+    marginRight: 8,
+  },
+  toolbar: {
+    flex: 0,
+    flexGrow: 0,
+    flexDirection: 'row' as 'row',
+    overflow: 'hidden' as 'hidden',
+  },
+  summonToolbar: {
+    marginTop: 9,
+    marginBottom: 9,
+    width: 33,
+    height: 25,
+    zIndex: 1,
+    justifyContent: 'center' as 'center',
+    alignItems: 'center' as 'center',
+    overflow: 'hidden' as 'hidden',
+  },
+  summonToolbarBackground: {
+    width: 17,
+    height: 25,
+    borderRadius: 3,
   },
   inputContainer: {
-    borderRadius: 17,
+    borderRadius: 10,
+    minHeight: 43,
     flex: 1,
     backgroundColor: colors.white,
-    borderColor: '#A372E2',
-    borderWidth: 1,
     flexDirection: 'row' as 'row',
     alignItems: 'flex-end' as 'flex-end',
   },
   input: {
-    ...type.small,
+    ...type.regular,
     color: colors.cosmos,
-    margin: 7,
-    marginTop: 2,
-    marginLeft: spacing.tiny,
-    marginRight: spacing.tiny,
+    lineHeight: 19,
+    paddingTop: 12,
+    paddingBottom: 12,
+    paddingRight: 12,
+    minHeight: 43,
     flex: 1,
     maxHeight: 300,
   },
   sendIconWrapper: {
-    padding: 4,
-    paddingRight: 8,
+    width: 52,
+    height: 43,
     zIndex: 1,
+    justifyContent: 'center' as 'center',
+    alignItems: 'center' as 'center',
   },
 }

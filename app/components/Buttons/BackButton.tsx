@@ -5,13 +5,13 @@ import {
 } from 'react-native'
 
 import Feather from 'react-native-vector-icons/Feather'
-import { colors, spacing, type } from '../../../foundation'
+import { colors, type } from '../../../new_foundation'
 
 interface IProps {
   onPress: () => any
   children?: any
 }
-export default class TextButton extends React.PureComponent<IProps> {
+export default class BackButton extends React.PureComponent<IProps> {
   constructor(props: IProps) {
     super(props)
   }

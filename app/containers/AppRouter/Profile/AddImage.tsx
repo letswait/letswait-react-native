@@ -12,7 +12,7 @@ import FastImage from 'react-native-fast-image'
 import Feather from 'react-native-vector-icons/Feather'
 import FeatherButton from '../../../components/Camera/CameraButton'
 
-import { colors, spacing, type } from '../../../../foundation'
+import { colors, type } from '../../../../new_foundation'
 
 import CameraModal from '../../../components/Camera/Camera'
 import CameraRollModal from '../../../components/CameraRoll/CameraRoll'
@@ -180,7 +180,7 @@ const style = {
     right: 16,
     borderRadius: 6,
     backgroundColor: 'transparent',
-    shadowColor: 'rgba(255, 255, 255, 0.24)',
+    shadowColor: colors.cloud,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -190,7 +190,7 @@ const style = {
   addImageContainer: {
     width: '100%',
     height: 350,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: colors.cloud,
     left: 0,
     top: 0,
     position: 'absolute' as 'absolute',

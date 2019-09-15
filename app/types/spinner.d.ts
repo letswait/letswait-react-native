@@ -14,13 +14,17 @@ export type SpinnerDeals = {
   5: SpinnerDateLocation,
   6: SpinnerDateLocation,
   7: SpinnerDateLocation,
+  8: SpinnerDateLocation,
+  9: SpinnerDateLocation,
+  10: SpinnerDateLocation,
+  11: SpinnerDateLocation,
 } & Array<SpinnerDateLocation>
 
-export type SpinnerSegmentType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+export type SpinnerSegmentType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11
 
 export interface ISegmentInfo {
   logo: string,
-  name: string,
+  label: string,
   venueId?: any,
   campaignId?: any,
   priceLevel?: 0 | 1 | 2 | 3 | 4,
@@ -43,4 +47,8 @@ export type SpinnerInfo = {
   5: ISegmentInfo,
   6: ISegmentInfo,
   7: ISegmentInfo,
+  8: ISegmentInfo,
+  9: ISegmentInfo,
+  10: ISegmentInfo,
+  11: ISegmentInfo,
 } & Array<ISegmentInfo>

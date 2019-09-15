@@ -1,6 +1,9 @@
 import React from 'react'
 import BaseButton, { IButtonStyle } from './BaseButton'
 
+import { colors } from '../../../new_foundation'
+import { ObjectOf } from '../../types/helpers'
+
 interface IProps {
   children: any
   onPress: () => any
@@ -30,16 +33,16 @@ const style: ObjectOf<IButtonStyle> = {
       margin: 16,
     },
     label: {
-
+      color: colors.seafoam,
     },
   },
   disabled: {
     container: {
       margin: 16,
-      borderColor: 'rgba(255,255,255,0.4)',
+      borderColor: colors.cloud,
     },
     label: {
-      color: 'rgba(255,255,255,0.4)',
+      color: colors.cloud,
     },
   },
 }

@@ -16,7 +16,7 @@ import {
 } from 'react-native'
 import { ifIphoneX } from 'react-native-iphone-x-helper'
 
-import { colors, spacing, type } from '../../../foundation'
+import { colors, type } from '../../../new_foundation'
 import {
   CameraRollRow,
   IMediaReference,
@@ -329,8 +329,10 @@ export default class CameraRollModalIos extends React.Component<IProps, IState> 
       NOT_READY: (
         <View
           style={{
+            ...type.title2,
             width: '100%',
             flex: 1,
+            color: colors.cosmos,
             display: 'flex' as 'flex',
             justifyContent: 'center' as 'center',
             alignItems: 'center' as 'center',
@@ -382,7 +384,7 @@ const style = {
     width: '100%',
     flexDirection: 'row' as 'row',
     borderBottomWidth: 1,
-    borderBottomColor: colors.wisteria,
+    borderBottomColor: colors.seafoam,
     display: 'flex' as 'flex',
   },
   headerChevron: {
@@ -413,7 +415,7 @@ const style = {
   headerTitle: {
     ...type.large,
     fontWeight: '700' as '700',
-    color: colors.wisteria,
+    color: colors.cosmos,
   },
   headerOptionWrapperLeft: {
     justifyContent: 'center' as 'center',
@@ -433,7 +435,8 @@ const style = {
   },
   headerOptionText: {
     ...type.regular,
-    padding: spacing.small,
+    color: colors.seafoam,
+    padding: 16,
   },
   content: {
     flex: 1,
@@ -448,7 +451,7 @@ const style = {
     width: '100%',
     height: '100%',
     position: 'absolute' as 'absolute',
-    backgroundColor: 'rgba(0,0,0,0)',
+    backgroundColor: 'transparent',
     flexDirection: 'column' as  'column',
     justifyContent: 'center' as 'center',
     alignItems: 'center' as 'center',

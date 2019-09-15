@@ -16,18 +16,19 @@ import Card from './Card'
 import { ApiResponse } from 'apisauce';
 import { ObjectOf } from 'app/types/helpers';
 import { isIphoneX } from 'react-native-iphone-x-helper'
-import { colors, spacing, type } from '../../../../foundation'
-const { width, height } = Dimensions.get('screen')
+import { colors, type } from '../../../../new_foundation'
+
+const { width, height } = Dimensions.get('window')
 
 // tslint:disable-next-line: no-var-requires
 const noGeolocation = require('../../../assets/ui/ui-geolocation.png')
 
 interface IProps {
-  shouldUpdate: boolean
+  // shouldUpdate: boolean
   geolocation: -1 | 0 | 1 | 2
   user: any,
   currentRoute: any,
-  disablePrerender?: boolean
+  // disablePrerender?: boolean
   locationServicesEnabled: boolean,
   onGeolocation: () => any
   revealSpinner: (spinner: {
@@ -47,12 +48,15 @@ interface IProps {
       chosenSegment: number,
     },
   }) => any,
+  onScrollUp: () => any
+  onScrollDown: () => any
 }
 interface IState {
   feed: any[]
   prerendered: boolean
   activeCard: number
   matchMap?: ObjectOf<string>,
+  tintColor: Animated.Value,
   cardSize: {
     width: number | undefined,
     height: number | undefined,
@@ -63,6 +67,7 @@ interface IState {
 }
 export default class FeedComponent extends React.Component<IProps, IState> {
   public state: IState = {
+    tintColor: new Animated.Value(0),
     feed: [],
     activeCard: 0,
     prerendered: false,
@@ -101,13 +106,13 @@ export default class FeedComponent extends React.Component<IProps, IState> {
       }
     })
   }
-  public shouldComponentUpdate() {
-    if(!this.state.prerendered && !this.props.disablePrerender) {
-      this.setState({ prerendered: true })
-      return true
-    }
-    return !!this.props.shouldUpdate
-  }
+  // public shouldComponentUpdate() {
+  //   if(!this.state.prerendered && !this.props.disablePrerender) {
+  //     this.setState({ prerendered: true })
+  //     return true
+  //   }
+  //   return !!this.props.shouldUpdate
+  // }
   public postAction(candidate: any, userId: string, action: 'rejected' | 'accepted') {
     if(!this.state.matchMap) return
     const matchId = this.state.matchMap[userId]
@@ -139,12 +144,35 @@ export default class FeedComponent extends React.Component<IProps, IState> {
   public decrementCard() {
     if(this.state.activeCard) this.setState({ activeCard: this.state.activeCard - 1 })
   }
+  public returnColor() {
+  }
   public growCard(value: number) {
     if(!!this.nextCard) {
       this.nextCard.state.swipeAnimation.setValue(value)
     }
   }
+  public shiftColor(value: number) {
+    this.state.tintColor.setValue(value)
+  }
   public render() {
+    const identityColor = 'rgba(255, 255, 255, 0)'
+    const colorHinge = {
+      width,
+      height,
+      position: 'absolute' as 'absolute',
+      left: 0,
+      top: 0,
+      backgroundColor: this.state.tintColor.interpolate({
+        inputRange: [-2*width, -1*width, 0, width, 2*width],
+        outputRange: [
+          identityColor,
+          'rgba(235, 124, 49, 0.75)',
+          identityColor ,
+          'rgba(102, 200, 204, 0.75)',
+          identityColor],
+        extrapolate: 'clamp',
+      }),
+    }
     return this.props.geolocation === 1 || this.props.geolocation === -1 ? (
       <View style={style.contentWrapper}>
         <View
@@ -165,19 +193,25 @@ export default class FeedComponent extends React.Component<IProps, IState> {
               ref={c => this.nextCard = c}
             />
         ) : null}
+        <Animated.View style={colorHinge} />
         {this.state.feed.length > this.state.activeCard ? (
           <Card
             {...this.state.feed[this.state.activeCard]}
             ref={(c) => {
               if(c) {
                 this.currentCard = c
-                c.state.swipeAnimation.addListener(({ value }) => this.growCard(value))
+                c.state.swipeAnimation.addListener(({ value }) => {
+                  this.growCard(value)
+                  this.shiftColor(value)
+                })
               }
             }}
             // ref={this.updateNextCardBound}
             layout={this.state.cardSize}
             onLeft={(id: string, candidate: any) => this.postAction(candidate, id, 'rejected')}
             onRight={(id: string, candidate: any) => this.postAction(candidate, id, 'accepted')}
+            onScrollUp={() => this.props.onScrollUp()}
+            onScrollDown={() => this.props.onScrollDown()}
           />
         ) : null}
       </View>
@@ -202,54 +236,38 @@ export default class FeedComponent extends React.Component<IProps, IState> {
 }
 
 const style = {
-  screenContainer: {
+  contentWrapper: {
     width,
     height,
-    padding: 16,
-    paddingTop: isIphoneX ? 136 : 112,
-    paddingBottom: isIphoneX ? 50 : 30,
-    backgroundColor: colors.transparent,
+    backgroundColor: 'transparent',
     flexDirection: 'column' as 'column',
     justifyContent: 'center' as 'center',
     alignItems: 'center' as 'center',
-  },
-  contentWrapper: {
-    width: '100%',
-    height: '100%',
-    padding: 8,
-    backgroundColor: colors.transparent,
-    flexDirection: 'column' as 'column',
-    justifyContent: 'center' as 'center',
-    alignItems: 'center' as 'center',
+    overflow: 'hidden' as 'hidden',
   },
   noGeolocationWrapper: {
-    width: '100%',
-    height: '100%',
+    width,
+    height,
     flexDirection: 'column' as 'column',
     justifyContent: 'center' as 'center',
     alignItems: 'center' as 'center',
   },
   displayText: {
-    ...type.title3,
+    ...type.title2,
     textAlign: 'center' as 'center',
-    lineHeight: 32,
-    color: 'rgba(134, 57, 182, 0.5)',
+    color: colors.white,
   },
   defaultCard: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 16,
-    borderWidth: 3,
-    borderStyle:'dashed' as 'dashed',
-    borderColor: 'rgba(176, 118, 215, 0.4)',
-    backgroundColor: colors.transparent,
+    width,
+    height,
+    backgroundColor: colors.seafoam,
     flexDirection: 'column' as 'column',
     justifyContent: 'center' as 'center',
     alignItems: 'center' as 'center',
   },
   nextCard: {
-    width: '100%',
-    height: '100%',
+    width,
+    height,
     position: 'absolute' as 'absolute',
   },
 }

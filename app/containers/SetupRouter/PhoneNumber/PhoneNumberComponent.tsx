@@ -8,7 +8,7 @@ import {
 import ActionButton from '../../../components/Buttons/ActionButton'
 import PhoneInput from '../../../components/Inputs/PhoneInput'
 
-import { colors, spacing, type } from '../../../../foundation'
+import { colors, type } from '../../../../new_foundation'
 import SetupWrapper from '../SetupWrapperComponent';
 
 interface IProps {
@@ -86,10 +86,10 @@ export default class PhoneNumberComponent extends React.PureComponent<IProps, IS
 
 const style = {
   title: {
-    ...type.title3,
+    ...type.title2,
     color: colors.white,
-    marginTop: spacing.small+spacing.base,
-    marginBottom: spacing.large,
+    marginTop: 40,
+    marginBottom: 48,
     maxWidth: 300,
   },
   contentWrapper: {

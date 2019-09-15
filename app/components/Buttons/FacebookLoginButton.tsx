@@ -2,7 +2,7 @@ import React from 'react'
 import BaseButton from './BaseButton'
 
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
-import { colors, spacing, type } from '../../../foundation'
+import { colors } from '../../../new_foundation'
 
 interface IProps {
   onPress: () => any
@@ -24,10 +24,11 @@ export default class FacebookLoginButton extends React.Component<IProps> {
 const style = {
   buttonDefault: {
     container: {
-      backgroundColor: 'rgba(59,89,152,1)',
-      borderColor: 'rgba(255,255,255,0)',
+      backgroundColor: colors.facebookBlue,
+      // border reset
+      borderColor: 'transparent',
       width: 253,
-      shadowColor: '#20335E',
+      shadowColor: colors.shadow,
       shadowOffset: { width: 0, height:1 },
       shadowOpacity: 0.2,
       shadowRadius: 1,

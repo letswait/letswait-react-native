@@ -48,7 +48,7 @@ declare namespace ReduxStore {
   export type Match = {
     _id: ObjectId,
     timestamp: Date,
-    userProfiles: [IMatchUser]
+    userProfiles: IMatchUser[]
     state: MatchState
     users: ObjectOf<UserMatched>
     chat: IChat[]

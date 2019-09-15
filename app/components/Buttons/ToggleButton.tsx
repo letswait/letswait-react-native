@@ -1,7 +1,7 @@
 import React from 'react'
 import BaseButton from './BaseButton'
 
-import { colors, spacing, type } from '../../../foundation'
+import { colors } from '../../../new_foundation'
 
 interface IProps {
   children: any
@@ -36,7 +36,7 @@ export default class ToggleButton extends React.Component<IProps> {
 const style = {
   buttonDefault: {
     container: {
-      backgroundColor: colors.transparent,
+      backgroundColor: 'transparent',
       borderColor: colors.white,
       width: 253,
     },
@@ -46,12 +46,12 @@ const style = {
   },
   buttonDisabled: {
     container: {
-      backgroundColor: colors.transparent,
-      borderColor: colors.lilac,
+      backgroundColor: 'transparent',
+      borderColor: colors.cloud,
       width: 253,
     },
     label: {
-      color: 'rgba(255,255,255,0.8)',
+      color: colors.white,
     },
   },
 }

@@ -7,7 +7,7 @@ import {
 
 import FastImage from 'react-native-fast-image'
 
-import { colors, spacing, type } from '../../../foundation'
+import { colors, type } from '../../../new_foundation'
 
 interface IProps {
   source?: string
@@ -41,15 +41,10 @@ export default class QueueMatch extends React.PureComponent<IProps> {
         onPress={() => this.props.onPress()}
         style={style.queueWrapper}
       >
-        <View style={style.shadowHelper}/>
-        <View style={style.imageWrapper}>
-          <View style={style.imageContainer}>
-            <FastImage
-              source={{ uri: this.props.source }}
-              style={style.image}
-            />
-          </View>
-        </View>
+        <FastImage
+          source={{ uri: this.props.source }}
+          style={style.image}
+        />
       </TouchableOpacity>
     )
   }
@@ -57,9 +52,10 @@ export default class QueueMatch extends React.PureComponent<IProps> {
 
 const style = {
   queueWrapper: {
-    height: 107,
-    width: 83,
-    backgroundColor: colors.transparent,
+    height: 67,
+    width: 67,
+    marginRight: 12,
+    backgroundColor: 'transparent',
     justifyContent: 'center' as 'center',
     alignItems: 'center' as 'center',
   },
@@ -70,33 +66,19 @@ const style = {
     justifyContent: 'center' as 'center',
     alignItems: 'center' as 'center',
   },
-  imageContainer: {
-    width: 75,
-    height: 75,
-    borderRadius: 75/2,
-    overflow: 'hidden' as 'hidden',
-  },
   imageContainerEnqueued: {
-    width: 75,
-    height: 75,
-    borderRadius: 75/2,
+    width: 67,
+    height: 67,
+    borderRadius: 67/2,
     overflow: 'hidden' as 'hidden',
     borderWidth: 1,
-    borderColor: colors.lilac,
+    borderColor: colors.cloud,
     borderStyle: 'dashed' as 'dashed',
   },
-  shadowHelper: {
-    height: 55,
-    width: 55,
-    borderRadius: 55/2,
-    backgroundColor: colors.wisteria,
-    shadowColor: colors.wisteria,
-    shadowOpacity: 0.6,
-    shadowOffset: { width: 0, height: 15 },
-    shadowRadius: 8,
-  },
   image: {
-    width: '100%',
-    height: '100%',
+    width: 67,
+    height: 67,
+    borderRadius: 67/2,
+    overflow: 'hidden' as 'hidden',
   },
 }

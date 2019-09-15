@@ -2,7 +2,8 @@ import { DISMISS_MODAL, PUSH_SPINNER, SHOW_MODAL } from './index'
 
 import { ThunkDispatch } from 'redux-thunk';
 
-export const showModal = (modalType: 'spinner') => ({
+export type ModalType = 'spinner' | 'profile' | 'datepreview'
+export const showModal = (modalType: ModalType) => ({
   modalType,
   type: SHOW_MODAL,
 })

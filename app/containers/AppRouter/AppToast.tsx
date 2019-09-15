@@ -9,7 +9,7 @@ import {
 } from 'react-native'
 
 import { isIphoneX } from 'react-native-iphone-x-helper'
-import { colors, type } from '../../../foundation'
+import { colors, type } from '../../../new_foundation'
 
 const { width, height } = Dimensions.get('window')
 
@@ -79,7 +79,9 @@ const style = {
   },
   container: {
     width: width-64,
-    backgroundColor: colors.lilac,
+    backgroundColor: colors.seafoam,
+    borderColor: colors.white,
+    borderWidth: 2,
     shadowColor: colors.cosmos,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.12,
@@ -91,7 +93,7 @@ const style = {
   },
   text: {
     ...type.small,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: colors.white,
     textAlign: 'center' as 'center',
   },
 }

@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Lets Wait Dating</string>
+	<string>LetsWait</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.1</string>
+	<string>0.2</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -34,7 +34,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>16</string>
+	<string>4</string>
 	<key>FacebookAppID</key>
 	<string>331108297584040</string>
 	<key>FacebookDisplayName</key>
@@ -61,12 +61,6 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>This App will not access your Apple Music Library</string>
-	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>This App does not utilize bluetooth peripherals</string>
-	<key>NSCalendarsUsageDescription</key>
-	<string>This App will not access your Calendar</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Let's Wait would like access the your Camera</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
@@ -78,13 +72,11 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Let's Wait would like access to your Microphone for video recording</string>
 	<key>NSMotionUsageDescription</key>
-	<string>This App will not access your Motion and Fitness data</string>
+	<string>This app does not ask for or use Motion</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Let's Wait would like access to your Camera Roll</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Let's Wait would like access to your Camera Roll</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>This App will not access Speech Recognition</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>

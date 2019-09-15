@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
 } from 'react-native'
 
-import { colors, spacing, type } from '../../../foundation'
+import { colors, type } from '../../../new_foundation'
 
 export interface IButtonStyle {
   container: any
@@ -105,7 +105,7 @@ export default class BaseButton extends React.Component<IProps, IState> {
       default: this.props.style && this.props.style.container.backgroundColor ?
         this.props.style.container.backgroundColor : colors.white,
       disabled: this.props.disabledStyle && this.props.disabledStyle.container.backgroundColor ?
-        this.props.disabledStyle.container.backgroundColor : colors.transparent,
+        this.props.disabledStyle.container.backgroundColor : 'transparent',
     }
     const borderColor = {
       default: this.props.style && this.props.style.container.borderColor ?
@@ -127,7 +127,7 @@ export default class BaseButton extends React.Component<IProps, IState> {
     }
     const labelColor = {
       default: this.props.style && this.props.style.label.color ?
-        this.props.style.label.color : colors.wisteria,
+        this.props.style.label.color : colors.cosmos,
       disabled: this.props.disabledStyle && this.props.disabledStyle.label.color ?
         this.props.disabledStyle.label.color : colors.white,
     }

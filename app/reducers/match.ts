@@ -38,12 +38,14 @@ const initialChatMatches: ReduxStore.Match[] = []
 export const chatMatches = (state = initialChatMatches, action: AnyAction) => {
   switch(action.type) {
     case PUSH_MATCHED_CHAT: return state.map((match, i, arr) => {
+      // console.log(match)
       if(i === action.index) {
         return {
           ...match,
           chat: match.chat.concat([action.message]),
         }
       }
+      return { ...match }
     })
     case PUSH_CHAT_MATCH: return [...state, action.match]
     case RESET_MATCHES: return initialChatMatches
@@ -93,7 +95,7 @@ const initialActiveChat: ReduxStore.Match = {
 }
 export const activeChat = (state = initialActiveChat, action: AnyAction) => {
   switch(action.type) {
-    case PUSH_MATCHED_CHAT: return { ...state, chat: state.chat.concat([action.message]) }
+    case PUSH_MATCHED_CHAT: return { ...state, chat: [...state.chat, action.message] }
     case PUSH_ENQUEUED_CHAT: return action.message
     case PUSH_CHAT_MATCH: return action.match
     case PUSH_CHAT: return action.match

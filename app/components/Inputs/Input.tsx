@@ -11,7 +11,7 @@ import {
 // import countryCodes from '../lib/countryCodes.json'
 
 import Feather from 'react-native-vector-icons/Feather'
-import { colors, spacing, type } from '../../../foundation'
+import { colors, type } from '../../../new_foundation'
 
 interface IProps {
   title: string
@@ -99,12 +99,12 @@ export default class Input extends React.Component<IProps, IState> {
         <View
           style={{
             flex: 1,
-            height: spacing.large,
+            height: 48,
             flexDirection: 'row' as 'row',
           }}
         >
           <View style={style.iconContainer}>
-            <Feather name={this.props.icon} size={spacing.base} color={colors.white}/>
+            <Feather name={this.props.icon} size={24} color={colors.white}/>
           </View>
           <View style={style.inputWrapper}>
             <TextInput
@@ -138,9 +138,9 @@ const style = {
     maxWidth: '100%',
   },
   iconContainer: {
-    width: spacing.base,
+    width: 24,
     height: 28,
-    marginRight: spacing.tiny,
+    marginRight: 8,
     justifyContent: 'center' as 'center',
   },
   titleWrapper: {
@@ -162,12 +162,12 @@ const style = {
     width: '100%',
     maxWidth: 223-32,
     height: 28,
-    marginRight: spacing.tiny,
-    marginLeft: spacing.tiny,
+    marginRight: 8,
+    marginLeft: 8,
   },
   bottomBorder: {
     width: '100%',
     height: 2,
-    backgroundColor: colors.lilac,
+    backgroundColor: colors.white,
   },
 }

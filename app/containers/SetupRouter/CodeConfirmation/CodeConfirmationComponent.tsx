@@ -9,7 +9,7 @@ import CodeInput from '../../../components/Inputs/CodeInput'
 import ActionButton from '../../../components/Buttons/ActionButton'
 
 import Feather from 'react-native-vector-icons/Feather'
-import { colors, spacing, type } from '../../../../foundation'
+import { colors, type } from '../../../../new_foundation'
 import SetupWrapper from '../SetupWrapperComponent';
 
 interface IProps {
@@ -74,10 +74,10 @@ export default class CodeConfirmationComponent extends React.PureComponent<IProp
 
 const style = {
   title: {
-    ...type.title3,
+    ...type.title2,
     color: colors.white,
-    marginTop: spacing.small+spacing.base,
-    marginBottom: spacing.large,
+    marginTop: 40,
+    marginBottom: 48,
   },
   contentWrapper: {
     flex: 1,

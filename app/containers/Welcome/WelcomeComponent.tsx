@@ -10,10 +10,12 @@ import {
 } from 'react-native'
 import SafariView from 'react-native-safari-view';
 
-import { colors, spacing, type } from '../../../foundation'
+import { colors, type } from '../../../new_foundation'
 
 import { isIphoneX } from 'react-native-iphone-x-helper'
 import { api, collectUUID, refreshApi } from '../../lib/api'
+
+import config from '../../../config'
 
 import AsyncStorage from '@react-native-community/async-storage'
 import { storeToken } from '../../lib/asyncStorage'
@@ -123,8 +125,17 @@ export default class WelcomeScreen extends React.PureComponent<IProps,{}> {
     }
   };
   public loginWithFacebook = async () => {
-    Alert.alert('Couldn\'t Log In', 'Facebook Login is disabled for now.')
-    // const uuid = await collectUUID()
+    // Alert.alert('Couldn\'t Log In', 'Facebook Login is disabled for now.')
+    const uuid = await collectUUID()
+    if (SafariView.isAvailable) {
+      SafariView.show({
+        url: `${config.api}/api/user/facebook-auth?uuid=${uuid}`,
+        fromBottom: true,
+      })
+    } else {
+      Linking.openURL(`${config.api}/api/user/facebook-auth?uuid=${uuid}`)
+    }
+
     // this.openURL(`${config.api}/api/user/facebook-auth?uuid=${uuid}`);
   }
   public render() {
@@ -135,7 +146,7 @@ export default class WelcomeScreen extends React.PureComponent<IProps,{}> {
         resizeMode="cover"
       >
         <LinearGradient
-          colors={[colors.transparent, 'rgba(255,255,255, 0.8)', colors.white]}
+          colors={['transparent', 'rgba(255,255,255, 0.8)', colors.white]}
           locations={[0, 0.45, 1]}
           angle={90}
           style={style.whiteGradient}
@@ -191,16 +202,16 @@ const style = {
     height: 100,
   },
   titleLine: {
-    paddingTop: spacing.tiny,
+    paddingTop: 8,
     flexDirection: 'row' as 'row',
   },
   smallTitleText: {
-    ...type.title2,
+    ...type.title1,
     color: '#B762C4',
     fontWeight: '400' as '400',
   },
   largeTitleText: {
-    ...type.title2,
+    ...type.title1,
     fontWeight: '600' as '600',
     color: '#B762C4',
   },

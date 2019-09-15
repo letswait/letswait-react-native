@@ -8,7 +8,7 @@ import {
 } from 'react-native'
 
 import Feather from 'react-native-vector-icons/Feather'
-import { colors, spacing, type } from '../../../foundation'
+import { colors, type } from '../../../new_foundation'
 
 interface IProps {
   source: string
@@ -65,7 +65,7 @@ export default class Match extends React.Component<IProps, IState> {
           >
             <Feather
               size={32}
-              color={colors.wisteria}
+              color={colors.capri}
               name={!!this.props.dateID ? 'tag' : 'calendar'}
             />
           </TouchableOpacity>
@@ -77,25 +77,25 @@ export default class Match extends React.Component<IProps, IState> {
 
 const style = {
   wrapper: {
-    padding: spacing.tiny,
-    paddingLeft: spacing.small,
-    paddingRight: spacing.small,
+    padding: 8,
+    paddingLeft: 16,
+    paddingRight: 16,
     justifyContent: 'center' as 'center',
     width: '100%',
   },
   container: {
-    height: spacing.xlarge,
+    height: 64,
     flexDirection: 'row' as 'row',
     alignItems: 'center' as 'center',
   },
   imageWrapper: {
-    height: spacing.xlarge,
-    width: spacing.xlarge,
+    height: 64,
+    width: 64,
   },
   image: {
-    width: spacing.xlarge,
-    height: spacing.xlarge,
-    borderRadius: spacing.xlarge/2,
+    width: 64,
+    height: 64,
+    borderRadius: 64/2,
     overflow: 'hidden' as 'hidden',
   },
   matchBadge: {
@@ -105,29 +105,29 @@ const style = {
     height: 20,
     width: 20,
     borderRadius: 10,
-    backgroundColor: colors.wisteria,
+    backgroundColor: colors.turmeric,
   },
   contentWrapper: {
-    marginLeft: spacing.small,
-    marginRight: spacing.small,
+    marginLeft: 16,
+    marginRight: 16,
     flex: 1,
     flexDirection: 'column' as 'column',
   },
   title: {
     ...type.regular,
     width: '100%',
-    color: colors.lavender,
+    color: colors.cosmos,
   },
   message: {
     ...type.small,
     width: '100%',
     paddingTop: 6,
     flex: 1,
-    color: colors.lilac,
+    color: colors.shadow,
   },
   featherWrapper: {
-    height: spacing.large,
-    width: spacing.large,
+    height: 48,
+    width: 48,
     justifyContent: 'center' as 'center',
     alignItems: 'center' as 'center',
   },

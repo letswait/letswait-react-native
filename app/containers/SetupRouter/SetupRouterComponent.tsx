@@ -5,13 +5,13 @@ import {
   View,
 } from 'react-native'
 
-import { isIphoneX } from 'react-native-iphone-x-helper'
+import { ifIphoneX } from 'react-native-iphone-x-helper'
 
 import LinearGradient from 'react-native-linear-gradient'
 import Feather from 'react-native-vector-icons/Feather'
 import { Route } from 'react-router'
 
-import { colors } from '../../../foundation'
+import { colors } from '../../../new_foundation'
 import BackButton from '../../components/Buttons/BackButton'
 
 import BirthdayComponent from './Birthday/Birthday'
@@ -38,10 +38,7 @@ export default class SetupRouter extends React.PureComponent<IProps, {}> {
   }
   public render() {
     return (
-      <LinearGradient
-        colors={['rgba(154,117,201,1)','rgba(126,82,185,1)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+      <View
         style={style.background}
       >
         <View style={style.navbar}>
@@ -94,7 +91,7 @@ export default class SetupRouter extends React.PureComponent<IProps, {}> {
         <Route path={'/setup/photo-upload'} component={PhotosComponent}/>
         <Route path={'/setup/food-interests'} component={FoodComponent}/>
         <Route path={'/setup/goals'} component={GoalComponent}/>
-      </LinearGradient>
+      </View>
     )
   }
 }
@@ -104,8 +101,9 @@ const style = {
     width: '100%' as '100%',
     height: '100%' as '100%',
     alignItems: 'center' as 'center',
-    paddingTop: isIphoneX ? 64 : 48,
-    paddingBottom: isIphoneX ? 30 : 20,
+    paddingTop: ifIphoneX(64, 40),
+    paddingBottom: ifIphoneX(24, 0),
+    backgroundColor: colors.seafoam,
   },
   navbar: {
     width: '100%' as '100%',
@@ -124,7 +122,7 @@ const style = {
   progressBarContainer: {
     height: 10,
     borderRadius: 5,
-    borderColor: '#9F86C0',
+    borderColor: colors.white,
     borderWidth: 1,
     flex: 1,
     flexDirection: 'row' as 'row',
@@ -132,7 +130,7 @@ const style = {
   },
   progressBarSegment: {
     flex: 1,
-    borderRightColor: '#BE95C4',
+    borderRightColor: colors.white,
     borderRightWidth: 1,
   },
   activeSegment: {

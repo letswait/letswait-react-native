@@ -4,7 +4,9 @@ import {
   View,
 } from 'react-native'
 
-import { colors, spacing, type } from '../../../../foundation'
+import { colors, type } from '../../../../new_foundation'
+
+import { ifIphoneX } from 'react-native-iphone-x-helper'
 
 interface IProps {
   title?: string,
@@ -30,20 +32,21 @@ export default class CardSection extends React.PureComponent<IProps> {
 const style = {
   sectionContainer: {
     width: '100%',
-    padding: 16,
+    padding: 24,
     flexDirection: 'column' as 'column',
     alignItems: 'flex-start' as 'flex-start',
     justifyContent: 'center' as 'center',
+    minHeight: ifIphoneX(200, 150),
   },
   title: {
     ...type.regular,
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: colors.cosmos,
     marginBottom: 8,
     marginTop: 16,
   },
   text: {
-    ...type.title3,
-    color: colors.white,
+    ...type.regular,
+    color: colors.cosmos,
     marginBottom: 16,
   },
 }

@@ -23,6 +23,9 @@ import { authedApi } from '../../lib/api'
 import { storeToken } from '../../lib/asyncStorage';
 
 import { Alert } from 'react-native';
+import { ReduxStore } from 'app/types/models';
+import { changeActiveChat } from './chat';
+import { showModal } from '../navigation/modal';
 
 export const setMatchMessage = (message: string = '') => ({
   message,
@@ -76,5 +79,12 @@ export function pushEnqueuedMatch(match: any) {
     }
     dispatch(push('/app/chat'))
     dispatch(pushToChatMatches(match))
+  }
+}
+
+export function previewDate(match: ReduxStore.Match) {
+  return (dispatch: ThunkDispatch<{},{},any>, getState: any) => {
+    dispatch(changeActiveChat(match))
+    dispatch(showModal('datepreview'))
   }
 }

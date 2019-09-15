@@ -1,5 +1,6 @@
 import * as React from 'react'
 import {
+  ActivityIndicator,
   Animated,
   Dimensions,
   Easing,
@@ -7,20 +8,22 @@ import {
   ScrollView,
   Text,
   TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native'
 
 import Date from '../../components/DateInvite/Date'
 import Spinner from '../../components/DateInvite/Spinner'
-import SpinnerButtonGroup from '../../components/DateInvite/SpinnerButtonGroup'
-import { SpinnerInfo } from '../../types/spinner';
 
-import { colors, spacing, type } from '../../../foundation'
+import Feather from 'react-native-vector-icons/Feather'
 
-import WisteriaButton from '../../components/Buttons/WisteriaButton';
+import { colors, type } from '../../../new_foundation'
+
 import { authedApi } from '../../lib/api';
 
 import { ApiResponse } from 'apisauce';
+import FastImage from 'react-native-fast-image';
 
 const { width, height } = Dimensions.get('window')
 
@@ -50,8 +53,7 @@ interface IState {
   choseVenue: boolean
   buttonsRevealed: boolean
   result: 'later' | 'accept' | undefined
-  msg: string
-  tip: string
+  dismissingModal: boolean
 }
 export default class MatchMakerModal extends React.PureComponent<IProps, IState> {
   public state: IState = {
@@ -59,8 +61,7 @@ export default class MatchMakerModal extends React.PureComponent<IProps, IState>
     choseVenue: false,
     buttonsRevealed: false,
     result: undefined,
-    msg: '',
-    tip: 'Spin the wheel to invite them on a date!',
+    dismissingModal: false,
   }
   constructor(props: IProps) {
     super(props)
@@ -69,24 +70,24 @@ export default class MatchMakerModal extends React.PureComponent<IProps, IState>
   public revealButtons() {
     this.setState({
       buttonsRevealed: true,
-      tip: `How does ${this.props.spinner!.wheel.segments[this.props.spinner!.wheel.chosenSegment].name} sound?`,
     })
   }
   public pageForward() {
-    this.setState({ paging: 1, tip: 'Say Hi!' })
+    this.setState({ paging: 1 })
     this.scrollView!.scrollTo({ x: width, y: 0, animated: true })
   }
   public sendMessage() {
+    this.setState({ dismissingModal: true })
     authedApi.post('/api/matches/post-wheel', {
       wheel: this.props.spinner!.wheel,
-      message: this.state.msg,
+      message: '',
       matchId: this.props.spinner!.match._id,
     }).then((res: ApiResponse<any>) => {
       if(res.ok) {
         const match = this.props.spinner!.match
         match.chat = match.chat.concat([{
           message: {
-            text: this.state.msg,
+            text: '',
           },
         }])
         this.props.pushChat(match, res.data!.candidate)
@@ -105,59 +106,138 @@ export default class MatchMakerModal extends React.PureComponent<IProps, IState>
     console.log(this.props.spinner)
     if(this.props.spinner) {
       const { user, candidate, wheel } = this.props.spinner
+      const pageStyle = {
+        width,
+        height,
+        flexDirection: 'column' as 'column',
+        justifyContent: 'center' as 'center',
+        alignItems: 'center' as 'center',
+      }
       return (
-        <KeyboardAvoidingView
-          behavior={'padding'}
-          style={style.container}
+        <ScrollView
+          scrollEnabled={false}
+          pagingEnabled={true}
+          style={{
+            width,
+            height,
+            backgroundColor: colors.seafoam,
+          }}
+          ref={c => this.scrollView = c}
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
         >
-          <Text style={style.congrats}>
-            {`You Matched with ${candidate.name}!`}
-          </Text>
-          <Date
-            sources={[user.profile.images[0], candidate.profile.images[0]]}
-          />
-          <Text style={style.tipText}>
-            {this.state.tip}
-          </Text>
-          <ScrollView
-            scrollEnabled={false}
-            pagingEnabled={true}
-            style={style.scrollView}
-            contentContainerStyle={{ flex: 0, height: 400 }}
-            ref={c => this.scrollView = c}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
+          <View style={pageStyle}>
+            <Date
+              sources={[user.profile.images[0], candidate.profile.images[0]]}
+            />
+            <Spinner
+              onSpin={() => this.proxyResponse()}
+              onFinish={() => this.pageForward()}
+              segments={wheel.segments as any}
+              result={this.state.choseVenue ? wheel.chosenSegment as any : undefined}
+            />
+            <Text
+              style={{
+                ...type.title2,
+                textAlign: 'center' as 'center',
+                marginTop: 29,
+              }}
+            >
+              {'IT\'S A MATCH!\nSPIN FOR A DATE'}
+            </Text>
+          </View>
+          <TouchableWithoutFeedback
+            onPress={() => this.sendMessage()}
           >
-            <View style={style.pageWrapper}>
-              <Spinner
-                onSpin={() => this.proxyResponse()}
-                onFinish={() => this.revealButtons()}
-                segments={wheel.segments as any}
-                result={this.state.choseVenue ? wheel.chosenSegment as any : undefined}
+            <View style={pageStyle}>
+              <Text
+                style={{
+                  ...type.title1,
+                  textAlign: 'center' as 'center',
+                  marginBottom: 12,
+                  maxWidth: 275,
+                }}
+              >
+                {`DON'T WAIT\n${this.props.spinner.user.name.toUpperCase()}!`}
+              </Text>
+              <Text
+                style={{
+                  ...type.regular,
+                  textAlign: 'center' as 'center',
+                  marginBottom: 16,
+                  maxWidth: 275,
+                }}
+              >
+                {`Check your messages for details.\nMessage ${this.props.spinner.candidate.name} and set your date at:`}
+              </Text>
+              <FastImage
+                source={{ uri: this.props.spinner.wheel.segments[this.props.spinner.wheel.chosenSegment].logo }}
+                style={{
+                  width: 225,
+                  height: 225,
+                }}
+                resizeMode="contain"
               />
               <View
-                pointerEvents={this.state.buttonsRevealed ? 'auto' : 'none'}
-                style={{ opacity: this.state.buttonsRevealed ? 1 : 0, marginTop: spacing.base }}
+                style={{
+                  width: 275,
+                  height: 67,
+                  maxWidth: '90%',
+                  backgroundColor: colors.white,
+                  borderRadius: 9,
+                  flexDirection: 'row' as 'row',
+                  justifyContent: 'center' as 'center',
+                  alignItems: 'center' as 'center',
+                  marginTop: 8,
+                }}
               >
-                <SpinnerButtonGroup
-                  onDeny={() => this.props.dismiss()}
-                  onAccept={() => this.pageForward()}
-                />
+                <Text
+                  style={{
+                    ...type.input,
+                    color: colors.cosmos,
+                    letterSpacing: 1.5,
+                  }}
+                >
+                  {this.props.spinner.wheel.segments[this.props.spinner.wheel.chosenSegment].code}
+                </Text>
               </View>
+              <Text
+                style={{
+                  ...type.regular,
+                  textAlign: 'center' as 'center',
+                  marginTop: 12,
+                  maxWidth: 275,
+                }}
+              >
+                {'Present validation code\ntogether to receive the discount.'}
+              </Text>
+
+              {!this.state.dismissingModal &&
+                <Feather name="crosshair" size={18} color={colors.cloud} style={{ marginTop: 40 }} />
+              }
+              {!this.state.dismissingModal &&
+                <Text
+                  style={{
+                    ...type.small,
+                    textAlign: 'center' as 'center',
+                    marginTop: 4,
+                    maxWidth: 275,
+                    color:  colors.cloud,
+                  }}
+                >
+                  Tap Anywhere to Dismiss
+                </Text>
+              }
+              {this.state.dismissingModal &&
+                <ActivityIndicator
+                  size={18}
+                  style={{ marginTop: 48 }}
+                  color={colors.cloud}
+                />
+              }
             </View>
-            <View style={style.pageWrapper}>
-              <TextInput
-                style={style.messageInput}
-                onChangeText={msg => this.setState({ msg })}
-                value={this.state.msg}
-                multiline
-              />
-              <WisteriaButton onPress={() => this.sendMessage()}>
-                {`Invite ${this.props.spinner!.candidate.name}`}
-              </WisteriaButton>
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+          </TouchableWithoutFeedback>
+        </ScrollView>
       )
     }
     return null
@@ -165,56 +245,5 @@ export default class MatchMakerModal extends React.PureComponent<IProps, IState>
 }
 
 const style = {
-  container: {
-    width,
-    height,
-    backgroundColor: 'rgba(0,0,0,0.9)',
-    display: 'flex' as 'flex',
-    flexDirection: 'column' as 'column',
-    justifyContent: 'center' as 'center',
-    alignItems: 'center' as 'center',
-  },
-  congrats: {
-    width,
-    ...type.title3,
-    textAlign: 'center' as 'center',
-    color: colors.white,
-    marginTop: spacing.large,
-    marginBottom: spacing.small * 2,
-    flex: 0,
-  },
-  tipText: {
-    width,
-    ...type.regular,
-    textAlign: 'center' as 'center',
-    color: colors.white,
-    marginTop: spacing.small*2,
-    marginBottom: spacing.small*2,
-    flex: 0,
-  },
-  scrollView: {
-    width,
-    backgroundColor: colors.transparent,
-    flexGrow: 0,
-    height: 400,
-  },
-  messageInput: {
-    height: 120,
-    backgroundColor: colors.white,
-    borderRadius: 16,
-    padding: 16,
-    color: colors.cosmos,
-    ...type.regular,
-    width: 300,
-  },
-  pageWrapper: {
-    width,
-    display: 'flex' as 'flex',
-    flex: 0,
-    height: 400,
-    flexDirection: 'column' as 'column',
-    alignItems: 'center' as 'center',
-    backgroundColor: colors.transparent,
-  },
 
 }

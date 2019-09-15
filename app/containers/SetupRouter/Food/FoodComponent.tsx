@@ -5,7 +5,7 @@ import {
   View,
 } from 'react-native'
 
-import { colors, spacing, type } from '../../../../foundation'
+import { colors, type } from '../../../../new_foundation'
 
 import ActionButton from '../../../components/Buttons/ActionButton'
 import FoodToggle from '../../../components/Buttons/FoodToggle'
@@ -150,10 +150,10 @@ export default class FoodComponent extends React.PureComponent<IProps, IState> {
 
 const style = {
   title: {
-    ...type.title3,
+    ...type.title2,
     color: colors.white,
-    marginTop: spacing.small + spacing.base,
-    marginBottom: spacing.large,
+    marginTop: 40,
+    marginBottom: 48,
   },
   contentWrapper: {
     flex: 1,

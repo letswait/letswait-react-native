@@ -6,7 +6,7 @@ import {
 
 import _ from 'lodash'
 
-import { colors, spacing, type } from '../../../foundation'
+import { colors, type } from '../../../new_foundation'
 
 interface IProps {
   onComplete: (code: string) => any
@@ -137,9 +137,9 @@ const style = {
     aspectRatio: 0.75,
   },
   digitUnderline: {
-    width: spacing.large,
+    width: 48,
     height: 2,
-    backgroundColor: colors.lilac,
+    backgroundColor: colors.white,
     borderRadius: 1,
   },
 }

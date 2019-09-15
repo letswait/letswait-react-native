@@ -4,7 +4,7 @@ import {
   View,
 } from 'react-native'
 
-import { colors, spacing } from '../../../foundation';
+import FastImage from 'react-native-fast-image';
 
 interface IProps {
   source: string
@@ -13,7 +13,7 @@ export default class MatchImage extends React.Component<IProps> {
   public render() {
     return (
       <View style={style.imageContainer}>
-        <Image source={{ uri: this.props.source }} style={style.image}/>
+        <FastImage source={{ uri: this.props.source }} style={style.image}/>
       </View>
     )
   }
@@ -21,13 +21,11 @@ export default class MatchImage extends React.Component<IProps> {
 
 const style = {
   imageContainer: {
-    width: spacing.xlarge * 2,
-    height: spacing.xlarge * 2,
-    borderWidth: 2,
-    borderColor: colors.wisteria,
+    width: 120,
+    height: 120,
     overflow: 'hidden' as 'hidden',
-    backgroundColor: colors.transparent,
-    borderRadius: spacing.xlarge,
+    backgroundColor: 'transparent',
+    borderRadius: 60,
   },
   image: {
     width: '100%',

@@ -1,35 +1,25 @@
 import React from 'react'
 import {
   Alert,
-  Animated,
   AppState,
   Dimensions,
-  Easing,
-  Image,
   Linking,
   Modal,
-  Text,
-  TouchableOpacity,
+  ScrollView,
   View,
+  Animated,
+  Easing,
 } from 'react-native'
 
 import BackgroundGeolocation from '@mauron85/react-native-background-geolocation'
-// import { AuthorizationStatus } from '../../../node_modules/@mauron85/react-native-background-geolocation/index'
-import FastImage from 'react-native-fast-image';
-import { isIphoneX } from 'react-native-iphone-x-helper'
-import LinearGradient from 'react-native-linear-gradient'
 import PushNotification from 'react-native-push-notification'
-import Feather from 'react-native-vector-icons/Feather'
-import { Route } from 'react-router'
-import SwipeNavigation from './SwipeNavigation'
 
-import config from '../../../config'
-import { colors, spacing, type } from '../../../foundation'
-import BackButton from '../../components/Buttons/BackButton'
-import { api, authedApi } from '../../lib/api'
+import { colors } from '../../../new_foundation'
+import { authedApi } from '../../lib/api'
 
-import { ObjectOf } from '../../types/helpers'
 import AppToast from './AppToast'
+
+import FastImage from 'react-native-fast-image'
 
 import ChatComponent from './Chat/Chat'
 import FeedComponent from './Feed/Feed'
@@ -39,7 +29,7 @@ import SettingsComponent from './Settings/Settings'
 
 import MatchMakerModal from '../MatchMakerModal/MatchMakerModalComponent';
 
-import { dismissModal } from '../../actions/navigation/modal';
+import { dismissModal, ModalType } from '../../actions/navigation/modal';
 
 const { width, height } = Dimensions.get('window')
 
@@ -48,17 +38,29 @@ const feedIcon = require('../../assets/ui/feed-icon.png')
 
 import io from 'socket.io-client'
 import { ReduxStore } from '../../types/models';
+import ControlledCornerPage from './ControlledCornerPage';
 // import config from '../../../config'
+
+import PageTransition from './PageTransition'
+
+import { Location } from 'history';
+import { Route, Switch } from 'react-router';
+import NavBar from './NavBar';
+
+import DatePreviewComponent from './DatePreviewComponent'
 
 interface IProps {
   changeThemeLight: () => any
+  match: any,
   currentRoute: string
+  location: Location
   getMatches: () => any
   pushChatMatch: (match: any) => any
   push: (route: string) => any
   pushChange: (change: ReduxStore.User) => void,
   showToast: (message: string, action: Function, duration?: number) => any
   dismissModal: () => any
+  showModal: (modal: ModalType) => void
   activeChat: any
   toast: {
     message: string
@@ -70,8 +72,9 @@ interface IProps {
   user?: ReduxStore.User
 }
 interface IState {
-  navRotation: Animated.Value
-  swipeRotation: Animated.Value
+  anim: Animated.Value;
+  previousRoute?: string
+  animating: boolean;
   location: -1 | 0 | 1 | 2,
   locationIsRunning: boolean
   locationServicesEnabled: boolean,
@@ -83,32 +86,27 @@ interface IState {
     candidate: any,
     match: any,
   } | undefined
+  backgroundColor: Animated.Value
+  currentColor: string,
+  nextColor: string,
 }
 export default class AppRouter extends React.PureComponent<IProps, IState> {
   public state: IState = {
-    navRotation: new Animated.Value(this.getRouteRotation(this.props.currentRoute)),
-    swipeRotation: new Animated.Value(0),
     location: -1,
+    anim: new Animated.Value(1),
+    animating: false,
     loadingMatches: true,
     locationIsRunning: false,
     suggestedLocation: false,
     locationServicesEnabled: false,
     notification: false,
     activeMatch: undefined,
+    backgroundColor: new Animated.Value(0),
+    currentColor: colors.seafoam,
+    nextColor: colors.seafoam,
   }
   private profilePage: any
-  private settingsPage: any
-  private feedPage: any
-  private matchPage: any
-  private chatPage: any
   public componentDidMount() {
-    // const socket = io(config.socket)
-    // socket.connect()
-    // socket.on('connect', () => {
-    //   // call the server-side function 'adduser' and send one parameter (value of prompt)
-    //   Alert.alert('Connected to socket!')
-    //   // socket.emit('adduser', prompt("What's your name?"));
-    // })
     AppState.addEventListener('change', this.appStateChange);
     this.props.getMatches()
     setTimeout(() => this.setState({ loadingMatches: false }), 10000)
@@ -137,12 +135,6 @@ export default class AppRouter extends React.PureComponent<IProps, IState> {
       locationProvider: BackgroundGeolocation.DISTANCE_FILTER_PROVIDER,
       interval: 10000,
       saveBatteryOnBackground: true,
-      // url: `${config.api}/api/profile/post-geolocation`,
-      // httpHeaders: Object.assign({}, authedApi.headers),
-      // postTemplate: {
-      //   lat: '@latitude',
-      //   lon: '@longitude',
-      // },
     });
 
     BackgroundGeolocation.on('location', (location) => {
@@ -193,6 +185,30 @@ export default class AppRouter extends React.PureComponent<IProps, IState> {
       // status === BackgroundGeolocation.
       // console.log(`[INFO] BackgroundGeolocation authorization status: ${status}`);
       // we need to set delay after permission prompt or otherwise alert will not be shown
+      if (status !== BackgroundGeolocation.AUTHORIZED) {
+        // we need to set delay after permission prompt or otherwise alert will not be shown
+        setTimeout(() =>
+          Alert.alert(
+            'App requires location tracking',
+            'Would you like to open app settings?',
+            [
+              {
+                text: 'Yes',
+                onPress: () => {
+                  BackgroundGeolocation.showAppSettings()
+                  setTimeout(() => this.forceUpdate(), 1000)
+                },
+              },
+              {
+                text: 'No',
+                onPress: () => console.log('No Pressed'),
+                style: 'cancel',
+              },
+            ],
+        ),         1000);
+      } else {
+        this.setState({ location: status })
+      }
     });
 
     BackgroundGeolocation.on('background', () => {
@@ -216,10 +232,35 @@ export default class AppRouter extends React.PureComponent<IProps, IState> {
     BackgroundGeolocation.on('http_authorization', () => {
       console.log('[INFO] App needs to authorize the http requests');
     })
-    this.requestGeolocation(false, true)
+    this.checkGeolocation(true)
     // this.checkGeolocation()
   }
+  // tslint:disable-next-line: function-name
+  public UNSAFE_componentWillReceiveProps(nextProps: IProps) {
+    if(nextProps.currentRoute !== this.props.currentRoute) {
+      this.setBackgroundColor(nextProps.currentRoute)
+      this.setState({ animating: true })
+      Animated.timing(this.state.anim, {
+        toValue: 0,
+        duration: 75,
+        useNativeDriver: true,
+      }).start(() => {
+        this.setState({ animating: false })
+        Animated.timing(this.state.anim, {
+          toValue: 1,
+          duration: 75,
+          useNativeDriver: true,
+        }).start()
+      })
+    }
+  }
   public checkGeolocation(silent = false) {
+    // BackgroundGeolocation.checkStatus(({ isRunning }) => {
+    //   this.setState({ locationIsRunning: isRunning });
+    //   if (isRunning) {
+    //     BackgroundGeolocation.start();
+    //   }
+    // });
     BackgroundGeolocation.checkStatus((status) => {
       // if(!permissions.alert) {
       // }
@@ -239,13 +280,6 @@ export default class AppRouter extends React.PureComponent<IProps, IState> {
         }
       }
     });
-  }
-  public componentDidUpdate(prevProps: IProps) {
-    if(JSON.stringify(prevProps) !== JSON.stringify(this.props)) {
-      if(this.props.currentRoute !== prevProps.currentRoute) {
-        this.setRotation(this.getRouteRotation(this.props.currentRoute))
-      }
-    }
   }
   private appStateChange = (nextAppState: string) => {
     if(nextAppState === 'active' && !this.state.suggestedLocation) {
@@ -300,61 +334,23 @@ export default class AppRouter extends React.PureComponent<IProps, IState> {
         }
       }
       this.checkGeolocation(silent)
-      // BackgroundGeolocation.start()
     })
   }
   private requestNotification() {
     PushNotification.requestPermissions(['alert', 'badge', 'sound']).then((permissions) => {
       this.setState({ notification: permissions.alert || false })
     })
-    // Permissions.request('notification').then(notification => this.setState({ notification }))
   }
-  private setRotation(rotInt: number) {
-    const prevRot = (this.state as any).navRotation._value
-    Animated.timing(this.state.navRotation, {
-      toValue: rotInt,
-      easing: Easing.elastic(1),
-      duration: 300,
-    }).start(() => {
-      switch(prevRot) {
-        case 0.75: this.profilePage.forceUpdate()
-          break;
-        default: console.log('nothing to update!')
-      }
-    })
-  }
-  private getRouteRotation(route: string) {
-    switch(route) {
-      case '/app/settings': return 1
-      case '/app/profile': return 0.75
-      case '/app': return 0.5
-      case '/app/matches': return 0.25
-      case '/app/chat': return 0
-      default: return 0.5
-    }
-  }
-  private getRotationRoute(rot: number) {
-    switch(rot) {
-      case 1: return '/app/settings'
-      case 0.75: return '/app/profile'
-      case 0.5: return '/app'
-      case 0.25: return '/app/matches'
-      case 0: return '/app/chat'
-      default: return '/app'
-    }
-  }
-  private releaseSwipe(gestureState: any) {
-    const { dx, vx } = gestureState
-    const navRot = (this.state as any).navRotation._value
-    if((dx > 140 || (dx > 30 && vx > 0.5)) && navRot !== 1) {
-      // Swipe Right - go left
-      this.props.push(this.getRotationRoute(navRot + 0.25))
-    } else if((dx < -140 || (dx < -30 && vx < -0.5)) && navRot !== 0.25) {
-      // Swipe Left - go right
-      this.props.push(this.getRotationRoute(navRot - 0.25))
-    } else {
-      this.props.push(this.getRotationRoute(navRot))
-    }
+  private setBackgroundColor(nextRoute: string): void {
+    let nextColor = colors.seafoam
+    if(nextRoute === '/app/chat') nextColor = colors.turmeric
+    this.setState({ nextColor })
+    this.state.backgroundColor.setValue(0)
+    Animated.timing(this.state.backgroundColor, {
+      toValue:  1,
+      duration: 75,
+      delay: 50,
+    }).start(() => this.setState({ currentColor: nextColor }))
   }
   public componentWillUnmount() {
     BackgroundGeolocation.events.forEach((event) => {
@@ -362,395 +358,138 @@ export default class AppRouter extends React.PureComponent<IProps, IState> {
     });
     AppState.removeEventListener('change', this.appStateChange);
   }
+  public navigatorScroll: ScrollView | null = null
+  public navbar: NavBar | null = null
   public render() {
-    const buttonPosition = (n: number) => {
-      return {
-        ...style.buttonPosition,
-        transform: [{ rotate: `${n*13}deg` }],
-      }
+    const appWrapper = {
+      ...style.appWrapper,
+      backgroundColor: this.state.backgroundColor.interpolate({
+        inputRange: [0, 1],
+        outputRange: [this.state.currentColor, this.state.nextColor],
+      }),
     }
-    const rotation = Animated.add(this.state.navRotation, this.state.swipeRotation).interpolate({
-      inputRange: [0, 1],
-      outputRange: ['26deg', '-26deg'],
-      extrapolate: 'clamp',
-    })
-    const navBackground = {
-      ...style.navBackground,
-      transform: [
-        { translateX: (-width*1.7) + (width/2) },
-        { rotate: rotation },
-      ],
-    }
-    const navButtonWrapper = (n: number, hideOverflow: boolean = true) => {
-      const stabalization = this.state.navRotation.interpolate({
-        inputRange: [0, 0.25, 0.5, 0.75, 1],
-        outputRange: [
-          `${(-2-n) * 13}deg`,
-          `${(-1-n) * 13}deg`,
-          `${(0-n) * 13}deg`,
-          `${(1-n) * 13}deg`,
-          `${(2-n) * 13}deg`,
-        ],
-      })
-      return  {
-        ...style.navButtonWrapper,
-        ...(hideOverflow ? null : { overflow: 'visible' as 'visible' }),
-        transform: [
-          { rotate: stabalization },
-        ],
-      }
-    }
-    const navText = (n: number) => {
-      const opacity = this.state.navRotation.interpolate({
-        inputRange: [0, 0.25,0.5, 0.75, 1],
-        outputRange: [
-          -2-n ? 0 : 1,
-          -1-n ? 0 : 1,
-          -n ? 0 : 1,
-          1-n ? 0 : 1,
-          2-n ? 0 : 1,
-        ],
-      })
-      const rollout = this.state.navRotation.interpolate({
-        inputRange: [0, 0.25,0.5, 0.75, 1],
-        outputRange: [
-          -2-n ? 0 : 150,
-          -1-n ? 0 : 150,
-          -n ? 0 : 150,
-          1-n ? 0 : 150,
-          2-n ? 0 : 150,
-        ],
-      })
-      return {
-        ...style.navText,
-        opacity,
-        maxWidth: rollout,
-      }
-    }
-    const screen = (n: number) => {
-      const w = 375
-      const translateX = this.state.navRotation.interpolate({
-        inputRange: [0, 0.25, 0.5, 0.75, 1],
-        outputRange: [
-          (-2-n)*w, // -750
-          (-1-n)*w, // -375
-          (0-n)*w, // 0
-          (1-n)*w, // 375
-          (2-n)*w, // 750
-        ],
-      })
-      const translateY = this.state.navRotation.interpolate({
-        inputRange: [0, 0.25, 0.5, 0.75, 1],
-        outputRange: [
-          -2-n ? -64 : 0,
-          -1-n ? -64 : 0,
-          -n ? -64 : 0,
-          1-n ? -64 : 0,
-          2-n ? -64 : 0,
-        ],
-      })
-      const scale = this.state.navRotation.interpolate({
-        inputRange: [0, 0.25, 0.5, 0.75, 1],
-        outputRange: [
-          -2-n ? 0.6 : 1,
-          -1-n ? 0.6 : 1,
-          -n ? 0.6 : 1,
-          1-n ? 0.6 : 1,
-          2-n ? 0.6 : 1,
-        ],
-      })
-      const opacity = this.state.navRotation.interpolate({
-        inputRange: [0, 0.25, 0.5, 0.75, 1],
-        outputRange: [
-          -2-n ? 0 : 1,
-          -1-n ? 0 : 1,
-          -n ? 0 : 1,
-          1-n ? 0 : 1,
-          2-n ? 0 : 1,
-        ],
-      })
-      return {
-        ...style.screenContainer,
-        opacity,
-        transform: [
-          { scale },
-          { translateX },
-          { translateY },
-        ],
-      }
-    }
-
-    const matchedUser = this.props.activeChat ?
-      this.props.activeChat.userProfiles[0]._id === this.props.user!._id ?
-        this.props.activeChat.userProfiles[1] :
-        this.props.activeChat.userProfiles[0] :
-      null
-
-    console.log(matchedUser)
-
     return (
-      <View style={style.appWrapper}>
-        <SwipeNavigation
-          onRelease={(e: any) => this.releaseSwipe(e)}
+      <Animated.View style={appWrapper}>
+        <NavBar
+          push={(route: string) => this.props.push(route)}
+          currentRoute={this.props.currentRoute}
+          ref={c => this.navbar = c}
         />
-        <Animated.View
-          style={{ ...screen(0), ...style.cardScreen }}
-          pointerEvents={this.props.currentRoute === '/app' ? 'auto' : 'none'}
+        <PageTransition
+          anim={this.state.anim}
+          currentRoute={this.props.currentRoute}
+          animating={this.state.animating}
         >
-          <FeedComponent
-            shouldUpdate={this.props.currentRoute === '/app'}
-            geolocation={this.state.location}
-            locationServicesEnabled={this.state.locationServicesEnabled}
-            onGeolocation={() => this.requestGeolocation()}
-          />
-        </Animated.View>
-        <Animated.View
-          style={{ ...screen(-1), ...style.marginPaddedScreen }}
-          pointerEvents={this.props.currentRoute === '/app/matches' ? 'auto' : 'none'}
-        >
-          <MatchesComponent
-            shouldUpdate={this.props.currentRoute === '/app/matches' || this.state.loadingMatches}
-          />
-        </Animated.View>
-        <Animated.View
-          style={screen(1)}
-          pointerEvents={this.props.currentRoute === '/app/profile' ? 'auto' : 'none'}
-        >
-          <ProfileComponent
-            shouldUpdate={this.props.currentRoute === '/app/profile'}
-            ref={c => this.profilePage = c}
-            setUser={(newUser: ReduxStore.User) => this.props.pushChange(newUser)}
-          />
-        </Animated.View>
-        <Animated.View
-          style={screen(2)}
-          pointerEvents={this.props.currentRoute === '/app/settings' ? 'auto' : 'none'}
-        >
-          <SettingsComponent
-            shouldUpdate={this.props.currentRoute === '/app/settings'}
-            setUser={(newUser: ReduxStore.User) => this.props.pushChange(newUser)}
-          />
-        </Animated.View>
-        <Animated.View
-          style={screen(-2)}
-          pointerEvents={this.props.currentRoute === '/app/chat' ? 'auto' : 'none'}
-        >
-          <ChatComponent
-            shouldUpdate={this.props.currentRoute === '/app/chat'}
-          />
-        </Animated.View>
-        <View style={style.navContainer}>
-          <Animated.View style={navBackground}>
-            <View style={buttonPosition(-2)} pointerEvents="box-none">
-              <Animated.View style={navButtonWrapper(-2, false)} pointerEvents="box-none">
-                {this.props.currentRoute === '/app/chat' && !!matchedUser ?
-                  <TouchableOpacity
-                    onPress={() => this.props.push('/app/chat')}
-                    style={style.chatHeader}
-                  >
-                    <FastImage
-                      style={style.chatHeaderImage}
-                      source={{ uri: matchedUser.profile.images[0] }}
-                    />
-                    <Text style={style.chatHeaderText}>
-                      {matchedUser.name}
-                    </Text>
-                  </TouchableOpacity> : null
-                  // <TouchableOpacity
-                  //   onPress={() => this.props.push('/app/chat')}
-                  //   style={style.navButton}
-                  // >
-                  //   <Feather
-                  //     name="search"
-                  //     size={26}
-                  //     color={softwhite}
-                  //     style={{ width: 26 }}
-                  //   />
-                  //   <Animated.Text style={navText(-2)}>Search</Animated.Text>
-                  // </TouchableOpacity>
-                }
-              </Animated.View>
-            </View>
-            <View style={buttonPosition(-1)} pointerEvents="box-none">
-              <Animated.View style={navButtonWrapper(-1)} pointerEvents="box-none">
-                <TouchableOpacity
-                  onPress={() => this.props.push('/app/matches')}
-                  style={style.navButton}
-                >
-                  {this.props.currentRoute === '/app/chat' ?
-                    <Feather
-                      name="chevron-left"
-                      size={26}
-                      color={softwhite}
-                      style={{ width: 26 }}
-                    /> :
-                    <Feather
-                      name="inbox"
-                      size={26}
-                      color={softwhite}
-                      style={{ width: 26 }}
-                    />
+          <Switch location={this.props.location}>
+            <Route
+              exact
+              path="/app"
+              render={() => (
+                <FeedComponent
+                  // shouldUpdate={this.props.currentRoute === '/app'}
+                  geolocation={this.state.location}
+                  locationServicesEnabled={this.state.locationServicesEnabled}
+                  onGeolocation={() => BackgroundGeolocation.start()}
+                  onScrollUp={() => this.navbar && this.navbar.animateUp()}
+                  onScrollDown={() => this.navbar && this.navbar.animateDown()}
+                />
+              )}
+            />
+            <Route
+              path="/app/matches"
+              component={MatchesComponent}
+            />
+            <Route
+              path="/app/chat"
+              component={ChatComponent}
+            />
+            <Route
+              path="/app/settings"
+              render={() => (
+                <ControlledCornerPage
+                  topLeft={
+                    <View style={style.profileContainer}>
+                      <FastImage
+                        style={style.profileImage}
+                        source={{ uri: this.props.user!.profile.images[0] }}
+                      />
+                    </View>
                   }
-                  <Animated.Text style={navText(-1)}>Matches</Animated.Text>
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
-            <View style={buttonPosition(0)} pointerEvents="box-none">
-              <Animated.View style={navButtonWrapper(0)} pointerEvents="box-none">
-                <TouchableOpacity
-                  onPress={() => this.props.push('/app')}
-                  style={style.navButton}
+                  onTopLeft={() => this.props.showModal('profile')}
                 >
-                  {/* <Feather name="menu" size={26} color={softwhite} />
-                  <Animated.Text style={navText(0)}>Feed</Animated.Text> */}
-                  <Image
-                    source={feedIcon}
-                    width={32}
-                    height={32}
+                  <SettingsComponent
+                    setUser={(newUser: ReduxStore.User) => this.props.pushChange(newUser)}
                   />
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
-            <View style={buttonPosition(1)} pointerEvents="box-none">
-              <Animated.View style={navButtonWrapper(1)} pointerEvents="box-none">
-                <TouchableOpacity
-                  onPress={() => this.props.push('/app/profile')}
-                  style={style.navButton}
-                >
-                  <Feather name="user" size={26} color={softwhite} />
-                  <Animated.Text style={navText(1)}>
-                    {this.props.user && this.props.user.name ? this.props.user.name : 'Profile'}
-                  </Animated.Text>
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
-            <View style={buttonPosition(2)} pointerEvents="box-none">
-              <Animated.View style={navButtonWrapper(2)} pointerEvents="box-none">
-                <TouchableOpacity
-                  onPress={() => this.props.push('/app/settings')}
-                  style={style.navButton}
-                >
-                  <Feather name="settings" size={26} color={softwhite} />
-                  <Animated.Text style={navText(2)}>Settings</Animated.Text>
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
-          </Animated.View>
-        </View>
+                </ControlledCornerPage>
+              )}
+            />
+          </Switch>
+        </PageTransition>
         <AppToast {...this.props.toast} />
         <Modal visible={!!this.props.modal && this.props.modal !== 'null'} animationType={'slide'} transparent>
           {this.props.modal && this.props.modal === 'spinner' && (
-            <MatchMakerModal
-              pushChat={(match: any, candidate: any) => this.props.pushChatMatch(match)}
+            <ControlledCornerPage
+
+            >
+              <MatchMakerModal
+                pushChat={(match: any, candidate: any) => this.props.pushChatMatch(match)}
+                dismiss={() => this.props.dismissModal()}
+                spinner={this.props.spinner}
+              />
+            </ControlledCornerPage>
+          )}
+          {this.props.modal && this.props.modal === 'profile' && (
+            <ControlledCornerPage
+              topLeft="chevron-left"
+              onTopLeft={() => this.props.dismissModal()}
+            >
+              <ProfileComponent
+                shouldUpdate
+                setUser={(newUser: ReduxStore.User) => this.props.pushChange(newUser)}
+              />
+            </ControlledCornerPage>
+          )}
+          {this.props.modal && this.props.modal === 'datepreview' && (
+            <DatePreviewComponent
+              name={this.props.user ? this.props.user.name : ''}
+              match={this.props.activeChat}
               dismiss={() => this.props.dismissModal()}
-              spinner={this.props.spinner}
             />
           )}
         </Modal>
-      </View>
+      </Animated.View>
     )
   }
 }
 
-const softwhite = '#fafafa'
-
-const diameter = width*3.4
-const radius = width*1.7
 const style = {
+  profileContainer: {
+    width: 50,
+    height: 50,
+    borderWidth: 2,
+    borderRadius: 25,
+    overflow: 'hidden' as 'hidden',
+    borderColor: colors.cloud,
+  },
+  profileImage: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+  },
   appWrapper: {
     width,
     height,
-    backgroundColor: colors.transparent,
+    flexDirection: 'column-reverse' as 'column-reverse',
+    backgroundColor: 'transparent',
   },
-  navContainer: {
-    width,
-    height: isIphoneX ? 120 : 96,
-    position: 'absolute' as 'absolute',
-    top: 0,
-    left: 0,
-  },
-  navBackground: {
-    position: 'absolute' as 'absolute',
-    width: diameter,
-    height: diameter,
-    bottom: 0,
-    borderRadius: radius,
-    backgroundColor: '#A372E2',
-  },
-  buttonPosition: {
-    padding: 21,
-    flexDirection: 'row' as 'row',
-    width: diameter,
-    height: diameter,
-    position: 'absolute' as 'absolute',
-    bottom: 0,
-    left: 0,
-    alignItems: 'flex-end' as 'flex-end',
-    justifyContent: 'center' as 'center',
-  },
-  navButtonWrapper: {
-    overflow: 'hidden' as 'hidden',
-    minWidth: 26,
-    flex: 1,
-    height: 26,
-    flexDirection: 'row' as 'row',
-    alignItems: 'center' as 'center',
-    justifyContent: 'center' as 'center',
-  },
-  navButton: {
-    flex: 0,
-    height: 26,
-    minWidth: 26,
-    flexDirection: 'row' as 'row',
-  },
-  navText: {
-    marginLeft: 4,
-    ...type.large,
-    lineHeight: 26,
-    flex: 0,
-    color: softwhite,
-  },
-  screenContainer: {
+  appNav: {
     width,
     height,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    backgroundColor: colors.transparent,
-    flexDirection: 'column' as 'column',
-    justifyContent: 'center' as 'center',
-    alignItems: 'center' as 'center',
+    backgroundColor: 'transparent',
   },
-  cardScreen: {
-    padding: 16,
-    paddingBottom: isIphoneX ? 40 : 20,
-    paddingTop: isIphoneX ? 136 : 112,
-  },
-  flushPaddedScreen: {
-    paddingTop: isIphoneX ? 104 : 78,
-  },
-  marginPaddedScreen: {
-    padding: 16,
-    paddingTop: isIphoneX ? 136 : 112,
-    paddingBottom: 0,
-  },
-  chatHeader: {
-    display: 'flex' as 'flex',
-    flexDirection: 'column' as 'column',
+  appNavInner: {
+    flexDirection: 'row' as 'row',
     alignItems: 'center' as 'center',
     justifyContent: 'center' as 'center',
-  },
-  chatHeaderImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    overflow: 'hidden' as 'hidden',
-    marginBottom: 2,
-  },
-  chatHeaderText: {
-    ...type.small,
-    fontWeight: '600' as '600',
-    textAlign: 'center' as 'center',
-    color: colors.white,
   },
 }

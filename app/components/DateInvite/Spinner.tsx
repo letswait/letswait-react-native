@@ -14,7 +14,7 @@ import Haptic from 'react-native-haptic'
 
 import FastImage from 'react-native-fast-image'
 
-import { colors, spacing, type } from '../../../foundation'
+import { colors, type } from '../../../new_foundation'
 import { SpinnerInfo, SpinnerSegmentType } from '../../types/spinner'
 
 import { SpinnerSegment } from './SpinnerSegment'
@@ -33,6 +33,7 @@ interface ISpinnerValues {
   rotation: number,
   friction: number,
   velocity: number,
+  framesSlowingDown: 0,
 }
 
 interface IProps {
@@ -45,18 +46,19 @@ interface IState {
   spinnable: boolean
   rot: Animated.Value
   lastVelocity: string
-  centerScale: Animated.Value
   hideImages: boolean
+  spinTextColor: Animated.Value
 }
-export default class Spinner extends React.Component<IProps, IState> {
+export default class Spinner extends React.PureComponent<IProps, IState> {
   private spinnerRef: any
   private spinnerValues: ISpinnerValues = {
     initialRotation: 0,
     time: 0,
     lastRotation: 0,
     rotation: 0,
-    friction: 0.001,
+    friction: 0.002,
     velocity: 0,
+    framesSlowingDown: 0,
   }
   private velocityQueue: Queue<number> = new Queue()
   private spinnerStyles: {style: ISpinnerStyles} = { style: {} }
@@ -145,9 +147,18 @@ export default class Spinner extends React.Component<IProps, IState> {
     this.state = {
       spinnable: true,
       rot: new Animated.Value(0),
-      centerScale: new Animated.Value(1),
       lastVelocity: '',
       hideImages: false,
+      spinTextColor: new Animated.Value(1),
+    }
+  }
+  public componentDidUpdate(prevProps: IProps, prevState: IState) {
+    if(this.state.spinnable !== prevState.spinnable) {
+      const toValue = this.state.spinnable ? 1 : 0
+      Animated.timing(this.state.spinTextColor, {
+        toValue,
+        duration: 150,
+      }).start()
     }
   }
   private moveSpinner(origin: boolean = false, customVelocity: number = 0) {
@@ -172,7 +183,7 @@ export default class Spinner extends React.Component<IProps, IState> {
         }
 
         // Create Vibration
-        const vibrateDeg = Math.abs(((newRot * 180)/Math.PI)%45)
+        const vibrateDeg = Math.abs(((newRot * 180)/Math.PI)%30)
         if(Math.abs(velocity) >= 0.20) {
           Haptic.generate('impactLight')
         } else if(Math.abs(velocity) >= 0.1 && vibrateDeg < 20) {
@@ -194,14 +205,7 @@ export default class Spinner extends React.Component<IProps, IState> {
     )
   }
   private spinToSegment(segment: number) {
-    // this.spinnerValues.rotation
-    // this.setState((prevState: IState): IState => {
-    //   return {
-    //     ...prevState,
-    //     spinnable: true,
-    //   }
-    // })
-    const targetRot = (45 * (Math.PI/180)) * segment
+    const targetRot = (30 * (Math.PI/180)) * segment
     let slowSpinner = false
     // Establish Ranges
     const range = 6
@@ -221,14 +225,13 @@ export default class Spinner extends React.Component<IProps, IState> {
     // Degree Offset for accurate targeting
     const cDegreeOffset = 65
     // Clockwise Degree Values
-    const cMinDegree = 45 - halfRange - cDegreeOffset
-    const cMaxDegree = 45 + halfRange - cDegreeOffset
+    const cMinDegree = 30 - halfRange - cDegreeOffset
+    const cMaxDegree = 30 + halfRange - cDegreeOffset
     // Clockwise Target Radians
     const cRadian = {
       min: Math.abs(this.normalizeAngle(targetRot + (cMinDegree * Math.PI/180))), // 40deg
       max: Math.abs(this.normalizeAngle(targetRot + (cMaxDegree * Math.PI/180))), // 50deg
     }
-    console.log('Counter Clockwise Radians', ccRadian, 'Clockwise Radians', cRadian)
     const moveSpinner = (customVelocity?: number) => {
       setTimeout(
         () => {
@@ -280,22 +283,15 @@ export default class Spinner extends React.Component<IProps, IState> {
           }
 
           // Create Vibration
-          const vibrateDeg = Math.abs(((newRot * 180)/Math.PI)%45)
+          const vibrateDeg = Math.abs(((newRot * 180)/Math.PI)%30)
           if(vibrateDeg <= 5) {
             Haptic.generate('impactLight')
           }
 
           if(0.005 > velocity && velocity > -0.005) {
-            // const transformRotation = velocity > 0 ? Math.min(0.002,)
             this.spinnerStyles.style.transform = [{ rotate: `${targetRot}rad` }]
             this.updateNativeStyles()
-            this.animateResult()
-            // this.setState((prevState: IState): IState => {
-            //   return {
-            //     ...prevState,
-            //     spinnable: true,
-            //   }
-            // })
+            setTimeout(() => this.props.onFinish(), 900)
           } else {
             this.spinnerStyles.style.transform = [{ rotate: `${newRot}rad` }]
             this.updateNativeStyles()
@@ -348,16 +344,9 @@ export default class Spinner extends React.Component<IProps, IState> {
   private updateNativeStyles() {
     return this.spinnerRef && this.spinnerRef.setNativeProps(this.spinnerStyles)
   }
-  private animateResult() {
-    this.setState({ hideImages: true })
-    Animated.timing(this.state.centerScale, {
-      toValue: 2.82,
-      duration: 500,
-    }).start(() => this.props.onFinish()) // Reveal Options
-  }
   private forceSpin() {
     const goRight = !!Math.round(Math.random()) // Randomly Generated True/False
-    this.moveSpinner(false, goRight ? 0.6 : -0.6)
+    this.moveSpinner(false, goRight ? 0.4 : -0.4)
   }
   public render() {
     return (
@@ -374,48 +363,54 @@ export default class Spinner extends React.Component<IProps, IState> {
         >
           <Image
             style={style.spinnerImage}
-            source={require('../../assets/images/spinner.png')}
+            source={{ uri: 'spinner' }}
           />
           {this.props.segments.map((segment, i, arr) => (
             <SpinnerSegment
               key={i}
-              source={segment.logo}
+              label={(segment as any).label}
               hideImage={!!this.state.hideImages}
               position={i as SpinnerSegmentType}
             />
           ))}
         </Animated.View>
-        <View style={style.innerWrapper} pointerEvents="none">
-          <View style={style.tickerContainer}>
-            <View style={style.ticker}/>
-            <Animated.View
-              style={{ ...style.center, transform: [
-                { scale: this.state.centerScale },
-              ]}}
-            />
-          </View>
-          {this.props.result ?
-            <Animated.View
-              style={{
-                ...style.resultWrapper,
-                opacity: this.state.centerScale.interpolate({
-                  inputRange: [1, 1.5, 2.82],
-                  outputRange: [0, 0.2, 1],
-                  extrapolate: 'clamp',
-                }),
-              }}
-            >
-              <FastImage
-                source={{ uri: this.props.segments[this.props.result].logo }}
-                style={style.resultLogo}
-                resizeMode={'contain'}
-              />
-              <Text style={style.resultDeal}>
-                {this.props.segments[this.props.result].message}
-              </Text>
-            </Animated.View> : null
-          }
-        </View>
+        <Image
+          source={{ uri: 'ticker' }}
+          style={{
+            position: 'absolute' as 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: [
+              { translateX: -58 },
+              { translateY: -58 },
+            ],
+            width: 116,
+            height: 116,
+          }}
+        />
+        <Animated.Text
+          style={{
+            ...type.title1,
+            fontSize: 28,
+            lineHeight: 34,
+            color: this.state.spinTextColor.interpolate({
+              inputRange: [0, 1],
+              outputRange: [colors.transparentWhite, colors.stone],
+            }),
+            width: 300,
+            textTransform: 'uppercase' as 'uppercase',
+            position: 'absolute' as 'absolute',
+            left: '50%',
+            top: '50%',
+            textAlign: 'center' as 'center',
+            transform: [
+              { translateX: -150 },
+              { translateY: -17 },
+            ],
+          }}
+        >
+          spin
+        </Animated.Text>
       </View>
     )
   }
@@ -425,6 +420,10 @@ const style = {
   wrapper: {
     width: 300,
     height: 300,
+    shadowColor: colors.shadow,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: -1 },
+    borderRadius: 150,
   },
   spinnerContainer: {
     width: '100%',
@@ -433,64 +432,5 @@ const style = {
   spinnerImage: {
     width: '100%',
     height: '100%',
-  },
-  innerWrapper: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute' as 'absolute',
-    justifyContent: 'center' as 'center',
-    alignItems: 'center' as 'center',
-  },
-  resultWrapper: {
-    left: '50%',
-    top: '50%',
-    width: 254,
-    height: 254,
-    position: 'absolute' as 'absolute',
-    transform: [
-      { translateX: 254/2 * -1 },
-      { translateY: 254/2 * -1 },
-    ],
-    display: 'flex' as 'flex',
-    flexDirection: 'column' as 'column',
-    alignItems: 'center' as 'center',
-    justifyContent: 'center' as 'center',
-  },
-  resultLogo: {
-    width: '100%',
-    height: 110,
-    marginBottom: spacing.small,
-  },
-  resultDeal: {
-    ...type.regular,
-    color: colors.lavender,
-    maxWidth: 150,
-    textAlign: 'center' as 'center',
-  },
-  tickerContainer: {
-    width: 85,
-    height: 85,
-    overflow: 'visible' as 'visible',
-  },
-  center: {
-    backgroundColor: colors.white,
-    borderRadius: 85/2,
-    height: 85,
-    width: 85,
-  },
-  ticker: {
-    width: 0,
-    height: 0,
-    backgroundColor: 'transparent',
-    borderStyle: 'solid' as 'solid',
-    borderLeftWidth: 30,
-    borderRightWidth: 30,
-    borderBottomWidth: 60,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderBottomColor: colors.white,
-    position: 'absolute' as 'absolute',
-    top: -40,
-    left: 85/2 - 30,
   },
 }

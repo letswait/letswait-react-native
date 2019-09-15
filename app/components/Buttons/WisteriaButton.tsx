@@ -1,7 +1,7 @@
 import React from 'react'
 import BaseButton from './BaseButton'
 
-import { colors } from '../../../foundation'
+import { colors } from '../../../new_foundation'
 
 interface IProps {
   children: any
@@ -23,10 +23,10 @@ export default class WisteriaButton extends React.Component<IProps> {
 const style = {
   buttonDefault: {
     container: {
-      backgroundColor: '#B762C4',
-      borderColor: colors.transparent,
+      backgroundColor: colors.lavender,
+      borderColor: 'transparent',
       width: 253,
-      shadowColor: '#5a2651',
+      shadowColor: colors.shadow,
       shadowOffset: { width: 0, height:1 },
       shadowOpacity: 0.2,
       shadowRadius: 1,

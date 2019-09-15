@@ -1,5 +1,6 @@
 import React from 'react'
 import {
+  Dimensions,
   PushNotificationIOS,
   ScrollView,
   Text,
@@ -9,7 +10,7 @@ import {
 import FastImage from 'react-native-fast-image'
 import LinearGradient from 'react-native-linear-gradient';
 
-import { colors, spacing, type } from '../../../../foundation'
+import { colors, type } from '../../../../new_foundation'
 import FeatherButton from '../../../components/Camera/CameraButton'
 
 import MatchRow from '../../../components/Matches/Match'
@@ -18,10 +19,18 @@ import MatchQueue from '../../../components/Matches/QueueMatch'
 import { ApiResponse } from 'apisauce';
 import { authedApi } from '../../../lib/api'
 
+import { ifIphoneX } from 'react-native-iphone-x-helper';
+
+import moment from 'moment';
+import { previewDate } from '../../../actions/matches'
+import { ReduxStore } from '../../../types/models';
+
+const { width, height } = Dimensions.get('window')
+
 interface IProps {
   user: any,
   currentRoute: any,
-  shouldUpdate: boolean
+  // shouldUpdate: boolean
   enqueuedMatches: any[]
   uninitializedMatches: any[]
   chatMatches: any[]
@@ -29,6 +38,7 @@ interface IProps {
   disablePrerender?: boolean
   getMatches: () => any
   openChat: (matchId: string) => any
+  previewDate: (match: ReduxStore.Match) => void
 }
 interface IState {
   prerendered: boolean
@@ -41,13 +51,13 @@ export default class MatchesComponent extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props)
   }
-  public shouldComponentUpdate() {
-    if(!this.state.prerendered && !this.props.disablePrerender) {
-      this.setState({ prerendered: true })
-      return true
-    }
-    return !!this.props.shouldUpdate
-  }
+  // public shouldComponentUpdate() {
+  //   if(!this.state.prerendered && !this.props.disablePrerender) {
+  //     this.setState({ prerendered: true })
+  //     return true
+  //   }
+  //   return !!this.props.shouldUpdate
+  // }
   // public componentDidMount() {
   //   this.props.getMatches()
   // }
@@ -56,19 +66,21 @@ export default class MatchesComponent extends React.Component<IProps, IState> {
       <View style={style.matchWrapper}>
         <View style={style.queueContainer}>
           <Text style={style.header}>
-            Match Queue
+            WAITING FOR YOU
           </Text>
           <ScrollView
             style={style.queueListWrapper}
             contentContainerStyle={style.queueListContainer}
             horizontal
+            showsHorizontalScrollIndicator={false}
           >
             <MatchQueue onPress={() => console.log('activated enqueued queue')} enqueued />
             {this.props.uninitializedMatches.length ? this.props.uninitializedMatches.map((match, i, arr) => {
+              console.log('Here are match: ', match)
               return (
                 <MatchQueue
                   key={i}
-                  source={match.userProfiles[0].profile.images[0]}
+                  source={match.userProfiles[0] ? match.userProfiles[0].profile.images[0] : null}
                   onPress={() => this.props.openChat(match._id.toString())}
                 />
               )
@@ -90,7 +102,7 @@ export default class MatchesComponent extends React.Component<IProps, IState> {
           /> */}
         </View>
         <Text style={style.header}>
-            Matches
+            MY CONNECTIONS
         </Text>
         <ScrollView
           style={style.chatListWrapper}
@@ -99,6 +111,7 @@ export default class MatchesComponent extends React.Component<IProps, IState> {
           {this.props.chatMatches.length ? this.props.chatMatches.map((match, i, arr) => {
             const chatStyle = style.chatPreview
             const lastChat = match && match.chat.length ? match.chat[match.chat.length - 1] : null
+            console.log('getting candidate?', match)
             const candidate = match.userProfiles[0]._id === this.props.user._id ?
               match.userProfiles[1] :
               match.userProfiles[0]
@@ -109,6 +122,70 @@ export default class MatchesComponent extends React.Component<IProps, IState> {
                 lastChatMessage =
                   // tslint:disable-next-line: max-line-length
                   `${lastChatOwned ? 'You' : candidate.name} invited ${lastChatOwned ? candidate.name : 'you'} to a date!`
+              } else if(!!lastChat.message.cloudfront) {
+                lastChatMessage =
+                  `${lastChatOwned ? 'You' : candidate.name} shared a video.`
+              } else if(!!lastChat.message.image) {
+                lastChatMessage =
+                  `${lastChatOwned ? 'You' : candidate.name} shared a photo.`
+              } else {
+                lastChatMessage = lastChat.message.text || ''
+              }
+            }
+            let venueLogo = ''
+            for(let ii = match.dates.length; ii--;) {
+              if(!match.dates[ii].consumed && moment(match.dates[ii].expiresOn).isAfter(moment())) {
+                venueLogo = match.dates[ii].logo
+                break;
+              }
+            }
+            return (
+              <TouchableOpacity
+                key={i}
+                onPress={() => this.props.openChat(match._id)}
+              >
+                <View style={chatStyle.container}>
+                  <View style={chatStyle.imageWrapper}>
+                    <FastImage
+                      source={{ uri: candidate.profile.images[0] }}
+                      style={chatStyle.thumbnail}
+                    />
+                    {/* {lastChat.user.toString() && <View style={chatStyle.badge} />} */}
+                  </View>
+                  <View style={chatStyle.previewWrapper}>
+                    <Text style={chatStyle.header}>{candidate.name}</Text>
+                    <Text style={chatStyle.lastMessage} numberOfLines={2}>
+                      {lastChatMessage}
+                    </Text>
+                  </View>
+                  <View style={chatStyle.actionWrapper}>
+                    {venueLogo ? (
+                      <TouchableOpacity onPress={() => this.props.previewDate(match)}>
+                        <FastImage
+                          source={{ uri: venueLogo  }}
+                          resizeMode="contain"
+                          style={{ width: 50, height: 50 }}
+                        />
+                      </TouchableOpacity>
+                    ) : null}
+                  </View>
+                </View>
+              </TouchableOpacity>
+            )
+          }) : null}
+          {/* {this.props.chatMatches.length ? this.props.chatMatches.map((match, i, arr) => {
+            const chatStyle = style.chatPreview
+            const lastChat = match && match.chat.length ? match.chat[match.chat.length - 1] : null
+            const candidate = match && match.userProfiles[0]._id === this.props.user._id ?
+              match.userProfiles[1] :
+              match.userProfiles[0]
+            let lastChatMessage: string = ''
+            const lastChatOwned: boolean = lastChat && lastChat.user === this.props.user._id
+            if(!!lastChat && !!lastChat.message) {
+              if(!!lastChat.message.location) {
+                lastChatMessage =
+                  // tslint:disable-next-line: max-line-length
+                `${lastChatOwned ? 'You' : candidate.name} invited ${lastChatOwned ? candidate.name : 'you'} to a date!`
               } else if(!!lastChat.message.cloudfront) {
                 lastChatMessage =
                   `${lastChatOwned ? 'You' : candidate.name} shared a video.`
@@ -134,32 +211,15 @@ export default class MatchesComponent extends React.Component<IProps, IState> {
                 onPress={() => this.props.openChat(match._id)}
               >
                 <View style={chatStyle.container}>
-                  <View style={chatStyle.imageWrapper}>
                     <FastImage
                       source={{ uri: candidate.profile.images[0] }}
                       style={chatStyle.thumbnail}
                     />
-                    {/* {lastChat.user.toString() && <View style={chatStyle.badge} />} */}
-                  </View>
-                  <View style={chatStyle.previewWrapper}>
-                    <Text style={chatStyle.header}>{candidate.name}</Text>
-                    <Text style={chatStyle.lastMessage} numberOfLines={2}>
-                      {lastChatMessage}
-                    </Text>
-                  </View>
-                  <View style={chatStyle.actionWrapper}>
-                    <FeatherButton
-                      style={chatStyle.button}
-                      onPress={() => console.log('pressed button')}
-                      color={colors.wisteria}
-                      size={28}
-                      name={recentDate ? 'tag' : 'calendar'}
-                    />
-                  </View>
+                    // {lastChat.user.toString() && <View style={chatStyle.badge} />}
                 </View>
               </TouchableOpacity>
             )
-          }) : null}
+          }) : null} */}
         </ScrollView>
       </View>
     )
@@ -168,25 +228,23 @@ export default class MatchesComponent extends React.Component<IProps, IState> {
 
 const style = {
   matchWrapper: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: colors.transparent,
+    width,
+    flex: 1,
+    flexGrow: 1,
     flexDirection: 'column' as 'column',
+    maxHeight: height - ifIphoneX(84,64),
   },
   queueContainer: {
     flex: 0,
     flexDirection: 'column' as 'column',
-    paddingTop: 16,
-    paddingBottom: spacing.tiny,
-    marginBottom: spacing.base,
-    borderBottomWidth: 1,
-    // borderStyle: 'dashed' as 'dashed',
-    borderColor: 'rgba(147, 114, 190, 0.2)',
+    paddingTop: ifIphoneX(60, 32),
+    paddingBottom: 24,
+    marginBottom: 16,
+    backgroundColor: colors.shadow,
   },
   header: {
-    ...type.regular,
-    fontWeight: '600' as '600',
-    color: colors.wisteria,
+    ...type.title2,
+    marginLeft: 16,
   },
   queueGradientLeft: {
     width: 32,
@@ -203,28 +261,42 @@ const style = {
     position: 'absolute' as 'absolute',
   },
   queueListWrapper: {
-    width: '100%',
+    width,
+    marginTop: 8,
+    marginbottom: 28,
   },
   queueListContainer: {
-
+    paddingLeft: 16,
   },
   chatListWrapper: {
-
+    marginLeft: 12,
+    marginRight: 12,
+    width: width - 24,
+    marginTop: 12,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    overflow: 'hidden' as 'hidden',
   },
   chatListContainer: {
-    paddingTop: spacing.tiny,
+    flexDirection: 'column' as 'column',
+    // justifyContent: 'center' as 'center',
+    // alignItems: 'stretch' as 'stretch',
+    width: width-24,
+    // flexWrap: 'wrap' as 'wrap',
+    // flexGrow: 1,
+    // flex: 1,
   },
   chatPreview: {
     container: {
-      height: 64,
+      height: 99,
       width: '100%',
       display: 'flex' as 'flex',
       flexDirection: 'row' as 'row',
       justifyContent: 'center' as 'center',
       alignItems: 'center' as 'center',
-      backgroundColor: colors.transparent,
-      marginTop: 16,
-      marginBottom: 16,
+      backgroundColor: 'transparent',
+      padding: 16,
+      paddingRight: 24,
     },
     imageWrapper: {
       height: 64,
@@ -244,22 +316,22 @@ const style = {
       height: 20,
       width: 20,
       borderRadius: 10,
-      backgroundColor: colors.wisteria,
+      backgroundColor: colors.turmeric,
     },
     previewWrapper: {
       flex: 1,
-      height: 64,
       display: 'flex' as 'flex',
       flexDirection: 'column' as 'column',
       alignItems: 'flex-start' as 'flex-start',
       justifyContent: 'center' as 'center',
-      backgroundColor: colors.transparent,
-      paddingLeft: spacing.small,
-      paddingRight: spacing.small,
+      backgroundColor: 'transparent',
+      paddingLeft: 16,
+      paddingRight: 16,
+      marginTop: 6,
     },
     header: {
       ...type.regular,
-      color: colors.wisteria,
+      color: colors.cosmos,
       paddingBottom: 8,
       textAlign: 'left' as 'left',
       flex: 0,
@@ -267,17 +339,18 @@ const style = {
     lastMessage: {
       flex: 1,
       ...type.small,
-      color: colors.lilac,
+      height: 34,
+      color: colors.shadow,
     },
     actionWrapper : {
       flex: 0,
-      width: 64,
-      height: 64,
+      width: 50,
+      height: 50,
       display: 'flex' as 'flex',
       flexDirection: 'column' as 'column',
       justifyContent: 'center' as 'center',
       alignItems: 'center' as 'center',
-      backgroundColor: colors.transparent,
+      backgroundColor: 'transparent',
     },
     button: {
 

@@ -10,7 +10,7 @@ import {
 import { IPhoto } from '../../types/photos';
 
 import Feather from 'react-native-vector-icons/Feather'
-import { colors, spacing, type } from '../../../foundation'
+import { colors } from '../../../new_foundation'
 
 const { height, width } = Dimensions.get('window')
 
@@ -181,7 +181,7 @@ const style = {
     height: third - 1,
   },
   wrapper: {
-    backgroundColor: 'rgba(0, 122, 255, 0.6)',
+    backgroundColor: colors.seafoam,
     width: third,
     height: third,
     flex: 0,
@@ -189,6 +189,6 @@ const style = {
   button: {
     width: '100%',
     height: '100%',
-    backgroundColor: 'rgba(0,0,0,0)',
+    backgroundColor: 'transparent',
   },
 }

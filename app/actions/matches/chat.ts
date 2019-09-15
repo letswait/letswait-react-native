@@ -12,7 +12,7 @@ import { authedApi } from '../../lib/api'
 import { storeToken } from '../../lib/asyncStorage';
 import { ReduxStore } from '../../types/models';
 
-export const changeActiveChat = (match: number) => ({
+export const changeActiveChat = (match: ReduxStore.Match) => ({
   match,
   type: PUSH_CHAT,
 })
