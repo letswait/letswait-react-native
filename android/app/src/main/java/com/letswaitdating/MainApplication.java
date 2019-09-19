@@ -3,6 +3,7 @@ package com.letswaitdating;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.zmxv.RNSound.RNSoundPackage;
 import com.psykar.cookiemanager.CookieManagerPackage;
 import com.marianhello.bgloc.react.BackgroundGeolocationPackage;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
@@ -34,6 +35,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNSoundPackage(),
             new CookieManagerPackage(),
             new BackgroundGeolocationPackage(),
             new AsyncStoragePackage(),

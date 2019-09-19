@@ -5,20 +5,17 @@ import {
   View,
 } from 'react-native'
 
-import moment, { Moment } from 'moment'
-import DatePicker from 'react-native-datepicker'
-
 import ActionButton from '../../../components/Buttons/ActionButton'
 
-import Feather from 'react-native-vector-icons/Feather'
 import { colors, type } from '../../../../new_foundation'
 
 import SetupWrapper from '../SetupWrapperComponent'
 
 import SelectPhoto from '../../../components/Buttons/SelectPhoto'
 import { photoUpload } from '../../../lib/api'
-import { ObjectOf } from '../../../types/helpers'
 import { IMediaReference } from '../../../types/photos'
+
+import RNHeicConverter from 'react-native-heic-converter'
 
 interface IProps {
   path: string
@@ -30,22 +27,25 @@ interface IProps {
   change: (changes: any) => any
   push: (route: string) => any
   updateProfile: () => any
+  postingProfile: boolean
 }
 interface IState {
   photos: Array<IMediaReference | undefined>
   disabled: boolean
+  loading: boolean
 }
 /** @todo SelectPhoto should be able to select many images, and auto-fill depending on its position in the grid
  * eg: n=2 pic_count= 4 => fill 2 <= n <=5
  * eg: n=5 pic_count_max= 1 => fill n = 5
  */
-export default class BirthdayComponent extends React.Component<IProps, IState> {
+export default class PhotosComponent extends React.PureComponent<IProps, IState> {
   public state: IState
   constructor(props: IProps) {
     super(props)
     this.state = {
       photos: new Array(6).fill(undefined),
       disabled: true,
+      loading: false,
     }
   }
   public componentDidMount() {
@@ -76,13 +76,17 @@ export default class BirthdayComponent extends React.Component<IProps, IState> {
     }
     return photoCount < 3
   }
-  private postPhotos() {
+  private async postPhotos() {
+    this.setState({ loading: true })
     const { photos } = this.state
     for(let i = photos.length; i--;) {
       if(photos[i] === undefined) {
         photos.splice(i, 1)
+      } else if(photos[i]!.type === 'image/heic') {
+        photos[i] = await this.convertPhoto(photos[i]!)
       }
     }
+
     photoUpload(
       '/api/upload/image/profile',
       photos as IMediaReference[],
@@ -90,12 +94,49 @@ export default class BirthdayComponent extends React.Component<IProps, IState> {
       (progress, event) => {
         console.log('photo upload progress: ', progress)
       }).then(({ err, errorMessage, urls }) => {
+        this.setState({ loading: false })
         if(err || urls.length < 3) {
           Alert.alert('Could not finish uploading Photos, try again later.')
         } else {
           this.props.change({ photos: urls })
         }
       })
+  }
+  public async convertPhoto(photo: IMediaReference) {
+    return await RNHeicConverter
+      .convert({ // options
+        path: photo.uri,
+        quality: 0,
+      })
+      .then((result: any) => {
+        return { uri: result.path, type: 'image/jpeg' }
+      })
+      // .then((result: any) => {
+      //   this.props.showToast(`Converted HEIC: ${result} ${photo}`)
+      //   photoUpload(
+      //     '/api/upload/image/profile',
+      //     [{ uri: result.path, type: 'image/jpeg' }],
+      //     true,
+      //     (progress, event) => {
+      //       this.setState((prevState) => {
+      //         return {
+      //           ...prevState,
+      //           photoProgress: Object.assign(
+      //             [],
+      //             prevState.photoProgress,
+      //             { [index]: progress },
+      //           ),
+      //         }
+      //       })
+      //       console.log('photo upload progress: ', progress)
+      //     }).then(({ err, errorMessage, urls }) => {
+      //       if (err || !urls || !urls.length) {
+      //         Alert.alert('Could not finish uploading Photos, try again later.')
+      //       } else {
+      //         this.pushPhoto({ uri: urls[0] }, index)
+      //       }
+      //     })
+      // });
   }
   private setPhoto(photo: IMediaReference, index: number) {
     console.log('setting photo: ', photo, index)
@@ -193,6 +234,7 @@ export default class BirthdayComponent extends React.Component<IProps, IState> {
         <ActionButton
           onPress={() => this.postPhotos()}
           disabled={this.state.disabled}
+          loading={this.props.postingProfile  || this.state.loading}
         >
           Next
         </ActionButton>

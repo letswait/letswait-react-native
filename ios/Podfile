@@ -68,6 +68,8 @@ target 'LetsWaitDating' do
   
   pod 'react-native-haptic', :path => '../node_modules/react-native-haptic'
 
+  pod 'RNSound', :path => '../node_modules/react-native-sound'
+
   target 'LetsWaitDatingTests' do
     inherit! :search_paths
     # Pods for testing

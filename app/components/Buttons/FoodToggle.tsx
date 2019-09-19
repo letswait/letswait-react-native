@@ -67,7 +67,7 @@ const style = {
   buttonDefault: {
     container: {
       backgroundColor: colors.white,
-      borderColor: 'transparent',
+      borderColor: colors.transparentWhite,
       width: 82,
       height: 82,
       flexDirection: 'column-reverse' as 'column-reverse',
@@ -78,7 +78,7 @@ const style = {
   },
   buttonDisabled: {
     container: {
-      backgroundColor: colors.shadow,
+      backgroundColor: colors.transparentWhite,
       alignItems: 'center' as 'center',
       width: 82,
       height: 82,

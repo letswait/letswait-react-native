@@ -105,7 +105,7 @@ export default class BaseButton extends React.Component<IProps, IState> {
       default: this.props.style && this.props.style.container.backgroundColor ?
         this.props.style.container.backgroundColor : colors.white,
       disabled: this.props.disabledStyle && this.props.disabledStyle.container.backgroundColor ?
-        this.props.disabledStyle.container.backgroundColor : 'transparent',
+        this.props.disabledStyle.container.backgroundColor : colors.transparentWhite,
     }
     const borderColor = {
       default: this.props.style && this.props.style.container.borderColor ?
@@ -164,10 +164,12 @@ export default class BaseButton extends React.Component<IProps, IState> {
 const style = {
   container: {
     maxWidth: '100%',
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 2,
     borderColor: colors.white,
     width: 155,
+    justifyContent: 'center' as 'center',
+    alignItems: 'center' as 'center',
     paddingLeft: 8,
     paddingRight: 8,
     marginTop: 16,

@@ -68,7 +68,7 @@ export default class SetupRouter extends React.PureComponent<IProps, {}> {
                         ...style.progressBarSegment,
                         ...(this.props.currentRoute >= i ? style.activeSegment : null),
                         ...(
-                            this.props.routes && this.props.routes.length === i ?
+                            this.props.routes && this.props.routes.length === i + 1 ?
                               { borderRightWidth: 0 }
                               : null
                         ),
@@ -135,5 +135,6 @@ const style = {
   },
   activeSegment: {
     backgroundColor: colors.white,
+    borderRightColor: colors.seafoam,
   },
 }

@@ -5,8 +5,11 @@ import {
   CHANGE_STATUS_BAR_THEME,
   CHANGE_TOAST,
   DISMISS_MODAL,
+  IS_LOADING,
+  NOT_LOADING,
   PUSH_SPINNER,
   SHOW_MODAL,
+  TOGGLE_LOADING,
 } from '../actions/navigation'
 
 const initialStatusBarState = {
@@ -45,5 +48,14 @@ export const spinner = (state: any | null = null, action: AnyAction) => {
   switch(action.type) {
     case PUSH_SPINNER: return action.spinner
     default: return state !== null ? { ...state } : null
+  }
+}
+
+export const loading = (state: boolean = false, action: AnyAction) => {
+  switch(action.type) {
+    case IS_LOADING: return true
+    case TOGGLE_LOADING: return !state
+    case NOT_LOADING: return false
+    default: return !!state
   }
 }

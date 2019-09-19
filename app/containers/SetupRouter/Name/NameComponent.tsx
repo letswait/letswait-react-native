@@ -22,6 +22,7 @@ interface IProps {
   change: (changes: any) => any
   push: (route: string) => any
   updateProfile: () => any
+  postingProfile: boolean
 }
 interface IState {
   name: string,
@@ -73,6 +74,7 @@ export default class NameComponent extends React.PureComponent<IProps, IState> {
         <ActionButton
           onPress={() => this.props.change({ name: this.state.name })}
           disabled={this.state.disabled}
+          loading={this.props.postingProfile}
         >
           Next
         </ActionButton>

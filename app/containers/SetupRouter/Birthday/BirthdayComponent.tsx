@@ -24,6 +24,7 @@ interface IProps {
   change: (changes: any) => any
   push: (route: string) => any
   updateProfile: () => any
+  postingProfile: boolean
 }
 interface IState {
   date: Moment,
@@ -94,6 +95,7 @@ export default class BirthdayComponent extends React.Component<IProps, IState> {
         <ActionButton
           onPress={() => this.props.change({ birth: this.state.date.format('L') })}
           disabled={this.state.disabled}
+          loading={this.props.postingProfile}
         >
           Next
         </ActionButton>

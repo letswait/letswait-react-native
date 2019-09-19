@@ -16,8 +16,10 @@ import {
 } from './index'
 
 import { ThunkDispatch } from 'redux-thunk';
-import { storeToken } from '../../lib/asyncStorage';
-import { authDevice, populateSignupRoutes, populateUser } from './auth';
+import { storeToken } from '../../lib/asyncStorage'
+import { authDevice, populateSignupRoutes, populateUser } from './auth'
+
+import { startLoading, stopLoading } from '../navigation'
 
 export const incrementRoute = () => ({
   type: INCREMENT_ROUTE,
@@ -55,6 +57,7 @@ export const signupChange = (changes: any) => ({
  */
 export function postSMS(sms: string) {
   return (dispatch: Dispatch) => {
+    dispatch(startLoading())
     api
       .post('/api/user/auth', { sms })
       .then(async (res: ApiResponse<any>) => {
@@ -64,6 +67,7 @@ export function postSMS(sms: string) {
           const didStoreAuth = await storeToken('authToken', res.data.authToken)
           const didStoreRefresh =  await storeToken('refreshToken', res.data.refreshToken)
           const didClearExpire = await storeToken('expiresIn', '')
+          dispatch(stopLoading())
           if(didStoreAuth && didStoreRefresh && didClearExpire) {
             // Add SMS to Signup data, keeps it available for code validation.
             dispatch(signupChange({ sms }))
@@ -96,6 +100,7 @@ export function postSMS(sms: string) {
  */
 export function postCode(sms: string, code: string) {
   return (dispatch: Dispatch) => {
+    dispatch(startLoading())
     authedApi
       .post('/api/user/code', { sms, code })
       .then(async (res: ApiResponse<any>) => {
@@ -104,6 +109,7 @@ export function postCode(sms: string, code: string) {
           user,
           remainingSetupRoutes,
         } = res.data
+        dispatch(stopLoading())
         if(res.ok && res.data && accepted) {
           // If SMS Code is validated enter app
           console.log()
@@ -132,6 +138,7 @@ export function postCode(sms: string, code: string) {
  */
 export function postChangeProfile() {
   return (dispatch: ThunkDispatch<{},{},any>, getState: () => any) => {
+    dispatch(startLoading())
     const { signup } = getState()
     authedApi
       .post('/api/profile/post-change-profile', {
@@ -152,6 +159,7 @@ export function postChangeProfile() {
         ...(signup.goal ? { goal: signup.goal } : null),
       })
       .then((res: ApiResponse<any>) => {
+        dispatch(stopLoading())
         if(res.ok) {
           if(res.data && res.data.remainingSetupRoutes && res.data.remainingSetupRoutes.length) {
             dispatch(populateSignupRoutes(res.data.remainingSetupRoutes))

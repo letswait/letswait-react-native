@@ -10,6 +10,10 @@ export const SHOW_MODAL = 'SHOW_MODAL'
 export const DISMISS_MODAL = 'DISMISS_MODAL'
 export const PUSH_SPINNER = 'PUSH_SPINNER'
 
+export const IS_LOADING = 'IS_LOADING'
+export const TOGGLE_LOADING = 'TOGGLE_LOADING'
+export const NOT_LOADING = 'NOT_LOADING'
+
 export const changeStatusBarColor = (color: string = '') => ({
   color,
   type: CHANGE_STATUS_BAR_COLOR,
@@ -29,4 +33,16 @@ export const showToast = (message: string, action: Function, duration = 1600) =>
   action,
   duration,
   type: CHANGE_TOAST,
+})
+
+export const toggleLoading = () => ({
+  type: TOGGLE_LOADING,
+})
+
+export const startLoading = () => ({
+  type: IS_LOADING,
+})
+
+export const stopLoading = () => ({
+  type: NOT_LOADING,
 })

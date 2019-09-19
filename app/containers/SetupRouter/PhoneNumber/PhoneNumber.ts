@@ -22,6 +22,7 @@ const mapStateToProps = (state: any) => {
     errorMessage: state.errorMessage,
     sms: state.signup.sms,
     smsValid: state.smsValid,
+    postingSMS: state.loading,
   }
 }
 

@@ -25,6 +25,7 @@ interface IProps {
   change: (changes: any) => any
   push: (route: string) => any
   updateProfile: () => any
+  postingProfile: boolean
 }
 interface IState {
   gender: string,
@@ -77,10 +78,10 @@ export default class GenderComponent extends React.PureComponent<IProps, IState>
     }).start()
   }
   private setGender(g: string, showInput: boolean = false) {
-    if(this.state.maxHeight._value === 0 && showInput) {
+    if((this.state.maxHeight as any)._value === 0 && showInput) {
       this.animateIn()
       this.genderInput.input.focus()
-    } else if(this.state.maxHeight._value === 1 && (!g.length || !showInput)) {
+    } else if((this.state.maxHeight as any)._value === 1 && (!g.length || !showInput)) {
       this.animateOut()
       this.genderInput.input.blur()
     }
@@ -150,6 +151,7 @@ export default class GenderComponent extends React.PureComponent<IProps, IState>
         <ActionButton
           onPress={() => this.props.change({ gender: this.state.gender.toLowerCase() })}
           disabled={this.state.disabled}
+          loading={this.props.postingProfile}
         >
           Next
         </ActionButton>

@@ -159,7 +159,7 @@ export default class SelectPhoto extends React.PureComponent<IProps, IState> {
   public render() {
     const borderColor = this.state.animationProgress.interpolate({
       inputRange: [0, 1],
-      outputRange: [colors.capri, this.state.borderColor],
+      outputRange: [colors.white, this.state.borderColor],
     })
     return (
       <View style={{ ...style.wrapper, ...this.props.style }}>
@@ -245,7 +245,7 @@ const style = {
   container: {
     justifyContent: 'center' as 'center',
     alignItems: 'center' as  'center',
-    backgroundColor: 'transparent',
+    backgroundColor: colors.transparentWhite,
     borderWidth: 2,
     borderRadius: 85/2,
     height: 85,

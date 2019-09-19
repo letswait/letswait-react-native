@@ -25,6 +25,7 @@ interface IProps {
   change: (changes: any) => any
   push: (route: string) => any
   updateProfile: () => any
+  postingProfile: boolean
 }
 interface IState {
   goal?: Goal,
@@ -93,6 +94,7 @@ export default class GoalComponent extends React.PureComponent<IProps, IState> {
         <ActionButton
           onPress={() => this.props.change({ goal: this.state.goal })}
           disabled={this.state.disabled}
+          loading={this.props.postingProfile}
         >
           Next
         </ActionButton>

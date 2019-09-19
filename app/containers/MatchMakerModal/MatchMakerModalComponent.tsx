@@ -127,6 +127,15 @@ export default class MatchMakerModal extends React.PureComponent<IProps, IState>
           showsHorizontalScrollIndicator={false}
         >
           <View style={pageStyle}>
+            <Text
+              style={{
+                ...type.title1,
+                textAlign: 'center' as 'center',
+                marginTop: 29,
+              }}
+            >
+              {'SPIN FOR A DATE'}
+            </Text>
             <Date
               sources={[user.profile.images[0], candidate.profile.images[0]]}
             />
@@ -138,12 +147,12 @@ export default class MatchMakerModal extends React.PureComponent<IProps, IState>
             />
             <Text
               style={{
-                ...type.title2,
+                ...type.title1,
                 textAlign: 'center' as 'center',
                 marginTop: 29,
               }}
             >
-              {'IT\'S A MATCH!\nSPIN FOR A DATE'}
+              {'SPIN FOR A DATE'}
             </Text>
           </View>
           <TouchableWithoutFeedback

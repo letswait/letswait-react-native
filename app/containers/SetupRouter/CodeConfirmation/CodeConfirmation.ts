@@ -18,6 +18,7 @@ const mapStateToProps = (state: any) => {
     errorMessage: state.errorMessage,
     code: state.signup.code,
     sms: state.signup.sms,
+    postingCode: state.loading,
   }
 }
 

@@ -69,6 +69,7 @@ interface IProps {
   change: (changes: any) => any
   push: (route: string) => any
   updateProfile: () => any
+  postingProfile: boolean
 }
 interface IState {
   food: ObjectOf<boolean>,
@@ -140,6 +141,7 @@ export default class FoodComponent extends React.PureComponent<IProps, IState> {
         <ActionButton
           onPress={() => this.props.change({ food: this.state.food })}
           disabled={this.state.disabled}
+          loading={this.props.postingProfile}
         >
           Next
         </ActionButton>

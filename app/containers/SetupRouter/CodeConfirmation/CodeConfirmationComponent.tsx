@@ -22,6 +22,7 @@ interface IProps {
   change: (changes: any) => any
   push: (route: string) => any
   postCode: (sms: string, code: string) => any
+  postingCode: boolean
 }
 interface IState {
   code: string,
@@ -64,6 +65,7 @@ export default class CodeConfirmationComponent extends React.PureComponent<IProp
         <ActionButton
           onPress={() => this.props.postCode(this.props.sms, this.state.code)}
           disabled={this.state.disabled}
+          loading={this.props.postingCode}
         >
           Next
         </ActionButton>

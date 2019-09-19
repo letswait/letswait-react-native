@@ -23,6 +23,7 @@ interface IProps {
   push: (route: string) => any
   postSMS: (sms: string) => any
   clearSMS: () => any
+  postingSMS: boolean
 }
 interface IState {
   sms: string
@@ -76,6 +77,7 @@ export default class PhoneNumberComponent extends React.PureComponent<IProps, IS
         <ActionButton
           onPress={() => this.props.postSMS(this.state.sms)}
           disabled={this.state.disabled}
+          loading={this.props.postingSMS}
         >
           Next
         </ActionButton>

@@ -23,6 +23,7 @@ interface IProps {
   change: (changes: any) => any
   push: (route: string) => any
   updateProfile: () => any
+  postingProfile: boolean
 }
 interface IState {
   sexualPreference: string,
@@ -88,6 +89,7 @@ export default class SexualPreferenceComponent extends React.PureComponent<IProp
         <ActionButton
           onPress={() => this.props.change({ sexualPreference: this.state.sexualPreference })}
           disabled={this.state.disabled}
+          loading={this.props.postingProfile}
         >
           Next
         </ActionButton>

@@ -36,18 +36,18 @@ export default class ToggleButton extends React.Component<IProps> {
 const style = {
   buttonDefault: {
     container: {
-      backgroundColor: 'transparent',
+      backgroundColor: colors.white,
       borderColor: colors.white,
       width: 253,
     },
     label: {
-      color: colors.white,
+      color: colors.seafoam,
     },
   },
   buttonDisabled: {
     container: {
-      backgroundColor: 'transparent',
-      borderColor: colors.cloud,
+      backgroundColor: colors.transparentWhite,
+      borderColor: colors.capri,
       width: 253,
     },
     label: {

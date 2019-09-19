@@ -40,6 +40,19 @@
 		B1FC5BF8675B4AD2A08237D8 /* FontAwesome5_Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 17D1D00FC8814ED487DDC073 /* FontAwesome5_Regular.ttf */; };
 		B699F23C1BF948649AC00E99 /* Feather.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 82210DE3FD1B44BF83CC7F2D /* Feather.ttf */; };
 		C7824E7B22FDD044006C859D /* libRCTBackgroundGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C7803DD622F9E886003DB183 /* libRCTBackgroundGeolocation.a */; };
+		C7CDD25C232E0BF5007E0CFE /* anti-shorts-9-correct.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD25B232E0BF4007E0CFE /* anti-shorts-9-correct.wav */; };
+		C7CDD25E232E0C17007E0CFE /* anti-shorts-18-attention.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD25D232E0C17007E0CFE /* anti-shorts-18-attention.wav */; };
+		C7CDD262232E0C29007E0CFE /* anti-pop-2.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD25F232E0C29007E0CFE /* anti-pop-2.wav */; };
+		C7CDD263232E0C29007E0CFE /* anti-pop-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD260232E0C29007E0CFE /* anti-pop-1.wav */; };
+		C7CDD264232E0C29007E0CFE /* anti-pop-3.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD261232E0C29007E0CFE /* anti-pop-3.wav */; };
+		C7CDD266232E0C3B007E0CFE /* notify.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD265232E0C3B007E0CFE /* notify.wav */; };
+		C7CDD268232E0C6B007E0CFE /* anti-notification-3-refill.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD267232E0C6B007E0CFE /* anti-notification-3-refill.wav */; };
+		C7CDD26A232E0D05007E0CFE /* anti-notification-7-network-failure.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD269232E0D05007E0CFE /* anti-notification-7-network-failure.wav */; };
+		C7CDD26C232E0D90007E0CFE /* anti-notification-19-call-ended.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD26B232E0D90007E0CFE /* anti-notification-19-call-ended.wav */; };
+		C7CDD26E232E0DB0007E0CFE /* anti-notification-18-push-notification-call.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD26D232E0DB0007E0CFE /* anti-notification-18-push-notification-call.wav */; };
+		C7CDD270232E0DF8007E0CFE /* anti-notificaiton-4-no-answer.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD26F232E0DF8007E0CFE /* anti-notificaiton-4-no-answer.wav */; };
+		C7CDD272232E0E56007E0CFE /* anti-theme-2-dailing.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD271232E0E56007E0CFE /* anti-theme-2-dailing.wav */; };
+		C7CDD274232E0F3F007E0CFE /* tap.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD273232E0F3F007E0CFE /* tap.wav */; };
 		C7E6D0D122D8F2920022C8F9 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C72DFA8222A9D8F80007F252 /* Images.xcassets */; };
 		CFA76B31F87DFF193A70308B /* libPods-LetsWaitDatingTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E673F3613AE6AA9AFE1E42D /* libPods-LetsWaitDatingTests.a */; };
 		DC530B92CE5855E802B8C5B0 /* libPods-LetsWaitDating-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F076735D049E3215AE7702DF /* libPods-LetsWaitDating-tvOSTests.a */; };
@@ -400,6 +413,19 @@
 		C7803DD022F9E885003DB183 /* RCTBackgroundGeolocation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBackgroundGeolocation.xcodeproj; path = "../node_modules/@mauron85/react-native-background-geolocation/ios/RCTBackgroundGeolocation.xcodeproj"; sourceTree = "<group>"; };
 		C79DF43722DCBD35000AFAE0 /* RCTCameraRoll.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTCameraRoll.xcodeproj; path = "../node_modules/react-native/Libraries/CameraRoll/RCTCameraRoll.xcodeproj"; sourceTree = "<group>"; };
 		C79DF44B22DFAD58000AFAE0 /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
+		C7CDD25B232E0BF4007E0CFE /* anti-shorts-9-correct.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-shorts-9-correct.wav"; sourceTree = "<group>"; };
+		C7CDD25D232E0C17007E0CFE /* anti-shorts-18-attention.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-shorts-18-attention.wav"; sourceTree = "<group>"; };
+		C7CDD25F232E0C29007E0CFE /* anti-pop-2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-pop-2.wav"; sourceTree = "<group>"; };
+		C7CDD260232E0C29007E0CFE /* anti-pop-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-pop-1.wav"; sourceTree = "<group>"; };
+		C7CDD261232E0C29007E0CFE /* anti-pop-3.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-pop-3.wav"; sourceTree = "<group>"; };
+		C7CDD265232E0C3B007E0CFE /* notify.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = notify.wav; sourceTree = "<group>"; };
+		C7CDD267232E0C6B007E0CFE /* anti-notification-3-refill.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-notification-3-refill.wav"; sourceTree = "<group>"; };
+		C7CDD269232E0D05007E0CFE /* anti-notification-7-network-failure.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-notification-7-network-failure.wav"; sourceTree = "<group>"; };
+		C7CDD26B232E0D90007E0CFE /* anti-notification-19-call-ended.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-notification-19-call-ended.wav"; sourceTree = "<group>"; };
+		C7CDD26D232E0DB0007E0CFE /* anti-notification-18-push-notification-call.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-notification-18-push-notification-call.wav"; sourceTree = "<group>"; };
+		C7CDD26F232E0DF8007E0CFE /* anti-notificaiton-4-no-answer.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-notificaiton-4-no-answer.wav"; sourceTree = "<group>"; };
+		C7CDD271232E0E56007E0CFE /* anti-theme-2-dailing.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-theme-2-dailing.wav"; sourceTree = "<group>"; };
+		C7CDD273232E0F3F007E0CFE /* tap.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = tap.wav; sourceTree = "<group>"; };
 		C7ECA81222FC88F50051A8B8 /* libBackgroundGeolocation.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libBackgroundGeolocation.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		C8B42661EE3902CC6089B67D /* Pods-LetsWaitDating-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LetsWaitDating-tvOSTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-LetsWaitDating-tvOSTests/Pods-LetsWaitDating-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
 		DBA04F4AE26249979682D09A /* Entypo.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Entypo.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Entypo.ttf"; sourceTree = "<group>"; };
@@ -575,6 +601,19 @@
 		1EE9A5ABDF37443EBCDF1A16 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C7CDD260232E0C29007E0CFE /* anti-pop-1.wav */,
+				C7CDD25F232E0C29007E0CFE /* anti-pop-2.wav */,
+				C7CDD261232E0C29007E0CFE /* anti-pop-3.wav */,
+				C7CDD265232E0C3B007E0CFE /* notify.wav */,
+				C7CDD273232E0F3F007E0CFE /* tap.wav */,
+				C7CDD26D232E0DB0007E0CFE /* anti-notification-18-push-notification-call.wav */,
+				C7CDD26F232E0DF8007E0CFE /* anti-notificaiton-4-no-answer.wav */,
+				C7CDD271232E0E56007E0CFE /* anti-theme-2-dailing.wav */,
+				C7CDD26B232E0D90007E0CFE /* anti-notification-19-call-ended.wav */,
+				C7CDD269232E0D05007E0CFE /* anti-notification-7-network-failure.wav */,
+				C7CDD267232E0C6B007E0CFE /* anti-notification-3-refill.wav */,
+				C7CDD25B232E0BF4007E0CFE /* anti-shorts-9-correct.wav */,
+				C7CDD25D232E0C17007E0CFE /* anti-shorts-18-attention.wav */,
 				62BFC864EF644D92971B05FA /* AntDesign.ttf */,
 				DBA04F4AE26249979682D09A /* Entypo.ttf */,
 				6199B79636C040AFA436F19C /* EvilIcons.ttf */,
@@ -1237,22 +1276,35 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C7CDD264232E0C29007E0CFE /* anti-pop-3.wav in Resources */,
+				C7CDD25E232E0C17007E0CFE /* anti-shorts-18-attention.wav in Resources */,
 				C7E6D0D122D8F2920022C8F9 /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
+				C7CDD262232E0C29007E0CFE /* anti-pop-2.wav in Resources */,
 				24A51330BC8044319611E283 /* AntDesign.ttf in Resources */,
 				ED292BFD077A43F6BBD4B652 /* Entypo.ttf in Resources */,
 				64D4B726E5454889B0A78BB3 /* EvilIcons.ttf in Resources */,
+				C7CDD25C232E0BF5007E0CFE /* anti-shorts-9-correct.wav in Resources */,
+				C7CDD268232E0C6B007E0CFE /* anti-notification-3-refill.wav in Resources */,
 				B699F23C1BF948649AC00E99 /* Feather.ttf in Resources */,
 				1ED9649AD2B24533B24F9586 /* FontAwesome.ttf in Resources */,
 				8559CA4E31644C1FB86905B4 /* FontAwesome5_Brands.ttf in Resources */,
 				B1FC5BF8675B4AD2A08237D8 /* FontAwesome5_Regular.ttf in Resources */,
+				C7CDD270232E0DF8007E0CFE /* anti-notificaiton-4-no-answer.wav in Resources */,
+				C7CDD26A232E0D05007E0CFE /* anti-notification-7-network-failure.wav in Resources */,
 				7E6C1820EB8443ECB9200A2F /* FontAwesome5_Solid.ttf in Resources */,
 				8E31EAE5D7334B97BD4A9AA1 /* Foundation.ttf in Resources */,
+				C7CDD272232E0E56007E0CFE /* anti-theme-2-dailing.wav in Resources */,
 				921E4CC88EAE4FF3A9B7C258 /* Ionicons.ttf in Resources */,
+				C7CDD263232E0C29007E0CFE /* anti-pop-1.wav in Resources */,
+				C7CDD26C232E0D90007E0CFE /* anti-notification-19-call-ended.wav in Resources */,
 				79DDB767FB4F4843B6637217 /* MaterialCommunityIcons.ttf in Resources */,
 				922F1B0BCDB84A439A63D90B /* MaterialIcons.ttf in Resources */,
+				C7CDD274232E0F3F007E0CFE /* tap.wav in Resources */,
 				A34F0DE87FA64B489B92180F /* Octicons.ttf in Resources */,
 				884CC4AD1DE34C05B7CC3CC6 /* SimpleLineIcons.ttf in Resources */,
+				C7CDD266232E0C3B007E0CFE /* notify.wav in Resources */,
+				C7CDD26E232E0DB0007E0CFE /* anti-notification-18-push-notification-call.wav in Resources */,
 				04E2A6D6282B4DE68B2094E8 /* Zocial.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

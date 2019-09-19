@@ -17,6 +17,7 @@ const mapStateToProps = (state: any) => {
     routes: state.signup.routes,
     errorMessage: state.errorMessage,
     sexualPreference: state.signup.sexualPreference,
+    postingProfile: state.loading,
   }
 }
 
