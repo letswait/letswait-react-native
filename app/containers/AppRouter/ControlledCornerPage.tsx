@@ -92,7 +92,7 @@ const ControlledCorner = (props: {
     onPress={() => props.onPress()}
     style={{ ...style.controlledCornerCircle, ...props.direction }}
   >
-    {props.icon ? <Feather name={props.icon} color={colors.cloud} size={50} /> : null}
+    {props.icon ? <Feather name={props.icon} color={colors.white} size={32} /> : null}
     {props.contains ? props.contains : null}
   </TouchableOpacity>
 )

@@ -22,7 +22,8 @@ import { IMediaReference } from '../../../types/photos'
 interface IProps {
   source?: IMediaReference | string
   onPhoto: (photo: IMediaReference) => void
-  onDelete: () => void
+  onDelete?: () => void
+  height?: number
 }
 interface IState {
   modalVisible: boolean
@@ -59,20 +60,26 @@ export default class AddImage extends React.PureComponent<IProps,IState> {
     )
   }
   private presentActionSheet() {
+    const options = Object.assign(
+      [],
+      ['Cancel', 'Choose from Library', 'Camera'],
+      !!this.props.onDelete ? 'Delete' : undefined,
+    )
+
     ActionSheetIOS.showActionSheetWithOptions(
       {
+        options,
         title: 'From where would you like to upload a photo',
-        options: ['Cancel', 'Delete', 'Choose from Library', 'Camera'],
         cancelButtonIndex: 0,
-        destructiveButtonIndex: 1,
+        ...(!!this.props.onDelete ? { destructiveButtonIndex: 3 } : null),
       },
       (buttonIndex: number) => {
         switch(buttonIndex) {
-          case 2: this.openModal('cameraRoll')
+          case 1: this.openModal('cameraRoll')
             break
-          case 3: this.openModal('camera')
+          case 2: this.openModal('camera')
             break
-          case 1: this.props.onDelete()
+          case 3: this.props.onDelete!()
             break
           default: break
         }
@@ -102,22 +109,26 @@ export default class AddImage extends React.PureComponent<IProps,IState> {
     }
   }
   public render() {
+    const container = {
+      height: this.props.height || 350,
+      width: '100%',
+    }
     return (
-      <View style={style.container}>
+      <View style={container}>
         {this.state.selectedPhoto ? this.state.selectedPhoto.type ? (
           <Image
             source={this.state.selectedPhoto}
-            style={style.image}
+            style={container}
           />
         ) : (
           <FastImage
             source={this.state.selectedPhoto}
-            style={style.image}
+            style={container}
           />
         ) : (
           <Image
             source={require('../../../assets/ui/ui-profile-blur-1.png')}
-            style={style.image}
+            style={container}
           />
         )}
         {this.state.selectedPhoto ? (
@@ -166,14 +177,6 @@ export default class AddImage extends React.PureComponent<IProps,IState> {
 }
 
 const style = {
-  container: {
-    width: '100%',
-    height: 350,
-  },
-  image: {
-    width: '100%',
-    height: 350,
-  },
   activeEditButton: {
     position: 'absolute' as 'absolute',
     top: 16,

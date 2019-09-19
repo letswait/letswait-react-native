@@ -13,11 +13,6 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native'
-import FastImage from 'react-native-fast-image'
-
-import WisteriaButton from '../../../components/Buttons/WisteriaButton'
-
-import moment from 'moment'
 
 import LinearGradient from 'react-native-linear-gradient'
 
@@ -26,12 +21,14 @@ import { photoUpload } from '../../../lib/api'
 import { colors, type } from '../../../../new_foundation'
 
 // import MultiSlider from '@ptomasroos/react-native-multi-slider'
-import { isIphoneX } from 'react-native-iphone-x-helper'
+import { isIphoneX, ifIphoneX } from 'react-native-iphone-x-helper'
 import SelectPhoto from '../../../components/Buttons/SelectPhoto'
 import FeatherButton from '../../../components/Camera/CameraButton'
 import { ObjectOf } from '../../../types/helpers';
 import { IMediaReference } from '../../../types/photos'
 const { width, height } = Dimensions.get('screen')
+
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 /**
  * @todo this needs to be cleaned up and turned into its own component. but for now it works, but its disorganized
@@ -227,6 +224,7 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
       },
     })
   }
+  private headerText: any = null
   public render() {
     if (
       !this.props.user ||
@@ -240,70 +238,50 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
       )
     }
     const images = this.state.settings.profile.images
+    const questions = this.state.settings.profile.questions
     return (
-      <KeyboardAvoidingView behavior="padding">
-        <Animated.ScrollView
+      <View>
+        <Animated.View
+          style={style.headerGradient}
+        >
+          <LinearGradient
+            colors={[
+              'rgba(33, 33, 33, 1)',
+              'rgba(17, 17, 17, 0.63)',
+              'rgba(0, 0, 0, 0.25)',
+              'rgba(0, 0, 0, 0.10)',
+              'rgba(0, 0, 0, 0)',
+            ]}
+            style={style.headerGradient}
+          />
+        </Animated.View>
+        <Animated.Text
+          style={style.headerText}
+          ref={(c: any) => this.headerText = c}
+        >
+          {this.props.user.name}
+        </Animated.Text>
+        <KeyboardAwareScrollView
           style={style.profileWrapper}
           contentContainerStyle={style.profileContainer}
           scrollEventThrottle={16}
           scrollEnabled={this.state.scrollEnabled}
+          onScroll={(event) => {
+            if(!!this.headerText) {
+              const opacity = Math.floor(Math.max(0, Math.min(100, event.nativeEvent.contentOffset.y)))/100
+              this.headerText.setNativeProps({ style: { ...style.headerText, opacity: 1 - opacity } })
+            }
+          }}
+          keyboardOpeningTime={50}
+          enableResetScrollToCoords={false}
         >
-          {/* <Animated.View
-            style={{
-              ...style.scrollWrapper,
-              transform,
-            }}
-            pointerEvents={this.state.touchEnabled ? 'auto' : 'none'}
-            {...this._panResponder.panHandlers}
-          >
-            <ScrollView
-              style={style.cardWrapper}
-              contentContainerStyle={style.cardContainer}
-              bounces={false}
-              showsVerticalScrollIndicator={false}
-              ref={c => this.scrollView = c}
-            >
-              <FastImage
-                style={style.headerImage}
-                source={{ uri: this.props.profile.images[0] }}
-              />
-              <LinearGradient
-                colors={[
-                  'rgba(33, 33, 33, 1)',
-                  'rgba(17, 17, 17, 0.63)',
-                  'rgba(0, 0, 0, 0.25)',
-                  'rgba(0, 0, 0, 0.10)',
-                  'rgba(0, 0, 0, 0)',
-                ]}
-                style={style.headerGradient}
-              />
-              <View style={titleContainer}>
-                <Text style={style.titleText}>
-                  {`${this.props.name}${this.props.age ? ', ' : ''}${this.props.age || ''}`.toUpperCase()}
-                </Text>
-              </View>
-              <Section>
-                {this.props.profile.aboutMe}
-              </Section>
-              {this.props.profile.images[1] &&
-                <FastImage {...imageProps} source={{ uri: this.props.profile.images[1] }} />}
-              {this.props.profile.images[2] &&
-                <FastImage {...imageProps} source={{ uri: this.props.profile.images[2] }} />}
-              {this.props.profile.images[3] &&
-                <FastImage {...imageProps} source={{ uri: this.props.profile.images[3] }} />}
-              {this.props.profile.images[4] &&
-                <FastImage {...imageProps} source={{ uri: this.props.profile.images[4] }} />}
-              {this.props.profile.images[5] &&
-                <FastImage {...imageProps} source={{ uri: this.props.profile.images[5] }} />}
-            </ScrollView>
-          </Animated.View> */}
 
           <View style={style.cardContainer}>
             <View style={style.profile.header}>
-              <FastImage
-                source={{ uri: this.state.settings.profile.images[0] }}
-                style={style.profile.headerImage}
-                resizeMode="cover"
+              <AddImage
+                source={images[0]}
+                onPhoto={(photo: IMediaReference) => this.postPhotos(photo, 0)}
+                height={height - startY - 64}
               />
             </View>
             <View style={style.profile.sectionContainer}>
@@ -321,7 +299,6 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
             <AddImage
               source={images[1]}
               onPhoto={(photo: IMediaReference) => this.postPhotos(photo, 1)}
-              onDelete={() => this.clearPhoto(1)}
             />
             <View style={style.profile.sectionContainer}>
               <Text style={style.profile.sectionTitle}>
@@ -331,8 +308,9 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
                 style={style.profile.sectionParagraph}
                 placeholder="Add Answer..."
                 value={
-                  this.state.settings.profile.questions &&
-                  this.state.settings.profile.questions['Favorite Hobbies'] || ''}
+                  questions && questions['Favorite Hobbies'] ?
+                  questions['Favorite Hobbies'] : ''
+                }
                 onChangeText={(text: string) => this.changeQA('Favorite Hobbies', text)}
                 onBlur={e => this.pushQA('Favorite Hobbies', e.nativeEvent.text)}
                 multiline
@@ -342,7 +320,6 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
             <AddImage
               source={images[2]}
               onPhoto={(photo: IMediaReference) => this.postPhotos(photo, 2)}
-              onDelete={() => this.clearPhoto(2)}
             />
             <View style={style.profile.sectionContainer}>
               <Text style={style.profile.sectionTitle}>
@@ -353,9 +330,9 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
                 placeholder="Add Answer..."
                 // tslint:disable-next-line: max-line-length
                 value={
-                  this.state.settings.profile.questions &&
-                  this.state.settings.profile.questions['The actor who would play me in a movie about my life...']
-                  || ''}
+                  questions && questions['The actor who would play me in a movie about my life'] ?
+                  questions['The actor who would play me in a movie about my life'] : ''
+                }
                 // tslint:disable-next-line: max-line-length
                 onChangeText={(text: string) => this.changeQA('The actor who would play me in a movie about my life', text)}
                 onBlur={e => this.pushQA('The actor who would play me in a movie about my life', e.nativeEvent.text)}
@@ -375,8 +352,10 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
               <TextInput
                 style={style.profile.sectionParagraph}
                 placeholder="Add Answer..."
-                value={this.state.settings.profile.questions &&
-                  this.state.settings.profile.questions['What drives me...'] || ''}
+                value={
+                  questions && questions['What drives me'] ?
+                  questions['What drives me'] : ''
+                }
                 onChangeText={(text: string) => this.changeQA('What drives me', text)}
                 onBlur={e => this.pushQA('What drives me', e.nativeEvent.text)}
                 multiline
@@ -395,8 +374,10 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
               <TextInput
                 style={style.profile.sectionParagraph}
                 placeholder="Add Answer..."
-                value={this.state.settings.profile.questions &&
-                  this.state.settings.profile.questions['Listener or talker'] || ''}
+                value={
+                  questions && questions['Listener or talker'] ?
+                  questions['Listener or talker'] : ''
+                }
                 onChangeText={(text: string) => this.changeQA('Listener or talker', text)}
                 onBlur={e => this.pushQA('Listener or talker', e.nativeEvent.text)}
                 multiline
@@ -409,8 +390,8 @@ export default class ProfileComponent extends React.Component<IProps, IState> {
               onDelete={() => this.clearPhoto(5)}
             />
           </View>
-        </Animated.ScrollView>
-      </KeyboardAvoidingView>
+        </KeyboardAwareScrollView>
+      </View>
     )
   }
 }
@@ -504,6 +485,28 @@ const style = {
     ...type.small,
     color: colors.white,
     marginTop: 12,
+  },
+  headerGradient: {
+    width,
+    height: 200,
+    top: 0,
+    left: 0,
+    opacity: 0.5,
+    position: 'absolute' as 'absolute',
+    display: 'flex' as 'flex',
+    flexDirection: 'row' as 'row',
+    alignItems: 'center' as 'center',
+    zIndex: 1,
+  },
+  headerText: {
+    ...type.title2,
+    width,
+    color: colors.white,
+    top: ifIphoneX(64, 35),
+    left: 0,
+    position: 'absolute' as 'absolute',
+    textAlign: 'center' as 'center',
+    zIndex: 1,
   },
   profile: {
     header: {

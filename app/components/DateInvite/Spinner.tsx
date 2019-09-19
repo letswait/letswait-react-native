@@ -153,13 +153,13 @@ export default class Spinner extends React.PureComponent<IProps, IState> {
     }
   }
   public componentDidUpdate(prevProps: IProps, prevState: IState) {
-    if(this.state.spinnable !== prevState.spinnable) {
-      const toValue = this.state.spinnable ? 1 : 0
-      Animated.timing(this.state.spinTextColor, {
-        toValue,
-        duration: 150,
-      }).start()
-    }
+    // if(this.state.spinnable !== prevState.spinnable) {
+    //   const toValue = this.state.spinnable ? 1 : 0
+    //   Animated.timing(this.state.spinTextColor, {
+    //     toValue,
+    //     duration: 150,
+    //   }).start()
+    // }
   }
   private moveSpinner(origin: boolean = false, customVelocity: number = 0) {
     if(customVelocity) {
@@ -405,7 +405,7 @@ export default class Spinner extends React.PureComponent<IProps, IState> {
             textAlign: 'center' as 'center',
             transform: [
               { translateX: -150 },
-              { translateY: -17 },
+              { translateY: -16 },
             ],
           }}
         >
@@ -420,9 +420,11 @@ const style = {
   wrapper: {
     width: 300,
     height: 300,
-    shadowColor: colors.shadow,
+    shadowColor: colors.cosmos,
+    shadowOpacity: 0.24,
     shadowRadius: 3,
-    shadowOffset: { width: 0, height: -1 },
+    shadowOffset: { width: 0, height: -2 },
+    backgroundColor: colors.transparentWhite,
     borderRadius: 150,
   },
   spinnerContainer: {

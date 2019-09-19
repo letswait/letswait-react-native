@@ -1,14 +1,14 @@
 import React from 'react'
 import {
   Alert,
+  Animated,
   AppState,
   Dimensions,
+  Easing,
   Linking,
   Modal,
   ScrollView,
   View,
-  Animated,
-  Easing,
 } from 'react-native'
 
 import BackgroundGeolocation from '@mauron85/react-native-background-geolocation'

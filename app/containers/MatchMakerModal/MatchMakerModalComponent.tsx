@@ -130,11 +130,12 @@ export default class MatchMakerModal extends React.PureComponent<IProps, IState>
             <Text
               style={{
                 ...type.title1,
+                fontSize: 28,
                 textAlign: 'center' as 'center',
-                marginTop: 29,
+                marginBottom: 40,
               }}
             >
-              {'SPIN FOR A DATE'}
+              {'ITS A MATCH!'}
             </Text>
             <Date
               sources={[user.profile.images[0], candidate.profile.images[0]]}
@@ -148,6 +149,7 @@ export default class MatchMakerModal extends React.PureComponent<IProps, IState>
             <Text
               style={{
                 ...type.title1,
+                fontSize: 22,
                 textAlign: 'center' as 'center',
                 marginTop: 29,
               }}
