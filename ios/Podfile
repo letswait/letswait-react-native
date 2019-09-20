@@ -70,6 +70,8 @@ target 'LetsWaitDating' do
 
   pod 'RNSound', :path => '../node_modules/react-native-sound'
 
+  pod 'react-native-version-number', :path => '../node_modules/react-native-version-number'
+
   target 'LetsWaitDatingTests' do
     inherit! :search_paths
     # Pods for testing

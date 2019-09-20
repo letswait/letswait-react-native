@@ -29,6 +29,7 @@ import { ifIphoneX } from 'react-native-iphone-x-helper'
 import { IMediaReference } from 'app/types/photos'
 import moment from 'moment'
 import FeatherButton from '../../../components/Camera/CameraButton'
+import DateInvite from '../../../components/Chat/DateInvite';
 
 const { width, height } = Dimensions.get('window')
 
@@ -167,6 +168,17 @@ export default class MatchesComponent extends React.PureComponent<IProps, IState
                 inverted
                 data={chatData}
                 renderItem={({ item, index }) => {
+                  if(item.message.location) {
+                    const date = this.props.match!.dates[0]
+                    return (
+                      <DateInvite
+                        {...date}
+                        largeMargins={this.props.match!.chat.length <= 1}
+                        userName={this.props.user.name}
+                        matchName={this.props.match!.userProfiles[0].name}
+                      />
+                    )
+                  }
                   const lastDirection = `${lastDir || ''}`
                   const showUser =
                     (lastDir === 'right' && item.user !== this.props.user._id) ||

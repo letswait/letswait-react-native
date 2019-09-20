@@ -22,10 +22,10 @@ import { ThunkDispatch } from 'redux-thunk'
 import { authedApi } from '../../lib/api'
 import { storeToken } from '../../lib/asyncStorage';
 
+import { ReduxStore } from 'app/types/models'
 import { Alert } from 'react-native';
-import { ReduxStore } from 'app/types/models';
+import { showModal } from '../navigation/modal'
 import { changeActiveChat } from './chat';
-import { showModal } from '../navigation/modal';
 
 export const setMatchMessage = (message: string = '') => ({
   message,
@@ -70,13 +70,13 @@ export const pushToChatMatches = (match: any) => ({
 })
 export function pushEnqueuedMatch(match: any) {
   return (dispatch: ThunkDispatch<{},{},any>, getState: any) => {
-    const { enqueuedMatches } = getState()
-    for(let i = enqueuedMatches.length; i--;) {
-      if(enqueuedMatches[i]._id === match._id) {
-        delete enqueuedMatches[i]
-        break
-      }
-    }
+    // const { enqueuedMatches } = getState()
+    // for(let i = enqueuedMatches.length; i--;) {
+    //   if(enqueuedMatches[i]._id === match._id) {
+    //     delete enqueuedMatches[i]
+    //     break
+    //   }
+    // }
     dispatch(push('/app/chat'))
     dispatch(pushToChatMatches(match))
   }

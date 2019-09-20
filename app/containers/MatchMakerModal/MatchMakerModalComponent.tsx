@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  Alert,
 } from 'react-native'
 
 import Date from '../../components/DateInvite/Date'
@@ -83,14 +84,11 @@ export default class MatchMakerModal extends React.PureComponent<IProps, IState>
       message: '',
       matchId: this.props.spinner!.match._id,
     }).then((res: ApiResponse<any>) => {
-      if(res.ok) {
-        const match = this.props.spinner!.match
-        match.chat = match.chat.concat([{
-          message: {
-            text: '',
-          },
-        }])
-        this.props.pushChat(match, res.data!.candidate)
+      // Alert.alert(res.data.match)
+      if(res.ok && res.data.match) {
+        this.props.pushChat(res.data.match, res.data!.candidate)
+        this.props.dismiss()
+      } else {
         this.props.dismiss()
       }
     })

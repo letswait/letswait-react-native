@@ -1,17 +1,24 @@
 import { ApiResponse, ApisauceConfig, create } from 'apisauce'
 import { Platform } from 'react-native'
-// import CookieManager from 'react-native-cookies'
 import config from '../../config'
 import { IMediaReference } from '../types/photos'
 import { retrieveToken, storeToken } from './asyncStorage'
 
-// CookieManager.get(config.api).then((res: any) => {
-//   console.log(`CookieManager.get() => ${JSON.stringify(res)}`)
-// })
+import VersionNumber from 'react-native-version-number';
 
-// import io from 'socket.io-client'
+const {
+  appVersion,
+  buildVersion,
+  bundleIdentifier,
+} = VersionNumber
 
-// const socket = io.connect(config.api)
+const headers = {
+  appVersion,
+  buildVersion,
+  bundleIdentifier,
+  os: Platform.OS,
+  osVersion: Platform.Version,
+}
 
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -42,8 +49,8 @@ export async function collectUUID() {
 }
 
 const api = create({
+  headers,
   baseURL: config.api,
-  headers: { os: Platform.OS },
 } as ApisauceConfig)
 
 api.addAsyncRequestTransform(request => async () => {
@@ -72,8 +79,8 @@ api.addAsyncRequestTransform(request => async () => {
 // })
 
 const authedApi = create({
+  headers,
   baseURL: config.api,
-  headers: { os: Platform.OS },
 })
 
 authedApi.addAsyncRequestTransform(request => async () => {
@@ -86,8 +93,8 @@ authedApi.addAsyncRequestTransform(request => async () => {
 })
 
 const refreshApi = create({
+  headers,
   baseURL: config.api,
-  headers: { os: Platform.OS },
 })
 
 refreshApi.addAsyncRequestTransform(request => async () => {

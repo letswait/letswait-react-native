@@ -47,10 +47,11 @@ export const chatMatches = (state = initialChatMatches, action: AnyAction) => {
       }
       return { ...match }
     })
-    case PUSH_CHAT_MATCH: return [...state, action.match]
+    case PUSH_ENQUEUED_CHAT: return [action.match, ...state]
+    case PUSH_CHAT_MATCH: return [action.match, ...state]
     case RESET_MATCHES: return initialChatMatches
     case PUSH_MATCHES: return action.chatMatches
-    case PUSH_ENQUEUED_CHAT: return state.concat([action.match])
+    // case PUSH_ENQUEUED_CHAT: return state.concat([action.match])
     default: return [...state]
   }
 }
