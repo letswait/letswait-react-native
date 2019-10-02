@@ -8,16 +8,19 @@ import {
 
 import { colors, type } from '../../../new_foundation'
 
-import TriangleCorner from './TriangleCorner'
+import LinearGradient from 'react-native-linear-gradient'
 
 export default class SentMessage extends React.PureComponent {
   public render() {
     return (
       <View style={style.wrapper}>
         <View style={style.flexHelper} />
-        <View style={style.container}>
+        <LinearGradient
+          colors={['#9EE3FE', '#93DBF8']}
+          style={style.container}
+        >
           {this.props.children}
-        </View>
+        </LinearGradient>
       </View>
     )
   }
@@ -32,12 +35,11 @@ const style = {
     flex: 1,
   },
   container: {
-    minHeight: 43,
-    minWidth: 43,
-    maxWidth: 200,
+    minHeight: 37,
+    minWidth: 37,
     flex: 0,
-    backgroundColor: colors.turmeric,
-    borderRadius: 12,
+    borderRadius: 18,
+    borderBottomRightRadius: 4,
     overflow: 'hidden' as 'hidden',
     borderWidth: 0,
   },

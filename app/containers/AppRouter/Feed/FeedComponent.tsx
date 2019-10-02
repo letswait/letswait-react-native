@@ -18,6 +18,8 @@ import { ObjectOf } from 'app/types/helpers';
 import { isIphoneX } from 'react-native-iphone-x-helper'
 import { colors, type } from '../../../../new_foundation'
 
+import LinearGradient from 'react-native-linear-gradient'
+
 const { width, height } = Dimensions.get('window')
 
 // tslint:disable-next-line: no-var-requires
@@ -65,7 +67,7 @@ interface IState {
   }
   feedMessage: string,
 }
-export default class FeedComponent extends React.Component<IProps, IState> {
+export default class FeedComponent extends React.PureComponent<IProps, IState> {
   public state: IState = {
     tintColor: new Animated.Value(0),
     feed: [],
@@ -89,7 +91,7 @@ export default class FeedComponent extends React.Component<IProps, IState> {
     if(this.props.geolocation > 0) this.requestFeed()
   }
   public componentDidUpdate(prevProps: IProps) {
-    if(this.props.geolocation > 0 && prevProps.geolocation !== 1) {
+    if(this.props.geolocation !== prevProps.geolocation && this.props.geolocation > 0 && prevProps.geolocation !== 1) {
       this.requestFeed()
     }
   }
@@ -243,7 +245,6 @@ const style = {
     flexDirection: 'column' as 'column',
     justifyContent: 'center' as 'center',
     alignItems: 'center' as 'center',
-    overflow: 'hidden' as 'hidden',
   },
   noGeolocationWrapper: {
     width,

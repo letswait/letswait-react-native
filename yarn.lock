@@ -1025,6 +1025,13 @@
     shell-quote "1.6.1"
     ws "^1.1.0"
 
+"@react-native-community/push-notification-ios@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@react-native-community/push-notification-ios/-/push-notification-ios-1.0.2.tgz#541bc8ce088d726c4a98fff0e261b4d0f555cacf"
+  integrity sha512-9lWaw+zBGvT8Yw9HZmiLkYbnmF5AzrWexYh2qmRt/shpfZawCTPmPBrq09N7JhiPV4g/gEbeLXlndxl1JQeB0g==
+  dependencies:
+    invariant "^2.2.4"
+
 "@types/babel__core@^7.1.0":
   version "7.1.1"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.1.tgz#ce9a9e5d92b7031421e1d0d74ae59f572ba48be6"

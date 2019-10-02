@@ -1,7 +1,6 @@
 import React from 'react'
 import {
   Dimensions,
-  PushNotificationIOS,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -30,12 +29,10 @@ const { width, height } = Dimensions.get('window')
 interface IProps {
   user: any,
   currentRoute: any,
-  // shouldUpdate: boolean
   enqueuedMatches: any[]
   uninitializedMatches: any[]
   chatMatches: any[]
   message: string
-  disablePrerender?: boolean
   getMatches: () => any
   openChat: (matchId: string) => any
   previewDate: (match: ReduxStore.Match) => void
@@ -51,16 +48,10 @@ export default class MatchesComponent extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props)
   }
-  // public shouldComponentUpdate() {
-  //   if(!this.state.prerendered && !this.props.disablePrerender) {
-  //     this.setState({ prerendered: true })
-  //     return true
-  //   }
-  //   return !!this.props.shouldUpdate
-  // }
-  // public componentDidMount() {
-  //   this.props.getMatches()
-  // }
+  public shouldComponentUpdate(nextProps: IProps, nextState: IState) {
+    if(nextProps.currentRoute === '/app/matches') return true
+    return false
+  }
   public render() {
     return (
       <View style={style.matchWrapper}>
@@ -76,7 +67,6 @@ export default class MatchesComponent extends React.Component<IProps, IState> {
           >
             <MatchQueue onPress={() => console.log('activated enqueued queue')} enqueued />
             {this.props.uninitializedMatches.length ? this.props.uninitializedMatches.map((match, i, arr) => {
-              console.log('Here are match: ', match)
               return (
                 <MatchQueue
                   key={i}
@@ -111,10 +101,7 @@ export default class MatchesComponent extends React.Component<IProps, IState> {
           {this.props.chatMatches.length ? this.props.chatMatches.map((match, i, arr) => {
             const chatStyle = style.chatPreview
             const lastChat = match && match.chat.length ? match.chat[match.chat.length - 1] : null
-            console.log('getting candidate?', match)
-            const candidate = match.userProfiles[0]._id === this.props.user._id ?
-              match.userProfiles[1] :
-              match.userProfiles[0]
+            const candidate = match.userProfiles[0]
             let lastChatMessage: string = ''
             const lastChatOwned: boolean = lastChat && lastChat.user === this.props.user._id
             if(!!lastChat && !!lastChat.message) {

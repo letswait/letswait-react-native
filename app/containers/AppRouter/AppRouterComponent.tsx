@@ -12,7 +12,7 @@ import {
 } from 'react-native'
 
 import BackgroundGeolocation from '@mauron85/react-native-background-geolocation'
-import PushNotification from 'react-native-push-notification'
+// import PushNotification from 'react-native-push-notification'
 
 import { colors } from '../../../new_foundation'
 import { authedApi } from '../../lib/api'
@@ -36,10 +36,11 @@ const { width, height } = Dimensions.get('window')
 // tslint:disable-next-line: no-var-requires
 const feedIcon = require('../../assets/ui/feed-icon.png')
 
-import io from 'socket.io-client'
 import { ReduxStore } from '../../types/models';
 import ControlledCornerPage from './ControlledCornerPage';
 // import config from '../../../config'
+
+import PushNotificationIOS from '@react-native-community/push-notification-ios'
 
 import PageTransition from './PageTransition'
 
@@ -47,6 +48,7 @@ import { Location } from 'history';
 import { Route, Switch } from 'react-router';
 import NavBar from './NavBar';
 
+import config from '../../../config'
 import DatePreviewComponent from './DatePreviewComponent'
 
 interface IProps {
@@ -105,24 +107,24 @@ export default class AppRouter extends React.PureComponent<IProps, IState> {
     currentColor: colors.seafoam,
     nextColor: colors.seafoam,
   }
-  private profilePage: any
   public componentDidMount() {
     AppState.addEventListener('change', this.appStateChange);
     this.props.getMatches()
     setTimeout(() => this.setState({ loadingMatches: false }), 10000)
     this.props.changeThemeLight()
-    PushNotification.checkPermissions((permissions) => {
-      this.setState({ notification: permissions.alert || false })
-      if(!permissions.alert) {
-        this.requestNotification()
-        this.props.showToast('Open Settings to turn on Notifications', async () => {
-          const canOpen = await Linking.canOpenURL('app-settings:')
-          if(canOpen) {
-            Linking.openURL('app-settings:')
-          }
-        })
-      }
-    })
+    this.requestNotification()
+    // PushNotification.checkPermissions((permissions) => {
+    //   this.setState({ notification: permissions.alert || false })
+    //   if(!permissions.alert) {
+    //     this.requestNotification()
+    //     this.props.showToast('Open Settings to turn on Notifications', async () => {
+    //       const canOpen = await Linking.canOpenURL('app-settings:')
+    //       if(canOpen) {
+    //         Linking.openURL('app-settings:')
+    //       }
+    //     })
+    //   }
+    // })
     BackgroundGeolocation.configure({
       desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
       stationaryRadius: 30,
@@ -238,7 +240,7 @@ export default class AppRouter extends React.PureComponent<IProps, IState> {
   // tslint:disable-next-line: function-name
   public UNSAFE_componentWillReceiveProps(nextProps: IProps) {
     if(nextProps.currentRoute !== this.props.currentRoute) {
-      this.setBackgroundColor(nextProps.currentRoute)
+      // this.setBackgroundColor(nextProps.currentRoute)
       this.setState({ animating: true })
       Animated.timing(this.state.anim, {
         toValue: 0,
@@ -337,9 +339,40 @@ export default class AppRouter extends React.PureComponent<IProps, IState> {
     })
   }
   private requestNotification() {
-    PushNotification.requestPermissions(['alert', 'badge', 'sound']).then((permissions) => {
-      this.setState({ notification: permissions.alert || false })
+    // const newPermissions = PushNotificationIOS.requestPermissions({ alert: true, badge: true, sound: true })
+    // const notification = await PushNotificationIOS.getInitialNotification()
+    // if(!notification) {
+    const setNotification = (notificationsAllowed: boolean) => {
+      if(notificationsAllowed) {
+        PushNotificationIOS.getApplicationIconBadgeNumber((badge) => {
+          console.log('applicationIcon Badge Count: ', badge)
+        })
+        PushNotificationIOS.getInitialNotification().then((notification) => {
+          if(notification) {
+            // const {
+
+            // } = notification.
+          }
+        })
+      }
+      this.setState({ notification: notificationsAllowed })
+    }
+
+    PushNotificationIOS.checkPermissions(async (permissions) => {
+      if(!permissions.alert) {
+        const newPermissions = await PushNotificationIOS.requestPermissions({ alert: true, badge: true, sound: true })
+        if(newPermissions.alert) return setNotification(true)
+        this.props.showToast('Open Settings to turn on Notifications', async () => {
+          const canOpen = await Linking.canOpenURL('app-settings:')
+          if(canOpen) {
+            Linking.openURL('app-settings:')
+          }
+        })
+        return setNotification(false)
+      }
+      return setNotification(true)
     })
+    // }
   }
   private setBackgroundColor(nextRoute: string): void {
     let nextColor = colors.seafoam

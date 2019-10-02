@@ -5,7 +5,8 @@ import ChatComponent from './ChatComponent'
 
 import { push } from 'connected-react-router'
 import { getMatches } from '../../../actions/matches'
-import { openChat, pushChat } from '../../../actions/matches/chat'
+import { openChat, postMessage } from '../../../actions/matches/chat'
+
 import { ReduxStore } from '../../../types/models'
 
 const mapStateToProps = (state: any) => {
@@ -16,7 +17,7 @@ const mapStateToProps = (state: any) => {
 }
 
 const mapDispatchToProps = (dispatch: ThunkDispatch<{},{},any>) => ({
-  pushChat: (matchId: string, message: ReduxStore.IChat) => dispatch(pushChat(matchId, message)),
+  postMessage: (matchId: ReduxStore.ObjectId, message: ReduxStore.IMessage) => dispatch(postMessage(matchId, message)),
   push: (route: string) =>  dispatch(push(route)),
 })
 

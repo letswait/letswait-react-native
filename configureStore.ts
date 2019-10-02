@@ -7,6 +7,8 @@ import loggerMiddleware from 'redux-logger'
 
 import thunkMiddleware from 'redux-thunk'
 
+import socketMiddleware from './app/actions/middleware/socket'
+
 export const history = createMemoryHistory()
 
 export default function configureStore(preloadedState?: any) {
@@ -16,7 +18,8 @@ export default function configureStore(preloadedState?: any) {
       applyMiddleware(
         routerMiddleware(history),
         thunkMiddleware,
-        // loggerMiddleware,
+        loggerMiddleware,
+        socketMiddleware(),
       ),
     ),
   )

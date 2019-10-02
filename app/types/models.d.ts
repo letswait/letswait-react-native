@@ -57,19 +57,20 @@ declare namespace ReduxStore {
 
   export interface IChat {
     _id: ObjectId,
-    sentTimestamp: Date
+    sentTimestamp?: Date
     readTimestamp?: Date
     user: string
     message: IMessage
+    error?: Date
     reactions: Map<string, Reaction> // key/value pair with user _id and reaction
   }
 
   export interface IMessage {
-    text: string
-    image?: string
-    cloudfront?: string
-    location?: Point
-    campaignId?: string
+    text?: string,
+    image?: string,
+    video?: string,
+    location?: Point,
+    campaignId?: string,
   }
 
   export enum Reaction {

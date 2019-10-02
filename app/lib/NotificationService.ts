@@ -1,7 +1,9 @@
+import moment from 'moment'
 import PushNotification, {
   PushNotification as IPushNotification,
   PushNotificationPermissions,
 } from 'react-native-push-notification'
+import { ObjectOf } from '../types/helpers';
 
 export default class NotificationService {
   private lastId: number
@@ -139,3 +141,65 @@ export default class NotificationService {
     PushNotification.cancelAllLocalNotifications();
   }
 }
+
+presentLocalNotification('INITIALIZING')
+export function presentLocalNotification(message: string) {
+  PushNotification.presentLocalNotification({
+    message,
+  })
+}
+
+export function scheduleLocalNotification(message: string, date: Date, id: any, payload: ObjectOf<any>) {
+  // message: type String
+  // date: type String  format 'YYYY-MM-DD HH:mm' (NOTIFICATION_DATE_TIME_FORMAT)
+
+  // construct the notification parameters
+  const fireDate = moment(date, 'YYYY-MM-DD HH:mm').toDate();
+  const notification = {
+    message,
+    id: createPushId(id), // for android cancel notification (must be stringified number)
+    number: '0', // necessary for iOS cancellation (not sure why)
+    date: fireDate,
+    // for ios only
+    userInfo: {
+      id: createPushId(id), // for ios cancel notfication (can be any string)
+      ...payload,
+    },
+    // for android only
+    data: JSON.stringify(payload),
+  };
+
+  // schedule the notification
+  PushNotification.localNotificationSchedule(notification);
+}
+
+export function createPushId(pushType: string) {
+  return NOTIFICATION_TYPE_TO_ID[pushType];
+}
+
+export const NOTIFICATION_TYPE_TO_ID: ObjectOf<string> = {
+  waiting: '000', // someone is waiting on you to swipe!
+  match: '001', // %s matched with you! invite her on a date now!
+  date_invite: '002', // You've been invited on a Date!
+  date_soon: '003', // Your date with %s is soon!
+  cheat_sheet: '004', // Looks like your approaching %venue. Here is a cheat sheet to remind you a little about %s
+  code_available: '005', // Looks like you and %s made it! here's a shortcut to the discount!
+                         // Keep this notification as a reminder to pay attention on your date.
+                         // it will be here for you when your ready to pay!
+  date_feedback: '006', // Good Morning! how was your date with %s last night?
+
+  chat_text: '100', // %t || %s sent you a message
+  chat_image: '101', // %s sent you an image
+  chat_video: '102', // %s sent you a video
+  chat_location: '103', // %s sent you their location
+
+  call_audio_calling: '200', // Receiving audio call from %s
+  call_audio_missed: '201', // Missed audio call from %s
+  call_video_calling: '202', // Recieving video call from %s
+  call_video_missed: '203', // Missed video call from %s
+
+  significant_other_request: '900',
+  event: '901',
+  special_deal: '902',
+  surge: '903',
+};

@@ -7,7 +7,6 @@ import {
   Image,
   PanResponder,
   PanResponderGestureState,
-  PushNotificationIOS,
   ScrollView,
   Text,
   TouchableWithoutFeedback,
@@ -19,11 +18,12 @@ const { width, height } = Dimensions.get('screen')
 
 import FastImage from 'react-native-fast-image'
 import LinearGradient from 'react-native-linear-gradient';
-import Section from './CardSection'
 
 import { colors, type } from '../../../../new_foundation'
 
 import { ifIphoneX } from 'react-native-iphone-x-helper';
+
+import CardSection from './CardSection'
 
 interface IProps {
   _id: string,
@@ -55,7 +55,7 @@ interface IState {
   lastScrollLoc: number,
   scrolling: boolean,
 }
-export default class Card extends React.Component<IProps, IState> {
+export default class Card extends React.PureComponent<IProps, IState> {
   public getNode: Function | undefined
   constructor(props: IProps) {
     super(props)
@@ -111,6 +111,7 @@ export default class Card extends React.Component<IProps, IState> {
     Animated.timing(this.state.swipeAnimation, {
       toValue: x,
       duration: t,
+      useNativeDriver: true,
     }).start(() => {
       return this.props.onRight!(
         this.props._id,
@@ -136,6 +137,7 @@ export default class Card extends React.Component<IProps, IState> {
     Animated.timing(this.state.swipeAnimation, {
       toValue: width * -2,
       duration: t,
+      useNativeDriver: true,
     }).start(() => {
       return this.props.onLeft!(
         this.props._id,
@@ -159,7 +161,8 @@ export default class Card extends React.Component<IProps, IState> {
     Animated.timing(this.state.swipeAnimation, {
       toValue: 0,
       duration: 120,
-      easing: Easing.elastic(1),
+      // easing: Easing.elastic(1),
+      useNativeDriver: true,
     }).start()
     // this.state.swipeAnimation
   }
@@ -192,6 +195,13 @@ export default class Card extends React.Component<IProps, IState> {
         extrapolate: 'clamp',
       }),
     }]
+    const opacity = this.state.touchEnabled ?
+      1 :
+      this.state.swipeAnimation.interpolate({
+        inputRange: [-1*width, 0, width],
+        outputRange: [1, 0, 1],
+        extrapolate: 'clamp',
+      })
     const titleContainer = {
       ...style.titleContainer,
       backgroundColor: this.props.profile.gender === 'male' ? colors.coralBlue : colors.coralPink,
@@ -201,6 +211,7 @@ export default class Card extends React.Component<IProps, IState> {
         style={{
           ...style.scrollWrapper,
           transform,
+          opacity,
         }}
         pointerEvents={this.state.touchEnabled ? 'auto' : 'none'}
         {...this._panResponder.panHandlers}
@@ -230,40 +241,52 @@ export default class Card extends React.Component<IProps, IState> {
             this.setState({ lastScrollLoc: event.nativeEvent.contentOffset.y })
           }}
         >
-          <FastImage
-            style={style.headerImage}
+          <CardSection
+            // title?: string,
             source={{ uri: this.props.profile.images[0] }}
-          />
-          <LinearGradient
-            colors={[
-              'rgba(33, 33, 33, 1)',
-              'rgba(17, 17, 17, 0.63)',
-              'rgba(0, 0, 0, 0.25)',
-              'rgba(0, 0, 0, 0.10)',
-              'rgba(0, 0, 0, 0)',
-            ]}
-            style={style.headerGradient}
-          />
-          <View style={titleContainer}>
-            <Text style={style.titleText}>
+            customHeight={height - ifIphoneX(77, 58) - 76}
+          >
+            <View style={titleContainer}>
+              <Text style={style.titleText}>
+                {`${this.props.name}${this.props.age ? ', ' : ''}${this.props.age || ''}`.toUpperCase()}
+              </Text>
+            </View>
+            <View style={style.profileBioWrapper}>
+              <Text style={style.profileBioText}>{this.props.profile.aboutMe}</Text>
+            </View>
+          </CardSection>
+          <CardSection source={{ uri: this.props.profile.images[1] }}/>
+          <CardSection source={{ uri: this.props.profile.images[2] }}/>
+          {this.props.profile.images[3] && <CardSection source={{ uri: this.props.profile.images[3] }}/>}
+          {this.props.profile.images[4] && <CardSection source={{ uri: this.props.profile.images[4] }}/>}
+          {this.props.profile.images[5] && <CardSection source={{ uri: this.props.profile.images[5] }}/>}
+        </ScrollView>
+
+        {/* <View style={style.stickyHeaderWrapper}>
+          <View
+            style={{
+              ...style.stickyHeader,
+              backgroundColor: this.props.profile.gender === 'male' ? colors.coralBlue : colors.coralPink,
+            }}
+          >
+            <Text style={style.stickyText}>
               {`${this.props.name}${this.props.age ? ', ' : ''}${this.props.age || ''}`.toUpperCase()}
             </Text>
           </View>
-          <Section>
-            {this.props.profile.aboutMe}
-          </Section>
-          {this.props.profile.images[1] && <FastImage {...imageProps} source={{ uri: this.props.profile.images[1] }} />}
-          {this.props.profile.images[2] && <FastImage {...imageProps} source={{ uri: this.props.profile.images[2] }} />}
-          {this.props.profile.images[3] && <FastImage {...imageProps} source={{ uri: this.props.profile.images[3] }} />}
-          {this.props.profile.images[4] && <FastImage {...imageProps} source={{ uri: this.props.profile.images[4] }} />}
-          {this.props.profile.images[5] && <FastImage {...imageProps} source={{ uri: this.props.profile.images[5] }} />}
-        </ScrollView>
+        </View> */}
       </Animated.View>
     )
   }
 }
 
 const style = {
+  backgroundSubtleGradient: {
+    height,
+    width,
+    position: 'absolute' as 'absolute',
+    left: 0,
+    top: 0,
+  },
   scrollWrapper: {
     width,
     height,
@@ -281,39 +304,58 @@ const style = {
   cardWrapper: {
     width,
     height,
-    // borderRadius: 16,
-    overflow: 'hidden' as 'hidden',
-    backgroundColor: colors.white,
+    backgroundColor: colors.transparentWhite,
+    overflow: 'visible' as 'visible',
   },
   cardContainer: {
-    // backgroundColor: '#9372BE',
+    backgroundColor: colors.transparentWhite,
     minHeight: height,
-    // borderRadius: 16,
-    // overflow: 'hidden' as 'hidden',
   },
-  headerImage: {
+  stickyHeaderWrapper: {
     width,
-    height: height - ifIphoneX(250, 200),
+    height: ifIphoneX(92, 68),
+    position: 'absolute' as 'absolute',
+    left: 0,
+    top: 0,
+    justifyContent: 'flex-end' as 'flex-end',
+    alignItems: 'center' as 'center',
+    backgroundColor: colors.white,
+  },
+  stickyHeader: {
+    height: 48,
+    paddingTop: 3,
+    width: width - 24,
+    display: 'flex' as 'flex',
+    flexDirection: 'row' as 'row',
+    justifyContent: 'center' as 'center',
+    alignItems: 'stretch' as 'stretch',
+    opacity: 0.9,
+    paddingLeft: 24,
+    paddingRight: 24,
+  },
+  stickyText: {
+    flex: 1,
+    ...type.title2,
+    color: colors.white,
+  },
+  profileBioWrapper: {
+    minHeight: 64,
+    flexDirection: 'column' as 'column',
+    justifyContent: 'center' as 'center',
+    alignItems: 'center' as 'center',
+  },
+  profileBioText: {
+    ...type.regular,
+    color: colors.cosmos,
+    width: width - 72,
   },
   titleContainer: {
-    width,
-    height: 50,
-    flexGrow: 0,
-    flex: 0,
+    height: 48,
+    paddingTop: 3,
     display: 'flex' as 'flex',
     flexDirection: 'row' as 'row',
     alignItems: 'center' as 'center',
-  },
-  headerGradient: {
-    width,
-    height: 200,
-    top: 0,
-    left: 0,
-    opacity: 0.75,
-    position: 'absolute' as 'absolute',
-    display: 'flex' as 'flex',
-    flexDirection: 'row' as 'row',
-    alignItems: 'center' as 'center',
+    opacity: 0.9,
   },
   titleText: {
     ...type.title2,

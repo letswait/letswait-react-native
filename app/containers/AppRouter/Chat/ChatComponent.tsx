@@ -9,6 +9,7 @@ import {
   ScrollView,
   Text,
   View,
+  Keyboard,
 } from 'react-native'
 import FastImage from 'react-native-fast-image'
 
@@ -20,86 +21,47 @@ import ChatInput from '../../../components/Chat/ChatInput'
 import Message from '../../../components/Chat/Message'
 import { ReduxStore } from '../../../types/models';
 
-import config from '../../../../config'
-
-import socket from 'socket.io-client'
-
 import { ifIphoneX } from 'react-native-iphone-x-helper'
 
-import { IMediaReference } from 'app/types/photos'
 import moment from 'moment'
 import FeatherButton from '../../../components/Camera/CameraButton'
 import DateInvite from '../../../components/Chat/DateInvite';
+import { IMediaReference } from '../../../types/photos'
+
+import LinearGradient from 'react-native-linear-gradient'
+
+// import { presentLocalNotification } from '../../../lib/NotificationService'
 
 const { width, height } = Dimensions.get('window')
 
 interface IProps {
   user: any,
-  // shouldUpdate: boolean,
-  disablePrerender?: boolean
   match?: ReduxStore.Match,
-  pushChat: (matchId: string, message: ReduxStore.IChat) => void
+  postMessage: (matchId: string, message: ReduxStore.IMessage) => void
   push: (route: string) => void
 }
 interface IState {
   keyboardVisible: Animated.Value
+  refresh: boolean
 }
 export default class MatchesComponent extends React.PureComponent<IProps, IState> {
-  private socket: any
   public state: IState = {
     keyboardVisible: new Animated.Value(0),
-  }
-  constructor(props: IProps) {
-    super(props)
-    this.socket = socket.connect(config.socket)
-    this.socket.on('connect', () => {
-      // Connected, let's sign-up for to receive messages for this room
-      // Should also send an array of new messages, client needs to handle
-      // Duplication issues.
-      if(this.props.match && this.props.match._id !== '00000000') {
-        this.socket.emit('joinchat', this.props.match._id.toString());
-      }
-    });
-    this.socket.on('disconnect', () => {
-      this.socket.open();
-    });
-    this.socket.on('messageSent', (res: { matchId: string, chat: ReduxStore.IChat}) => {
-      props.pushChat(res.matchId, res.chat)
-    })
+    refresh: false,
   }
   public componentDidUpdate(prevProps: IProps, prevState: IState) {
-    if(this.props.match) {
-      if(prevProps.match && prevProps.match._id.toString() !== this.props.match._id.toString()) {
-        // New Chat, Switch Rooms
-        if(this.socket.disconnected) {
-          // When its disconnected, it will automatically join the right room when the socket opens again.
-          this.socket.open()
-        } else {
-          // Server checks for match, checks for both parties' approval, and leaves all other rooms before joining.
-          this.socket.emit('joinchat', this.props.match._id.toString());
-        }
-      }
+    if(prevState.refresh !== this.state.refresh) {
+      this.setState({ refresh: !this.state.refresh })
     }
   }
-  public sendMessage(message: string) {
-    const newMessage = {
-      text: message,
-    }
-    const socketData: { matchId: string, message: ReduxStore.IMessage } = {
-      matchId: this.props.match!._id.toString(),
-      message: newMessage,
-    }
-    this.socket.emit(
-      'message',
-      socketData,
-      (data: ReduxStore.IChat | null) => {
-        if(data && this.props.match) {
-          this.props.pushChat(this.props.match._id.toString(), data)
-        } else {
-          console.log('something went wrong submitting message')
-        }
-      },
-    )
+  public sendMessage(message: {
+    text?: string,
+    image?: string,
+    video?: string,
+    location?: ReduxStore.Point,
+    campaignId?: string,
+  }) {
+    this.props.postMessage(this.props.match!._id, message)
   }
   public keyboardWillShow() {
     Animated.timing(this.state.keyboardVisible, {
@@ -114,6 +76,7 @@ export default class MatchesComponent extends React.PureComponent<IProps, IState
       duration: 300,
     }).start()
   }
+  public offset: number | undefined
   public scrollView: any = null
   public render() {
     const matchedUserIndex = this.props.match ?
@@ -128,38 +91,40 @@ export default class MatchesComponent extends React.PureComponent<IProps, IState
     const chatData = this.props.match ? [...this.props.match.chat].reverse() : []
     let lastDir: 'left' | 'right' | null = null
     let lastTime: Date  | undefined
+    // presentLocalNotification('Test')
     return (
       <ScrollView
         style={{ width, height }}
         contentContainerStyle={{ width, height }}
         scrollEnabled={false}
-        keyboardDismissMode="on-drag"
+        keyboardDismissMode="none"
         keyboardShouldPersistTaps="always"
       >
-        <KeyboardAvoidingView style={style.matchWrapper} behavior="padding">
-          <View style={style.chatHeader}>
-            <FeatherButton
-              name="chevron-left"
-              color={colors.white}
-              size={32}
-              style={style.headerButton}
-              onPress={() => this.props.push('/app/matches')}
-            />
-            <Text style={style.chatTitle}>
-              {matchedUser ? matchedUser.name : ''}
-            </Text>
-            <FeatherButton
-              name="more-vertical"
-              color={colors.white}
-              size={32}
-              style={style.headerButton}
-              onPress={() => this.props.push('/app/matches')}
-            />
-          </View>
+        <LinearGradient
+          colors={['#9EE3FE', '#89D4F2']}
+          style={style.backgroundSubtleGradient}
+        />
+        <KeyboardAvoidingView
+          style={style.matchWrapper}
+          behavior="padding"
+        >
+          <ChatInput
+            onSend={(message: ReduxStore.IMessage) => this.sendMessage(message)}
+            keyboardWillHide={() => this.keyboardWillHide()}
+            keyboardWillShow={() => this.keyboardWillShow()}
+          />
           <BoundedContentView>
             {this.props.match &&
               <FlatList
-                keyboardDismissMode="on-drag"
+                keyboardDismissMode="none"
+                onScroll={(e) => {
+                  const currentOffset = e.nativeEvent.contentOffset.y;
+                  const velocity = Math.abs(currentOffset - (this.offset || 0))
+                  this.offset = currentOffset;
+                  // tslint:disable-next-line: no-unused-expression
+                  velocity > 15 && Keyboard.dismiss()
+                }}
+                scrollEventThrottle={16}
                 keyboardShouldPersistTaps={'always'}
                 style={style.matchScroll}
                 showsVerticalScrollIndicator={false}
@@ -188,10 +153,11 @@ export default class MatchesComponent extends React.PureComponent<IProps, IState
                   const lastTimestamp = moment(lastTime).toDate()
                   const nextTimestamp =
                     chatData[index + 1] ? moment(chatData[index + 1].sentTimestamp).toDate() :
-                    undefined
+                    new Date()
                   // Recent (null sentTimestamp) messages Automatically grouped, will auto sort
                   // and group according to server once its loaded in and out of memory
                   lastTime = moment(item.sentTimestamp || lastTime).toDate()
+                  const loading = !item.sentTimestamp
                   return  (
                     <Message
                       {...item}
@@ -200,6 +166,7 @@ export default class MatchesComponent extends React.PureComponent<IProps, IState
                       lastDirection={lastDirection as any}
                       nextTimestamp={nextTimestamp}
                       lastTimestamp={lastTimestamp}
+                      loading={loading}
                       source={direction === 'right' ? {
                         uri: this.props.user.profile.images[0],
                       } : {
@@ -210,16 +177,32 @@ export default class MatchesComponent extends React.PureComponent<IProps, IState
                 }}
 
                 keyExtractor={(item, index) => item._id}
-                extraData={this.props.match.chat}
+                extraData={this.state.refresh}
               />
             }
           </BoundedContentView>
-          <ChatInput
-            onSend={(message: string) => this.sendMessage(message)}
-            onSendImage={image => console.log(image)}
-            keyboardWillHide={() => this.keyboardWillHide()}
-            keyboardWillShow={() => this.keyboardWillShow()}
-          />
+          <View style={style.chatHeader}>
+            <FeatherButton
+              name="chevron-left"
+              color={colors.white}
+              size={32}
+              style={style.headerButton}
+              onPress={() => {
+                Keyboard.dismiss()
+                this.props.push('/app/matches')
+              }}
+            />
+            <Text style={style.chatTitle}>
+              {matchedUser ? matchedUser.name : ''}
+            </Text>
+            <FeatherButton
+              name="more-vertical"
+              color={colors.white}
+              size={28}
+              style={style.headerButton}
+              onPress={() => this.props.push('/app/matches')}
+            />
+          </View>
         </KeyboardAvoidingView>
       </ScrollView>
     )
@@ -227,27 +210,19 @@ export default class MatchesComponent extends React.PureComponent<IProps, IState
 }
 
 const style = {
-  nav: {
+  backgroundSubtleGradient: {
+    height,
     width,
-    height: ifIphoneX(84, 64),
-    flexDirection: 'row' as 'row',
-    justifyContent: 'space-around' as 'space-around',
-    alignItems: 'flex-end' as 'flex-end',
-    backgroundColor: 'yellow',
-    overflow: 'hidden' as 'hidden',
-  },
-  navIcon: {
-    marginTop: 16,
-    marginBottom: ifIphoneX(39,20),
-    width: 26,
-    height: 26,
+    position: 'absolute' as 'absolute',
+    left: 0,
+    top: 0,
   },
   matchWrapper: {
     width,
     flex: 1,
     flexGrow: 1,
     maxHeight: height - ifIphoneX(84, 64),
-    flexDirection: 'column' as 'column',
+    flexDirection: 'column-reverse' as 'column-reverse',
     display: 'flex' as 'flex',
   },
   matchScroll: {
@@ -266,7 +241,7 @@ const style = {
   chatHeader: {
     width,
     height: ifIphoneX(104, 88),
-    backgroundColor: colors.shadow,
+    backgroundColor: 'rgba(0,145,180, 0.35)',
     flexDirection: 'row' as 'row',
     alignItems: 'flex-end' as 'flex-end',
     justifyContent: 'space-between' as 'space-between',
@@ -282,6 +257,7 @@ const style = {
   },
   chatTitle: {
     ...type.title2,
+    textTransform: 'uppercase' as 'uppercase',
     marginBottom: ifIphoneX(22, 16),
   },
 }

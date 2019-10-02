@@ -1,7 +1,11 @@
 import {
+  changeActiveChat,
+  POST_MESSAGE,
   PUSH_CHAT,
   PUSH_ENQUEUED_CHAT,
   PUSH_MATCHED_CHAT,
+  REPLACE_ACTIVE_MESSAGE,
+  REPLACE_MESSAGE,
 } from './index'
 
 import { ApiResponse } from 'apisauce'
@@ -12,10 +16,6 @@ import { authedApi } from '../../lib/api'
 import { storeToken } from '../../lib/asyncStorage';
 import { ReduxStore } from '../../types/models';
 
-export const changeActiveChat = (match: ReduxStore.Match) => ({
-  match,
-  type: PUSH_CHAT,
-})
 export function openChat(matchId: any) {
   return (dispatch: ThunkDispatch<{},{}, any>, getState: Function) => {
     const { enqueuedMatches, uninitializedMatches, chatMatches } = getState()
@@ -53,17 +53,17 @@ export function openChat(matchId: any) {
   }
 }
 
-const pushMatchedChat = (i: number, message: ReduxStore.IChat) => ({
+const pushMatchedMatch = (i: number, message: ReduxStore.IChat) => ({
   message,
   index: i,
   type: PUSH_MATCHED_CHAT,
 })
-const pushEnqueuedChat = (newMatch: ReduxStore.Match, i: number) => ({
+const pushEnqueuedMatch = (newMatch: ReduxStore.Match, i: number) => ({
   match: newMatch,
   index: i,
   type: PUSH_ENQUEUED_CHAT,
 })
-export function pushChat(matchId: string, message: ReduxStore.IChat) {
+export function pushMessage(matchId: ReduxStore.ObjectId, message: ReduxStore.IChat) {
   return (dispatch: ThunkDispatch<{}, {}, any>, getState: Function) => {
     const { enqueuedMatches, uninitializedMatches, chatMatches }: {
       enqueuedMatches: ReduxStore.Match[],
@@ -73,11 +73,11 @@ export function pushChat(matchId: string, message: ReduxStore.IChat) {
     let foundMatch = false
     let matchIndex: number
     foundMatch = chatMatches.some((v, i, arr) => {
-      if(v && v._id.toString() === matchId) {
+      if(v && v._id.toString() === matchId.toString()) {
         matchIndex = i
         // 1. Pushes to ActiveChat
         // 2. Push to Matched Chat
-        dispatch(pushMatchedChat(i, message))
+        dispatch(pushMatchedMatch(i, message))
         return true
       }
       return false
@@ -85,7 +85,7 @@ export function pushChat(matchId: string, message: ReduxStore.IChat) {
 
     if(!foundMatch) {
       foundMatch = enqueuedMatches.some((v, i, arr) => {
-        if(v && v._id.toString() === matchId) {
+        if(v && v._id.toString() === matchId.toString()) {
           matchIndex = i
           // This is a oddly complex dispatch. There are three reducers that will respond.
           // 1. store.enqueuedChat(i: number) Removes the index from enqueuedMatches
@@ -95,7 +95,7 @@ export function pushChat(matchId: string, message: ReduxStore.IChat) {
             ...v,
             chat: [...v.chat, message],
           }
-          dispatch(pushEnqueuedChat(newMatch, i))
+          dispatch(pushEnqueuedMatch(newMatch, i))
           return true
         }
         return false
@@ -105,31 +105,44 @@ export function pushChat(matchId: string, message: ReduxStore.IChat) {
     if(!foundMatch) {
       console.log('match not found!')
     }
-
-    // This is good for extracting a match from the matches. not suited to modify and replace matches.
-    // if(chatMatches.length) {
-      // for(let i = chatMatches.length; i--;) {
-        // if(chatMatches[i]._id.toString() === matchId) {
-          // chatMatch = chatMatches[i]
-          // break
-        // }
-      // }
-    // }
-    // if(!chatMatch && enqueuedMatches.length) {
-      // for(let i = enqueuedMatches.length; i--;) {
-        // if(enqueuedMatches[i]._id.toString === matchId) {
-          // chatMatch = enqueuedMatches[i]
-          // break
-        // }
-      // }
-    // }
-    // if(!chatMatch && uninitializedMatches.length) {
-      // for(let i = uninitializedMatches.length; i--;) {
-        // if(uninitializedMatches[i]._id === matchId) {
-          // chatMatch = uninitializedMatches[i]
-          // break
-        // }
-      // }
-    // }
   }
 }
+
+const replaceActiveMessage = (i: number, message: ReduxStore.IChat) => ({
+  message,
+  index: i,
+  type: REPLACE_ACTIVE_MESSAGE,
+})
+const replaceMessage = (i: number, message: ReduxStore.IChat) => ({
+  message,
+  index: i,
+  type: REPLACE_MESSAGE,
+})
+export const replaceChatMessage = (matchId: ReduxStore.ObjectId, message: ReduxStore.IChat) => {
+  return (dispatch: ThunkDispatch<{}, {}, any>, getState: Function) => {
+    const { chatMatches, activeChat }: {
+      chatMatches: ReduxStore.Match[],
+      activeChat: any,
+    } = getState()
+    const matchIdString = matchId.toString()
+    chatMatches.some((v, i, arr) => {
+      if(v && v._id.toString() === matchIdString) {
+        // 1. Pushes to ActiveChat
+        // 2. Push to Matched Chat
+        if(activeChat._id !== '00000000' && activeChat._id.toString() === matchIdString) {
+          dispatch(replaceActiveMessage(i, message))
+        } else {
+          dispatch(replaceMessage(i, message))
+        }
+        return true
+      }
+      return false
+    })
+  }
+}
+
+export const postMessage = (matchId: ReduxStore.ObjectId, message: ReduxStore.IMessage) => ({
+  matchId,
+  message,
+  type: POST_MESSAGE,
+})

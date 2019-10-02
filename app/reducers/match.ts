@@ -10,6 +10,8 @@ import {
   PUSH_UNINITIALIZED,
   RESET_MATCHES,
   SET_MATCH_MESSAGE,
+  REPLACE_ACTIVE_MESSAGE,
+  REPLACE_MESSAGE,
 } from '../actions/matches'
 
 import { AnyAction } from 'redux';
@@ -43,6 +45,20 @@ export const chatMatches = (state = initialChatMatches, action: AnyAction) => {
         return {
           ...match,
           chat: match.chat.concat([action.message]),
+        }
+      }
+      return { ...match }
+    })
+    case REPLACE_ACTIVE_MESSAGE:
+    case REPLACE_MESSAGE: return state.map((match, i, arr) => {
+      // console.log(match)
+      if(i === action.index) {
+        return {
+          ...match,
+          chat: state[i].chat.map((message, ii, ar) => {
+            if(message._id === action.message._id) return action.message
+            return state[i].chat[ii]
+          }),
         }
       }
       return { ...match }
@@ -97,6 +113,10 @@ const initialActiveChat: ReduxStore.Match = {
 export const activeChat = (state = initialActiveChat, action: AnyAction) => {
   switch(action.type) {
     case PUSH_MATCHED_CHAT: return { ...state, chat: [...state.chat, action.message] }
+    case REPLACE_ACTIVE_MESSAGE: return { ...state, chat: state.chat.map((message, i, arr) => {
+      if(message._id === action.message._id) return action.message
+      return state.chat[i]
+    })}
     case PUSH_ENQUEUED_CHAT: return action.message
     case PUSH_CHAT_MATCH: return action.match
     case PUSH_CHAT: return action.match

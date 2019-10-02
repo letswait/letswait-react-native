@@ -21,7 +21,7 @@ export default class BoundedContentView extends React.PureComponent<IProps> {
 
 const style = {
   backgroundColor: 'white',
-  borderRadius: 16,
+  borderRadius: 8,
   overflow: 'hidden' as 'hidden',
   margin: 12,
   marginBottom: 0,

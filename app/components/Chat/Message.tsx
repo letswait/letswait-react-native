@@ -3,9 +3,9 @@ import {
   Animated,
   Easing,
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
   View,
-  Alert,
+  Dimensions,
 } from 'react-native'
 
 import FastImage from 'react-native-fast-image'
@@ -19,6 +19,10 @@ import { ReduxStore } from '../../types/models'
 
 import { IMediaReference } from 'app/types/photos'
 import moment from 'moment';
+import Feather from 'react-native-vector-icons/Feather'
+import FeatherButton from '../Camera/CameraButton'
+
+const { width, height } = Dimensions.get('window')
 
 interface IProps extends ReduxStore.IChat {
   direction: 'left' | 'right' | null
@@ -27,15 +31,18 @@ interface IProps extends ReduxStore.IChat {
   lastTimestamp?: Date
   source: IMediaReference
   key: number | string,
+  loading?: boolean,
 }
 interface IState {
   displayTime?: string
   groupChat: boolean
+  loading: Animated.Value
 }
 export default class Message extends React.PureComponent<IProps, IState> {
   public state: IState = {
     displayTime: undefined,
     groupChat: false,
+    loading: new Animated.Value(this.props.loading ? 0.3 : 1),
   }
   constructor(props: IProps) {
     super(props)
@@ -48,19 +55,27 @@ export default class Message extends React.PureComponent<IProps, IState> {
       }
       return props.sentTimestamp
     })()
-    this.state.displayTime =
-    this.props.lastDirection !== this.props.direction ?
-      `${prefix} ${moment(newMoment).format('ddd MMM DD, hh:mmA')}` :
+    this.state.displayTime = newMoment && this.props.lastDirection !== this.props.direction ?
+      `${prefix} ${this.calculateTimeSince(newMoment)}` :
       undefined
     const diff = moment(props.sentTimestamp).diff(moment(props.nextTimestamp), 'minutes')
     if(diff < 5) {
       this.state.groupChat = true
     } else {
-      this.state.displayTime = `${prefix} ${moment(newMoment).format('ddd MMM DD, hh:mmA')}`
+      this.state.displayTime = `${prefix} ${this.calculateTimeSince(newMoment!)}`
+    }
+  }
+  public componentDidUpdate(prevProps: IProps, prevState: IState) {
+    if(prevProps.loading !== this.props.loading) {
+      Animated.timing(this.state.loading, {
+        toValue: this.props.loading ? 0.3 : 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start()
     }
   }
   public renderMessage() {
-    const { text, image, cloudfront, location, campaignId } = this.props.message
+    const { text, image, video, location, campaignId } = this.props.message
 
     if(image) {
       return (
@@ -74,7 +89,7 @@ export default class Message extends React.PureComponent<IProps, IState> {
         </View>
       )
     }
-    if(cloudfront) {
+    if(video) {
       return (
         <View>
           <Text>
@@ -129,14 +144,53 @@ export default class Message extends React.PureComponent<IProps, IState> {
       </View>
     )
   }
+  public pluralize(n: number, unit: string) {
+    const rationalizedNumber = Math.floor(n)
+    return `${rationalizedNumber} ${unit}${rationalizedNumber === 1 ? '' : 's'}`
+  }
+  public calculateTimeSince(date?: Date) {
+    const instance = moment(date)
+    if(!instance.isValid()) return undefined
+    const now = moment()
+    const secondsSince = now.diff(instance, 'seconds')
+    if(secondsSince < 30) {
+      return 'just now' // just now
+    }
+    if(secondsSince < 60) {
+      return `${this.pluralize(secondsSince, 'second')} ago` // 56 seconds ago
+    }
+    if(secondsSince < 3600) {
+      return `${this.pluralize(secondsSince/60, 'minute')} ago` // 24 minutes ago
+    }
+    if(secondsSince < 21600) {
+      return `${this.pluralize(secondsSince/3600, 'hour')} ago` // 4 hours ago
+    }
+    // check if it was yesterday
+    const formattedTime = instance.format('h:mm A')
+    if(instance.isSame(now, 'd')) {
+      return `Today at ${formattedTime}` // today at 4:36 PM
+    }
+    const yesterday = now.clone().subtract(1, 'days').startOf('day');
+    if(instance.isSame(yesterday, 'd')) {
+      return `Yesterday at ${formattedTime}` // yesterday at 4:36 PM
+    }
+    const daysSince = Math.floor(secondsSince/86400)
+    if(instance.isSame(now, 'M') && daysSince <= 7) {
+      return `${this.pluralize(daysSince, 'day')} ago` // 5 days ago
+    }
+    if(instance.isSame(now, 'y')) {
+      return instance.format('MMMM Do') // March 3rd
+    }
+    return instance.format('MMMM YYYY') // March 2019
+  }
   public render() {
     const messageWrapper = {
       ...style.messageWrapper,
       flexDirection: this.props.direction === 'right' ?
         'row-reverse' as 'row-reverse' :
         'row' as 'row',
-      marginTop: this.state.groupChat ? 2 : 13,
-      paddingBottom: this.state.displayTime ? 11 : 0,
+      paddingBottom: this.state.displayTime ? 20 : 2,
+      opacity: this.state.loading,
     }
     const MessageContainer = this.props.direction === 'right' ?
       RightMesssageContainer :
@@ -144,40 +198,89 @@ export default class Message extends React.PureComponent<IProps, IState> {
 
     const displayTime = {
       ...style.displayTime,
+      left: this.props.direction === 'left' ? 52 : 4,
+      textAlign: 'left' as 'left',
+    }
+    const displayTimeError = {
+      ...style.displayTimeError,
       left: 52,
       textAlign: 'left' as 'left',
     }
     return (
-      <View style={messageWrapper}>
-        <View
-          style={{
-            width: 52,
-            height: 43,
-            // backgroundColor: colors.seafoam,
-          }}
-        >
-          {this.props.source && this.state.displayTime ? (
-            <FastImage
-              source={this.props.source}
+      <Animated.View style={messageWrapper}>
+        {this.props.direction === 'left' ? this.props.source && this.state.displayTime ? (
+          <View
+            style={{
+              width: 43,
+              height: 37,
+              backgroundColor: colors.transparentWhite,
+            }}
+          >
+            <View
               style={{
-                width: 43,
-                height: 43,
-                borderRadius: 12,
+                width: 37,
+                height: 37,
+                borderRadius: 16,
                 marginLeft: 4,
-                marginRight: 5,
+                marginRight: 2,
+                shadowColor: colors.cosmos,
+                shadowOpacity: 0.08,
+                shadowRadius: 4,
+                shadowOffset: { width: 0, height: 1 },
               }}
-            />
-          ) : null}
-        </View>
+            >
+              <FastImage
+                source={this.props.source}
+                style={{
+                  width: 37,
+                  height: 37,
+                  borderRadius: 16,
+                }}
+              />
+            </View>
+          </View>
+        ) : (
+          <View
+            style={{
+              width: 43,
+              height: 37,
+              backgroundColor: colors.transparentWhite,
+            }}
+          />
+        ) : this.props.error ? (
+          <View
+            style={{
+              width: 43,
+              height: 37,
+              backgroundColor: colors.transparentWhite,
+              justifyContent: 'center' as 'center',
+              alignItems: 'center' as 'center',
+            }}
+          >
+            <Feather size={25} color={colors.duckbill} name="alert-circle" />
+          </View>
+        ) : (
+          <View
+            style={{
+              width: 4,
+              height: 37,
+              backgroundColor: colors.transparentWhite,
+            }}
+          />
+        )}
         <MessageContainer>
           {this.renderMessage()}
         </MessageContainer>
-        {this.state.displayTime && this.state.displayTime.length ? (
+        {this.props.error ? (
+          <Text style={displayTimeError}>
+            {`Attempted ${this.calculateTimeSince(this.props.error)}`}
+          </Text>
+        ) : !this.props.loading && this.state.displayTime && this.state.displayTime.length ? (
           <Text style={displayTime}>
             {this.state.displayTime}
           </Text>
         ): null}
-      </View>
+      </Animated.View>
     )
   }
 }
@@ -185,9 +288,15 @@ export default class Message extends React.PureComponent<IProps, IState> {
 const style = {
   displayTime: {
     position: 'absolute' as 'absolute',
-    bottom: 0,
+    bottom: 8,
     ...type.micro,
     color: colors.shadow,
+  },
+  displayTimeError: {
+    position: 'absolute' as 'absolute',
+    bottom: 8,
+    ...type.micro,
+    color: colors.duckbill,
   },
   messageWrapper: {
     alignItems: 'flex-end' as 'flex-end',
@@ -195,7 +304,7 @@ const style = {
   messageMetadataContainer: {
     display: 'flex' as 'flex',
     flexDirection: 'column' as 'column',
-    maxWidth: 250,
+    maxWidth: width * 0.6,
   },
   messageContainer: {
     padding: 10,
@@ -205,12 +314,12 @@ const style = {
   messageTextContainer: {
     display: 'flex' as 'flex',
     flexDirection: 'column' as 'column',
-    maxWidth: 250,
+    maxWidth: width * 0.6,
     padding: 10,
     flex: 0,
   },
   map: {
-    width: 250,
+    maxWidth: width * 0.6,
     height: 150,
     marginBottom: 4,
   },
@@ -218,8 +327,8 @@ const style = {
     ...type.regular,
     color: colors.cosmos,
     opacity:  0.75,
-    fontWeight: '500' as '500',
-    flex: 1,
+    // fontWeight: '500' as '500',
+    // flex: 1,
     textAlign: 'left' as 'left',
   },
 }

@@ -39,6 +39,9 @@
 		A34F0DE87FA64B489B92180F /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E9C327E054D348C598F30E11 /* Octicons.ttf */; };
 		B1FC5BF8675B4AD2A08237D8 /* FontAwesome5_Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 17D1D00FC8814ED487DDC073 /* FontAwesome5_Regular.ttf */; };
 		B699F23C1BF948649AC00E99 /* Feather.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 82210DE3FD1B44BF83CC7F2D /* Feather.ttf */; };
+		C778576C233D33F200F6F25C /* libRNCPushNotificationIOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C778576B233D33A100F6F25C /* libRNCPushNotificationIOS.a */; };
+		C778576D233D33F900F6F25C /* libRNCPushNotificationIOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C778576B233D33A100F6F25C /* libRNCPushNotificationIOS.a */; };
+		C778576E233D340100F6F25C /* libRCTBackgroundGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C7803DD622F9E886003DB183 /* libRCTBackgroundGeolocation.a */; };
 		C7824E7B22FDD044006C859D /* libRCTBackgroundGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C7803DD622F9E886003DB183 /* libRCTBackgroundGeolocation.a */; };
 		C7CDD25C232E0BF5007E0CFE /* anti-shorts-9-correct.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD25B232E0BF4007E0CFE /* anti-shorts-9-correct.wav */; };
 		C7CDD25E232E0C17007E0CFE /* anti-shorts-18-attention.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD25D232E0C17007E0CFE /* anti-shorts-18-attention.wav */; };
@@ -329,6 +332,13 @@
 			remoteGlobalIDString = ED296FEE214C9CF800B7C4FE;
 			remoteInfo = "jsiexecutor-tvOS";
 		};
+		C778576A233D33A100F6F25C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C7785766233D33A100F6F25C /* PushNotificationIOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 9B97F66B220DEC6000B61540;
+			remoteInfo = RNCPushNotificationIOS;
+		};
 		C7803DD522F9E886003DB183 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C7803DD022F9E885003DB183 /* RCTBackgroundGeolocation.xcodeproj */;
@@ -342,20 +352,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 58B5115D1A9E6B3D00147676;
 			remoteInfo = RCTCameraRoll;
-		};
-		C79DF45D22DFAD58000AFAE0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C79DF44B22DFAD58000AFAE0 /* RCTPushNotification.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RCTPushNotification;
-		};
-		C79DF45F22DFAD58000AFAE0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C79DF44B22DFAD58000AFAE0 /* RCTPushNotification.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 3D05745F1DE6004600184BB4;
-			remoteInfo = "RCTPushNotification-tvOS";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -409,10 +405,10 @@
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 		C70F4AA622B7D11F00F63EF8 /* LetsWaitDating.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = LetsWaitDating.entitlements; path = LetsWaitDating/LetsWaitDating.entitlements; sourceTree = "<group>"; };
 		C72DFA8222A9D8F80007F252 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = LetsWaitDating/Images.xcassets; sourceTree = "<group>"; };
+		C7785766233D33A100F6F25C /* PushNotificationIOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PushNotificationIOS.xcodeproj; path = "../node_modules/@react-native-community/push-notification-ios/ios/PushNotificationIOS.xcodeproj"; sourceTree = "<group>"; };
 		C7803DCE22F8B15D003DB183 /* libRCTBackgroundGeolocation.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libRCTBackgroundGeolocation.a; path = "../../../../Library/Developer/Xcode/DerivedData/LetsWaitDating-bcyxdqbarpwzsohdsakctagvitud/Build/Products/Debug-iphoneos/libRCTBackgroundGeolocation.a"; sourceTree = "<group>"; };
 		C7803DD022F9E885003DB183 /* RCTBackgroundGeolocation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBackgroundGeolocation.xcodeproj; path = "../node_modules/@mauron85/react-native-background-geolocation/ios/RCTBackgroundGeolocation.xcodeproj"; sourceTree = "<group>"; };
 		C79DF43722DCBD35000AFAE0 /* RCTCameraRoll.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTCameraRoll.xcodeproj; path = "../node_modules/react-native/Libraries/CameraRoll/RCTCameraRoll.xcodeproj"; sourceTree = "<group>"; };
-		C79DF44B22DFAD58000AFAE0 /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		C7CDD25B232E0BF4007E0CFE /* anti-shorts-9-correct.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-shorts-9-correct.wav"; sourceTree = "<group>"; };
 		C7CDD25D232E0C17007E0CFE /* anti-shorts-18-attention.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-shorts-18-attention.wav"; sourceTree = "<group>"; };
 		C7CDD25F232E0C29007E0CFE /* anti-pop-2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-pop-2.wav"; sourceTree = "<group>"; };
@@ -446,6 +442,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				140ED2AC1D01E1AD002B40FF /* libReact.a in Frameworks */,
+				C778576E233D340100F6F25C /* libRCTBackgroundGeolocation.a in Frameworks */,
+				C778576D233D33F900F6F25C /* libRNCPushNotificationIOS.a in Frameworks */,
 				CFA76B31F87DFF193A70308B /* libPods-LetsWaitDatingTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -456,6 +454,7 @@
 			files = (
 				ED297163215061F000B7C4FE /* JavaScriptCore.framework in Frameworks */,
 				C7824E7B22FDD044006C859D /* libRCTBackgroundGeolocation.a in Frameworks */,
+				C778576C233D33F200F6F25C /* libRNCPushNotificationIOS.a in Frameworks */,
 				F52D709E5CA9224713C825C8 /* libPods-LetsWaitDating.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -670,8 +669,8 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				C7785766233D33A100F6F25C /* PushNotificationIOS.xcodeproj */,
 				C7803DD022F9E885003DB183 /* RCTBackgroundGeolocation.xcodeproj */,
-				C79DF44B22DFAD58000AFAE0 /* RCTPushNotification.xcodeproj */,
 				C79DF43722DCBD35000AFAE0 /* RCTCameraRoll.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
 				146833FF1AC3E56700842450 /* React.xcodeproj */,
@@ -753,6 +752,14 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		C7785767233D33A100F6F25C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C778576B233D33A100F6F25C /* libRNCPushNotificationIOS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		C7803D9F22F82609003DB183 /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
@@ -773,15 +780,6 @@
 			isa = PBXGroup;
 			children = (
 				C79DF43C22DCBD35000AFAE0 /* libRCTCameraRoll.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		C79DF44C22DFAD58000AFAE0 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				C79DF45E22DFAD58000AFAE0 /* libRCTPushNotification.a */,
-				C79DF46022DFAD58000AFAE0 /* libRCTPushNotification-tvOS.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -915,6 +913,10 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = C7785767233D33A100F6F25C /* Products */;
+					ProjectRef = C7785766233D33A100F6F25C /* PushNotificationIOS.xcodeproj */;
+				},
+				{
 					ProductGroup = 00C302A81ABCB8CE00DB3ED1 /* Products */;
 					ProjectRef = 00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */;
 				},
@@ -945,10 +947,6 @@
 				{
 					ProductGroup = 00C302D41ABCB9D200DB3ED1 /* Products */;
 					ProjectRef = 00C302D31ABCB9D200DB3ED1 /* RCTNetwork.xcodeproj */;
-				},
-				{
-					ProductGroup = C79DF44C22DFAD58000AFAE0 /* Products */;
-					ProjectRef = C79DF44B22DFAD58000AFAE0 /* RCTPushNotification.xcodeproj */;
 				},
 				{
 					ProductGroup = 139105B71AF99BAD00B5F7CC /* Products */;
@@ -1234,6 +1232,13 @@
 			remoteRef = C7686CDB22622672002EF485 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		C778576B233D33A100F6F25C /* libRNCPushNotificationIOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNCPushNotificationIOS.a;
+			remoteRef = C778576A233D33A100F6F25C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		C7803DD622F9E886003DB183 /* libRCTBackgroundGeolocation.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1246,20 +1251,6 @@
 			fileType = archive.ar;
 			path = libRCTCameraRoll.a;
 			remoteRef = C79DF43B22DCBD35000AFAE0 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		C79DF45E22DFAD58000AFAE0 /* libRCTPushNotification.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRCTPushNotification.a;
-			remoteRef = C79DF45D22DFAD58000AFAE0 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		C79DF46022DFAD58000AFAE0 /* libRCTPushNotification-tvOS.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libRCTPushNotification-tvOS.a";
-			remoteRef = C79DF45F22DFAD58000AFAE0 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1567,6 +1558,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/@mauron85/react-native-background-geolocation/ios/RCTBackgroundGeolocation/**",
+					"$(SRCROOT)/../node_modules/@react-native-community/push-notification-ios/ios",
 				);
 				INFOPLIST_FILE = LetsWaitDatingTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1596,6 +1588,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/@mauron85/react-native-background-geolocation/ios/RCTBackgroundGeolocation/**",
+					"$(SRCROOT)/../node_modules/@react-native-community/push-notification-ios/ios",
 				);
 				INFOPLIST_FILE = LetsWaitDatingTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1650,6 +1643,7 @@
 					"\"${PODS_ROOT}/Headers/Public/yoga\"",
 					"\"${SRCROOT}/../node_modules/react-native/Libraries/LinkingIOS\"",
 					"$(SRCROOT)/../node_modules/@mauron85/react-native-background-geolocation/ios/RCTBackgroundGeolocation/**",
+					"$(SRCROOT)/../node_modules/@react-native-community/push-notification-ios/ios",
 				);
 				INFOPLIST_FILE = LetsWaitDating/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
@@ -1704,6 +1698,7 @@
 					"\"${PODS_ROOT}/Headers/Public/yoga\"",
 					"\"${SRCROOT}/../node_modules/react-native/Libraries/LinkingIOS\"",
 					"$(SRCROOT)/../node_modules/@mauron85/react-native-background-geolocation/ios/RCTBackgroundGeolocation/**",
+					"$(SRCROOT)/../node_modules/@react-native-community/push-notification-ios/ios",
 				);
 				INFOPLIST_FILE = LetsWaitDating/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
@@ -2045,6 +2040,7 @@
 					"\"${PODS_ROOT}/Headers/Public/yoga\"",
 					"\"${SRCROOT}/../node_modules/react-native/Libraries/LinkingIOS\"",
 					"$(SRCROOT)/../node_modules/@mauron85/react-native-background-geolocation/ios/RCTBackgroundGeolocation/**",
+					"$(SRCROOT)/../node_modules/@react-native-community/push-notification-ios/ios",
 				);
 				INFOPLIST_FILE = LetsWaitDating/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
@@ -2075,6 +2071,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/@mauron85/react-native-background-geolocation/ios/RCTBackgroundGeolocation/**",
+					"$(SRCROOT)/../node_modules/@react-native-community/push-notification-ios/ios",
 				);
 				INFOPLIST_FILE = LetsWaitDatingTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;

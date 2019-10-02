@@ -6,6 +6,10 @@ export const RESET_MATCHES = 'RESET_MATCHES'
 export const PUSH_CHAT = 'PUSH_CHAT'
 export const CLEAR_CHAT = 'CLEAR_CHAT'
 
+export const POST_MESSAGE = 'POST_MESSAGE'
+export const REPLACE_MESSAGE = 'REPLACE_MESSAGE'
+export const REPLACE_ACTIVE_MESSAGE = 'REPLACE_ACTIVE_MESSAGE'
+
 export const SET_MATCH_MESSAGE = 'SET_MATCH_MESSAGE'
 
 export const PUSH_ENQUEUE = 'PUSH_ENQUEUE'
@@ -25,7 +29,14 @@ import { storeToken } from '../../lib/asyncStorage';
 import { ReduxStore } from 'app/types/models'
 import { Alert } from 'react-native';
 import { showModal } from '../navigation/modal'
-import { changeActiveChat } from './chat';
+
+/**
+ * @funciton changeActiveChat: Originally in /actions/matches/chat.ts but created a require cycle.
+ */
+export const changeActiveChat = (match: ReduxStore.Match) => ({
+  match,
+  type: PUSH_CHAT,
+})
 
 export const setMatchMessage = (message: string = '') => ({
   message,
