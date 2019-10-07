@@ -16,6 +16,8 @@ import { colors, type } from '../../../../new_foundation'
 
 import { IMediaReference } from 'app/types/photos'
 import { ifIphoneX } from 'react-native-iphone-x-helper'
+import BuoyantContainer from '../../../components/BuoyantContainer';
+import DynamicListContainer from '../../../components/DynamicListContainer';
 
 interface IProps {
   title?: string,
@@ -28,101 +30,127 @@ interface IState {
   height: number
 }
 export default class CardSection extends React.PureComponent<IProps, IState> {
+  private dynamicImageContainer: any
+  private dynamicCardContainer: any
   public state = {
-    // height: this.props.customHeight || width + 64,
     height: this.props.customHeight || this.props.children ? width + 64 : width - 24,
   }
   constructor(props: IProps) {
     super(props)
   }
+  public onScroll(toValue: number, delay: number, duration: number = 300) {
+    if(this.dynamicImageContainer) {
+      if (this.props.children) {
+        this.dynamicImageContainer.onScroll(toValue, delay, 600)
+      } else {
+        this.dynamicImageContainer.onScroll(toValue, delay, 200)
+      }
+    }
+    if(this.dynamicCardContainer) {
+      this.dynamicCardContainer.onScroll(toValue, delay, 200)
+    }
+  }
   public render() {
+    const imageWrapper = this.props.children ? {
+      // maxWidth: width,
+      // maxHeight: this.props.customHeight || width,
+      height: (this.props.customHeight || width) + 16,
+      width: width + 16,
+      borderRadius: 8,
+      left: -8,
+      top: -8,
+      overflow: 'hidden' as 'hidden',
+    } : {
+      borderRadius: 24,
+      overflow: 'hidden' as 'hidden',
+      height: width - 24,
+      marginLeft: 12,
+      marginRight: 12,
+    }
+    const imageContainer = this.props.children ? {
+      height: (this.props.customHeight || width) + 16,
+      width: width + 16,
+      // transform: [{ scale: 1.1 }],
+    } : {
+      height: width - 24,
+    }
+    const imageStyle = this.props.children ? {
+      height: (this.props.customHeight || width) + 16,
+      width: width + 16,
+    } : {
+      height: width - 24,
+    }
+    const marginTop = this.props.customHeight ? 0 : 6
     return (
       <View
         style={{
+          marginTop,
           height: this.state.height,
-          marginTop: this.props.customHeight ? 0 : 6,
           marginBottom: 6,
-          // height: this.state.height,
-          // ...(this.props.children ? this.props.source ? {
-          //   //Source+Children
-          // } : {
-          //   //Source Only
-          // } : {
-
-          // })
-          // ...(this.props.source ? style.imageWrapper : style.wrapper),
-          // height: this.state.height,
-          // ...(this.props.children ?
-          //   null : {
-          //     marginTop: 0,
-          //     marginBottom: 22,
-          //   }),
         }}
       >
         {this.props.source && (
-          <View
-            style={{
-              maxWidth: width,
-              maxHeight: this.props.customHeight || width,
-              // shadowColor: colors.cosmos,
-              // shadowOpacity: 0.12,
-              // shadowRadius: 6,
-              // shadowOffset: { width: 0, height: 2 },
-            }}
+          <DynamicListContainer
+            vertical={true}
+            ref={c => this.dynamicImageContainer = c}
+            maxOffset={8}
+            style={imageWrapper}
           >
-            <FastImage
-              style={{
-                ...(this.props.children ? {
-                  height: (this.props.customHeight || width) + 16,
-                  width: width + 16,
-                  borderRadius: 8,
-                  overflow: 'hidden' as 'hidden',
-                  transform: [
-                    { translateY: -8 },
-                    { translateX: -8 },
-                  ],
-                } : {
-                  borderRadius: 24,
-                  overflow: 'hidden' as 'hidden',
-                  height: width - 24,
-                  marginLeft: 12,
-                  marginRight: 12,
-                }),
-              }}
-              source={this.props.source}
+            <View
+              // maxOffset={16}
+              style={imageContainer}
             >
-              {
-                (this.props.showGradient || this.props.customHeight) &&
-                <LinearGradient
-                  colors={[
-                    'rgba(33, 33, 33, 1)',
-                    'rgba(17, 17, 17, 0.63)',
-                    'rgba(0, 0, 0, 0.25)',
-                    'rgba(0, 0, 0, 0.10)',
-                    'rgba(0, 0, 0, 0)',
-                  ]}
-                  style={style.gradient}
-                />
-              }
-              {
-                this.props.children &&
-                <LinearGradient
-                  colors={[
-                    'rgba(0, 0, 0, 0)',
-                    'rgba(0, 0, 0, 0.10)',
-                    'rgba(0, 0, 0, 0.25)',
-                    'rgba(17, 17, 17, 0.63)',
-                    'rgba(33, 33, 33, 1)',
-                  ]}
-                  style={style.bottomGradient}
-                />
-              }
-            </FastImage>
-          </View>
+              <FastImage
+                style={imageStyle}
+                source={this.props.source}
+              >
+                {
+                  (this.props.showGradient || this.props.customHeight) &&
+                  <LinearGradient
+                    colors={[
+                      'rgba(33, 33, 33, 1)',
+                      'rgba(17, 17, 17, 0.63)',
+                      'rgba(0, 0, 0, 0.25)',
+                      'rgba(0, 0, 0, 0.10)',
+                      'rgba(0, 0, 0, 0)',
+                    ]}
+                    style={style.gradient}
+                  />
+                }
+                {
+                  this.props.children &&
+                  <LinearGradient
+                    colors={[
+                      'rgba(0, 0, 0, 0)',
+                      'rgba(0, 0, 0, 0.10)',
+                      'rgba(0, 0, 0, 0.25)',
+                      'rgba(17, 17, 17, 0.63)',
+                      'rgba(33, 33, 33, 1)',
+                    ]}
+                    style={style.bottomGradient}
+                  />
+                }
+              </FastImage>
+            </View>
+          </DynamicListContainer>
         )}
         {this.props.children &&
-          <View
+          <DynamicListContainer
+            vertical={true}
+            maxOffset={8}
+            ref={c => this.dynamicCardContainer = c}
             style={this.props.source ? style.floatingSectionWrapper : style.sectionWrapper}
+          >
+          <View
+            style={{
+              // ...(this.props.source ? style.floatingSectionWrapper : style.sectionWrapper),
+              // width: width - 24,
+              // flexDirection: 'column' as 'column',
+              // alignItems: 'stretch' as 'stretch',
+              // justifyContent: 'center' as 'center',
+              borderRadius: 18,
+              overflow: 'hidden' as 'hidden',
+            }}
             {...(this.props.source ? { onLayout: (e: LayoutChangeEvent) => {
               const minHeight = (this.props.customHeight || width) + 64
               this.setState({
@@ -130,40 +158,20 @@ export default class CardSection extends React.PureComponent<IProps, IState> {
               })
             }} : null)}
           >
-            <View style={style.sectionContainer}>
-              {this.props.title && <Text style={style.title}>{this.props.title}</Text>}
-              {typeof this.props.children === 'string' ?
-                <Text style={style.text}>{this.props.children}</Text> :
-                this.props.children
-              }
-            </View>
+              <View style={style.sectionContainer}>
+                {this.props.title && <Text style={style.title}>{this.props.title}</Text>}
+                {typeof this.props.children === 'string' ?
+                  <Text style={style.text}>{this.props.children}</Text> :
+                  this.props.children
+                }
+              </View>
           </View>
+          </DynamicListContainer>
         }
       </View>
     )
   }
 }
-// interface IProps {
-//   title?: string,
-//   children: React.ReactNode,
-//   source: IMediaReference
-// }
-// export default class CardSection extends React.PureComponent<IProps> {
-//   constructor(props: IProps) {
-//     super(props)
-//   }
-//   public render() {
-//     return (
-//       <View style={style.sectionContainer}>
-//         {this.props.title && <Text style={style.title}>{this.props.title}</Text>}
-//         {typeof this.props.children === 'string' ?
-//           <Text style={style.text}>{this.props.children}</Text> :
-//           this.props.children
-//         }
-//       </View>
-//     )
-//   }
-// }
 
 const style = {
   gradient: {
@@ -182,39 +190,20 @@ const style = {
     opacity: 0.4,
     position: 'absolute' as 'absolute',
   },
-  imageWrapper: {
-    // paddingBottom: 64,
-  },
-  wrapper: {
-    // paddingTop: 48,
-    // paddingBottom: 48,
-  },
   sectionWrapper: {
     paddingLeft: 12,
     paddingRight: 12,
-    // shadowColor: colors.cosmos,
-    // shadowOpacity: 0.18,
-    // shadowRadius: 16,
-    // shadowOffset: { width: 0, height: 4  },
+    width: width - 24,
   },
   floatingSectionWrapper: {
-    paddingLeft: 12,
-    paddingRight: 12,
-    // shadowColor: colors.cosmos,
-    // shadowOpacity: 0.06,
-    // shadowRadius: 10,
-    // shadowOffset: { width: 0, height: 4 },
+    left: 12,
+    width: width - 24,
     position: 'absolute' as 'absolute',
     bottom: 0,
   },
   sectionContainer: {
     width: width - 24,
-    flexDirection: 'column' as 'column',
-    alignItems: 'stretch' as 'stretch',
-    justifyContent: 'center' as 'center',
     backgroundColor: colors.white,
-    borderRadius: 18,
-    overflow: 'hidden' as 'hidden',
   },
   title: {
     ...type.regular,

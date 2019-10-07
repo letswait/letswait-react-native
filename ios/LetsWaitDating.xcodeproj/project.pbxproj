@@ -43,6 +43,8 @@
 		C778576D233D33F900F6F25C /* libRNCPushNotificationIOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C778576B233D33A100F6F25C /* libRNCPushNotificationIOS.a */; };
 		C778576E233D340100F6F25C /* libRCTBackgroundGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C7803DD622F9E886003DB183 /* libRCTBackgroundGeolocation.a */; };
 		C7824E7B22FDD044006C859D /* libRCTBackgroundGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C7803DD622F9E886003DB183 /* libRCTBackgroundGeolocation.a */; };
+		C7A595BB234711A700DB1312 /* libRNSensors.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C7A595BA2347119400DB1312 /* libRNSensors.a */; };
+		C7A595BC234712A300DB1312 /* libRNSensors.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C7A595BA2347119400DB1312 /* libRNSensors.a */; };
 		C7CDD25C232E0BF5007E0CFE /* anti-shorts-9-correct.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD25B232E0BF4007E0CFE /* anti-shorts-9-correct.wav */; };
 		C7CDD25E232E0C17007E0CFE /* anti-shorts-18-attention.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD25D232E0C17007E0CFE /* anti-shorts-18-attention.wav */; };
 		C7CDD262232E0C29007E0CFE /* anti-pop-2.wav in Resources */ = {isa = PBXBuildFile; fileRef = C7CDD25F232E0C29007E0CFE /* anti-pop-2.wav */; };
@@ -353,6 +355,13 @@
 			remoteGlobalIDString = 58B5115D1A9E6B3D00147676;
 			remoteInfo = RCTCameraRoll;
 		};
+		C7A595B92347119400DB1312 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C7A5958E2347119400DB1312 /* RNSensors.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNSensors;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -409,6 +418,7 @@
 		C7803DCE22F8B15D003DB183 /* libRCTBackgroundGeolocation.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libRCTBackgroundGeolocation.a; path = "../../../../Library/Developer/Xcode/DerivedData/LetsWaitDating-bcyxdqbarpwzsohdsakctagvitud/Build/Products/Debug-iphoneos/libRCTBackgroundGeolocation.a"; sourceTree = "<group>"; };
 		C7803DD022F9E885003DB183 /* RCTBackgroundGeolocation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBackgroundGeolocation.xcodeproj; path = "../node_modules/@mauron85/react-native-background-geolocation/ios/RCTBackgroundGeolocation.xcodeproj"; sourceTree = "<group>"; };
 		C79DF43722DCBD35000AFAE0 /* RCTCameraRoll.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTCameraRoll.xcodeproj; path = "../node_modules/react-native/Libraries/CameraRoll/RCTCameraRoll.xcodeproj"; sourceTree = "<group>"; };
+		C7A5958E2347119400DB1312 /* RNSensors.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNSensors.xcodeproj; path = "../node_modules/react-native-sensors/ios/RNSensors.xcodeproj"; sourceTree = "<group>"; };
 		C7CDD25B232E0BF4007E0CFE /* anti-shorts-9-correct.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-shorts-9-correct.wav"; sourceTree = "<group>"; };
 		C7CDD25D232E0C17007E0CFE /* anti-shorts-18-attention.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-shorts-18-attention.wav"; sourceTree = "<group>"; };
 		C7CDD25F232E0C29007E0CFE /* anti-pop-2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "anti-pop-2.wav"; sourceTree = "<group>"; };
@@ -444,6 +454,7 @@
 				140ED2AC1D01E1AD002B40FF /* libReact.a in Frameworks */,
 				C778576E233D340100F6F25C /* libRCTBackgroundGeolocation.a in Frameworks */,
 				C778576D233D33F900F6F25C /* libRNCPushNotificationIOS.a in Frameworks */,
+				C7A595BC234712A300DB1312 /* libRNSensors.a in Frameworks */,
 				CFA76B31F87DFF193A70308B /* libPods-LetsWaitDatingTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -455,6 +466,7 @@
 				ED297163215061F000B7C4FE /* JavaScriptCore.framework in Frameworks */,
 				C7824E7B22FDD044006C859D /* libRCTBackgroundGeolocation.a in Frameworks */,
 				C778576C233D33F200F6F25C /* libRNCPushNotificationIOS.a in Frameworks */,
+				C7A595BB234711A700DB1312 /* libRNSensors.a in Frameworks */,
 				F52D709E5CA9224713C825C8 /* libPods-LetsWaitDating.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -669,6 +681,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				C7A5958E2347119400DB1312 /* RNSensors.xcodeproj */,
 				C7785766233D33A100F6F25C /* PushNotificationIOS.xcodeproj */,
 				C7803DD022F9E885003DB183 /* RCTBackgroundGeolocation.xcodeproj */,
 				C79DF43722DCBD35000AFAE0 /* RCTCameraRoll.xcodeproj */,
@@ -780,6 +793,14 @@
 			isa = PBXGroup;
 			children = (
 				C79DF43C22DCBD35000AFAE0 /* libRCTCameraRoll.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C7A5958F2347119400DB1312 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C7A595BA2347119400DB1312 /* libRNSensors.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -967,6 +988,10 @@
 				{
 					ProductGroup = 146834001AC3E56700842450 /* Products */;
 					ProjectRef = 146833FF1AC3E56700842450 /* React.xcodeproj */;
+				},
+				{
+					ProductGroup = C7A5958F2347119400DB1312 /* Products */;
+					ProjectRef = C7A5958E2347119400DB1312 /* RNSensors.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -1251,6 +1276,13 @@
 			fileType = archive.ar;
 			path = libRCTCameraRoll.a;
 			remoteRef = C79DF43B22DCBD35000AFAE0 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C7A595BA2347119400DB1312 /* libRNSensors.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNSensors.a;
+			remoteRef = C7A595B92347119400DB1312 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1644,6 +1676,7 @@
 					"\"${SRCROOT}/../node_modules/react-native/Libraries/LinkingIOS\"",
 					"$(SRCROOT)/../node_modules/@mauron85/react-native-background-geolocation/ios/RCTBackgroundGeolocation/**",
 					"$(SRCROOT)/../node_modules/@react-native-community/push-notification-ios/ios",
+					"$(SRCROOT)/../node_modules/react-native-sensors/ios",
 				);
 				INFOPLIST_FILE = LetsWaitDating/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
@@ -1699,6 +1732,7 @@
 					"\"${SRCROOT}/../node_modules/react-native/Libraries/LinkingIOS\"",
 					"$(SRCROOT)/../node_modules/@mauron85/react-native-background-geolocation/ios/RCTBackgroundGeolocation/**",
 					"$(SRCROOT)/../node_modules/@react-native-community/push-notification-ios/ios",
+					"$(SRCROOT)/../node_modules/react-native-sensors/ios",
 				);
 				INFOPLIST_FILE = LetsWaitDating/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
@@ -2041,6 +2075,7 @@
 					"\"${SRCROOT}/../node_modules/react-native/Libraries/LinkingIOS\"",
 					"$(SRCROOT)/../node_modules/@mauron85/react-native-background-geolocation/ios/RCTBackgroundGeolocation/**",
 					"$(SRCROOT)/../node_modules/@react-native-community/push-notification-ios/ios",
+					"$(SRCROOT)/../node_modules/react-native-sensors/ios",
 				);
 				INFOPLIST_FILE = LetsWaitDating/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;

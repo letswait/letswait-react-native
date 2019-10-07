@@ -3,9 +3,12 @@ import {
 } from '../user'
 
 import {
+  ACCEPT_MATCH,
   changeActiveChat,
+  DENY_MATCH,
   POST_MESSAGE,
   PUSH_CHAT,
+  REQUEST_FEED,
 } from '../matches'
 
 import { ApiResponse } from 'apisauce'
@@ -43,10 +46,12 @@ export default function socketClientMiddleware() {
 
     return (next: Dispatch<AnyAction>) => (action: AnyAction) => {
       switch (action.type) {
+
         case POPULATE_USER:
           state.socketListening = true
           socket.connect()
           return next(action)
+
         case PUSH_CHAT:
           const { match }: {
             match: ReduxStore.Match,
@@ -59,6 +64,7 @@ export default function socketClientMiddleware() {
             socket.emit('joinchat', match._id);
           }
           return next(action)
+
         case POST_MESSAGE:
           // Define and get action.
           const {
@@ -106,6 +112,75 @@ export default function socketClientMiddleware() {
             },
           )
           return
+
+        case ACCEPT_MATCH: {
+          try {
+            const {
+              // tslint:disable-next-line: no-shadowed-variable
+              suitorId,
+            }: {
+              suitorId: ReduxStore.ObjectId,
+            } = action as any
+            const { feed }: { feed: ReduxStore.Match[] } = getState()
+            // tslint:disable-next-line: no-shadowed-variable
+            let matchId = null
+            for(let i = 0; i <= feed.length; i++) {
+              if(feed[i].userProfiles[0]._id.toString() === suitorId.toString()) {
+                matchId = feed[i]._id.toString()
+                break;
+              }
+            }
+            if(matchId) {
+              socket.emit('acceptMatch', matchId, (data: {
+                matchId?: ReduxStore.ObjectId
+                preloadedDate?: 'sponsored' | 'event' | 'premiumMatch' | 'recommendation'
+                preloadedSource?: string
+                preloadedSpinner?: string
+
+                match?: ReduxStore.Match
+                // When got spinner data, send it down. client should catch it and incorporate it into match
+                wheel?: any,
+              }) => {
+                Alert.alert('Accepted Match Response', encodeURIComponent(JSON.stringify(data)))
+              })
+            } else {
+              throw new Error('Could not communicate with server')
+            }
+          } catch(e) {
+            // tslint:disable-next-line: no-unused-expression
+            __DEV__ && console.log(e)
+            Alert.alert((e as Error).message)
+          }
+        }
+
+        case DENY_MATCH: {
+          const {
+            // tslint:disable-next-line: no-shadowed-variable
+            matchId,
+          }: {
+            matchId: ReduxStore.ObjectId,
+          } = action as any
+          return next(action)
+        }
+
+        case REQUEST_FEED: {
+          const {
+            searchSettings,
+          }: {
+            searchSettings: {
+              sexualPreference: 'men' | 'women' | 'everyone'
+              radius: number,
+              ageRange: [number, number],
+              goal: 'exclusive' | 'unsure' | 'casual' | 'serious',
+              // tags: {
+
+              // },
+            },
+          } = action as any
+          const { feed } = getState()
+          socket.emit('')
+        }
+
         default: return next(action)
       }
     }
@@ -129,10 +204,23 @@ export default function socketClientMiddleware() {
         }
       })
 
-      socket.on('messageSent', (res: { matchId: string, message: ReduxStore.IChat}) => {
+      socket.on('messageSent', (res: { matchId: string, message: ReduxStore.IChat }) => {
         pushMessage(res.matchId, res.message)
       })
 
+      socket.on('messageRead', (res: { matchId: string, message: ReduxStore.IChat }) => {
+        pushMessage(res.matchId, res.message)
+      })
+
+      // Someone Accepted user and user had already accepted
+      socket.on('newMatch', (res: { match: ReduxStore.Match }) => {
+
+      })
+
+      // Someone accepted user, user had not accepted yet
+      socket.on('newSuitor', (res: { match: ReduxStore.Match }) => {
+
+      })
       // socket.on('')
     }
   }

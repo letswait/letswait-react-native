@@ -3,7 +3,7 @@ import { createMemoryHistory } from 'history'
 import { applyMiddleware, compose, createStore, Store } from 'redux'
 import createRootReducer from './app/reducers'
 
-import loggerMiddleware from 'redux-logger'
+// import loggerMiddleware from 'redux-logger'
 
 import thunkMiddleware from 'redux-thunk'
 
@@ -18,7 +18,7 @@ export default function configureStore(preloadedState?: any) {
       applyMiddleware(
         routerMiddleware(history),
         thunkMiddleware,
-        loggerMiddleware,
+        // loggerMiddleware,
         socketMiddleware(),
       ),
     ),

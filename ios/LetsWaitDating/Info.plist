@@ -62,21 +62,21 @@
 		</dict>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Let's Wait would like access the your Camera</string>
+	<string>Enable the Camera to capture moments and profile photos</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Let's Wait requires background tracking to find local users</string>
+	<string>Enabling Location Services allows LetsWait to find you local users and activities, and to provide you better experiences and security during dates</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Let's Wait requires background tracking to find local users</string>
+	<string>Enabling Location Services allows LetsWait to find you local users and activities, and to provide you better experiences and security during dates</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Let's Wait requires location tracking to find local users</string>
+	<string>Enabling Location Services allows LetsWait to find you local users and activities, and to provide you better experiences and security during dates</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Let's Wait would like access to your Microphone for video recording</string>
+	<string>Enabling microphone access is needed to capture video recordings</string>
 	<key>NSMotionUsageDescription</key>
 	<string>This app does not ask for or use Motion</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Let's Wait would like access to your Camera Roll</string>
+	<string>Enable LetsWait to access the camera roll to upload photos and save photos you've taken with the app</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Let's Wait would like access to your Camera Roll</string>
+	<string>Enable LetsWait to access the camera roll to save photos you've taken with the app</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>

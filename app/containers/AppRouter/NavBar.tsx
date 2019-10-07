@@ -9,6 +9,7 @@ import {
   Text,
   TouchableWithoutFeedback,
   View,
+  Image,
 } from 'react-native'
 
 const { width, height } = Dimensions.get('window')
@@ -18,7 +19,7 @@ import FeatherButton from '../../components/Camera/CameraButton';
 
 import { colors, type } from '../../../new_foundation'
 
-const dissapearValue = ifIphoneX(84, 64)
+const navHeight = ifIphoneX(84, 64)
 
 interface IProps {
   push: (route: string) => void
@@ -38,7 +39,7 @@ export default class NavBar extends React.Component<IProps, IState> {
   public state: IState = {
     visible: true,
     menuVisible: false,
-    offset: new Animated.Value(dissapearValue),
+    offset: new Animated.Value(navHeight),
     animating: false,
     feedButton: new Animated.Value(1),
     matchButton: new Animated.Value(0.5),
@@ -117,22 +118,22 @@ export default class NavBar extends React.Component<IProps, IState> {
   public componentDidMount() {
     this.animateUp()
   }
-  public UNSAFE_componentWillReceiveProps(nextProps: IProps) {
-    if (this.props.currentRoute !== nextProps.currentRoute) {
+  public componentDidUpdate(prevProps: IProps) {
+    if (this.props.currentRoute !== prevProps.currentRoute) {
       this.animateUp()
-      if (nextProps.currentRoute === '/app') {
-        this.enableButton(this.state.feedButton)
-      } else if (nextProps.currentRoute === '/app/settings') {
-        this.enableButton(this.state.settingsButton)
+      if (prevProps.currentRoute === '/app') {
+        this.disableButton(this.state.feedButton)
+      } else if (prevProps.currentRoute === '/app/settings') {
+        this.disableButton(this.state.settingsButton)
       } else if (this.props.currentRoute !== '/app/matches' && this.props.currentRoute !== '/app/chat') {
-        this.enableButton(this.state.matchButton)
+        this.disableButton(this.state.matchButton)
       }
       if (this.props.currentRoute === '/app') {
-        this.disableButton(this.state.feedButton)
+        this.enableButton(this.state.feedButton)
       } else if (this.props.currentRoute === '/app/settings') {
-        this.disableButton(this.state.settingsButton)
-      } else if (nextProps.currentRoute !== '/app/matches' && nextProps.currentRoute !== '/app/chat') {
-        this.disableButton(this.state.matchButton)
+        this.enableButton(this.state.settingsButton)
+      } else if (prevProps.currentRoute !== '/app/matches' && prevProps.currentRoute !== '/app/chat') {
+        this.enableButton(this.state.matchButton)
       }
     }
   }
@@ -166,7 +167,7 @@ export default class NavBar extends React.Component<IProps, IState> {
     if (this.state.animating) return
     this.setState({ animating: true })
     Animated.timing(this.state.offset, {
-      toValue: dissapearValue,
+      toValue: navHeight,
       duration: 150,
     }).start(() => this.setState({ animating: false, visible: false }))
   }
@@ -194,37 +195,44 @@ export default class NavBar extends React.Component<IProps, IState> {
     const navWrapper = {
       ...style.navWrapper,
       ...(this.props.currentRoute === '/app' || this.props.currentRoute === '/app/chat' ?
-        { ...style.floatNav } : { ...style.staticNav }),
+      { ...style.floatNav } : { ...style.staticNav }),
     }
-    const nav = {
-      ...style.nav,
-      // ...(this.props.currentRoute === '/app' || this.props.currentRoute === '/app/chat' ?
-      //   { ...style.floatNav } : { ...style.staticNav }),
-      transform: [
-        {
-          translateY: Animated.add(this.state.offset, this.state.swipeMenuPosition.interpolate({
-            inputRange: [this.swipeMenuOffset, 0],
-            outputRange: [this.swipeMenuOffset, 0],
-            extrapolate: 'clamp',
-          })),
-        },
-      ],
-      backgroundColor: this.props.currentRoute === '/app' ?
-        'white' :
-        this.state.feedButton.interpolate({
-          inputRange: [0.5, 1],
-          outputRange: ['rgba(255,255,255,0)', 'white'],
-        }),
-      borderColor: this.state.feedButton.interpolate({
-        inputRange: [0.5, 1],
-        outputRange: ['rgba(255,255,255,0)', this.props.currentRoute === '/app' ? colors.seafoam : colors.cloud],
-      }),
-    }
-    const swipeMenuBackground = this.state.swipeMenuPosition.interpolate({
+    const swipeMenuOverlayColor = this.props.currentRoute === '/app' || this.props.currentRoute === '/app/chat' ?
+      'rgba( 0, 0, 0, 0.95)' :
+      'rgba( 0, 0, 0, 0.6)'
+    const swipeMenuOverlay = this.state.swipeMenuPosition.interpolate({
       inputRange: [this.swipeMenuOffset, 0],
-      outputRange: ['rgba( 0, 0, 0, 0.6)', 'transparent'],
+      outputRange: [swipeMenuOverlayColor, 'transparent'],
       extrapolate: 'clamp',
     })
+    const navOffset = Animated.add(this.state.offset, this.state.swipeMenuPosition)
+    const navBorderRadius = this.state.swipeMenuPosition.interpolate({
+      inputRange: [this.swipeMenuOffset, 0],
+      outputRange: [18, 0],
+    })
+    const navBorderColor = this.state.feedButton.interpolate({
+      inputRange: [0.5, 1],
+      outputRange: ['rgba(255,255,255,0)', this.props.currentRoute === '/app' ? colors.seafoam : colors.cloud],
+    })
+    const navbarOpacity = this.state.swipeMenuPosition.interpolate({
+      inputRange: [this.swipeMenuOffset, 0],
+      outputRange: [0, 1],
+      extrapolate: 'clamp',
+    })
+    const navbarBackgroundColor = Animated.add(this.state.feedButton, this.state.swipeMenuPosition.interpolate({
+      inputRange: [this.swipeMenuOffset, 0],
+      outputRange: [1, 0],
+    })).interpolate({
+      inputRange: [0.5, 1],
+      outputRange: ['rgba(255,255,255,0)', 'white'],
+      extrapolate: 'clamp',
+    })
+    const swipeMenuHeight = navHeight + this.swipeMenuHeight
+    const swipeMenuOpacity =
+      this.state.swipeMenuPosition.interpolate({
+        inputRange: [this.swipeMenuOffset, 0],
+        outputRange: [1, 0],
+      })
     const swipeAlertOpacity = this.state.swipeMenuPosition.interpolate({
       inputRange: [this.swipeMenuOffset, 0],
       outputRange: [0.3, 1],
@@ -238,58 +246,85 @@ export default class NavBar extends React.Component<IProps, IState> {
     })
     return (
       <Animated.View style={navWrapper} {...this.panResponder.panHandlers}>
-        <View
-          pointerEvents={this.state.menuVisible ? 'auto' : 'none'}
-          style={style.swipeMenuBackgroundWrapper}
-        >
-          <TouchableWithoutFeedback
-            onPress={() => this.animateHideMenu()}
-          >
+        {/* Whole Page Background */}
+        <View pointerEvents={this.state.menuVisible ? 'auto' : 'none'} style={style.swipeMenuBackgroundWrapper}>
+          <TouchableWithoutFeedback onPress={() => this.animateHideMenu()}>
             <Animated.View
-              style={{ ...style.swipeMenuBackground, backgroundColor: swipeMenuBackground }}
+              style={{
+                ...style.swipeMenuBackground,
+                backgroundColor: swipeMenuOverlay,
+              }}
             />
           </TouchableWithoutFeedback>
         </View>
+
+        {/* Nav Container */}
         <Animated.View
-          style={nav}
+          style={{
+            ...style.nav,
+            transform: [{ translateY: navOffset }],
+          }}
           ref={(c: any) => this.swipeMenu = c}
         >
           <Animated.View
+              style={{
+                width,
+                height: swipeMenuHeight,
+                backgroundColor: navbarBackgroundColor,
+                borderTopLeftRadius: navBorderRadius,
+                borderTopRightRadius: navBorderRadius,
+                borderColor: navBorderColor,
+                borderTopWidth: 1,
+                position: 'absolute' as 'absolute',
+                left: 0,
+                top: 0,
+              }}
+          />
+
+          {/* Swipe Menu */}
+          <Animated.View
             style={{
               ...style.swipeMenu,
-              height: ifIphoneX(77, 58) + this.swipeMenuHeight,
-              opacity: this.state.swipeMenuPosition.interpolate({
-                inputRange: [this.swipeMenuOffset, 0],
-                outputRange: [1, 0],
-                extrapolate: 'clamp',
-              }),
+              height: swipeMenuHeight,
+              opacity: swipeMenuOpacity,
+              // backgroundColor: 'white',
+              // backgroundColor: swipeMenuBackground,
             }}
           >
-            <Text>Hello There</Text>
+            <Image
+              source={{
+                uri: 'swipe-menu',
+              }}
+              style={{
+                width,
+                height: 164,
+              }}
+            />
           </Animated.View>
-          <Animated.View style={style.navMenu}>
-            <Animated.View style={{ ...style.swipeAlertContainer, opacity: swipeAlertOpacity }}>
-              <Animated.View style={{ ...style.swipeAlertBar, backgroundColor: swipeAlertColor }} />
-              {/* <Text style={style.swipeAlertText}>
-              {this.state.menuVisible ? '' : 'swipe up for more.'}
-            </Text> */}
-            </Animated.View>
-            <TouchableWithoutFeedback
-              onPress={() => this.props.push('/app')}
-            >
+
+          {/* Navbar */}
+          <Animated.View
+            style={{
+              ...style.navbar,
+              opacity: navbarOpacity,
+              // borderRadius: navBarBorderRadius,
+            }}
+          >
+            {/* Home/Feed Screen Button */}
+            <TouchableWithoutFeedback onPress={() => this.props.push('/app')}>
               <View style={style.iconWrapper}>
                 <Animated.Image
+                  source={{ uri: 'logo-small' }}
                   style={{
                     ...style.navIcon,
                     opacity: this.state.feedButton,
                   }}
-                  source={{ uri: 'logo-small' }}
                 />
               </View>
             </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() => this.props.push('/app/matches')}
-            >
+
+            {/* Matches Screen Button */}
+            <TouchableWithoutFeedback onPress={() => this.props.push('/app/matches')}>
               <View style={style.iconWrapper}>
                 <Animated.Image
                   style={{
@@ -300,10 +335,9 @@ export default class NavBar extends React.Component<IProps, IState> {
                 />
               </View>
             </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() => this.props.push('/app/settings')}
-            // style={style.iconWrapper}
-            >
+
+            {/* Profile/Settings Screen Button */}
+            <TouchableWithoutFeedback onPress={() => this.props.push('/app/settings')}>
               <View style={style.iconWrapper}>
                 <Animated.Image
                   style={{
@@ -314,6 +348,14 @@ export default class NavBar extends React.Component<IProps, IState> {
                 />
               </View>
             </TouchableWithoutFeedback>
+          </Animated.View>
+
+          {/* Swipe Menu Bar & Text */}
+          <Animated.View style={{ ...style.swipeAlertContainer, opacity: swipeAlertOpacity }}>
+            <Animated.View style={{ ...style.swipeAlertBar, backgroundColor: swipeAlertColor }} />
+            <Text style={style.swipeAlertText}>
+              {this.state.menuVisible ? '' : 'swipe up for more.'}
+            </Text>
           </Animated.View>
         </Animated.View>
       </Animated.View>
@@ -351,7 +393,7 @@ const style = {
   swipeAlertText: {
     ...type.micro,
     color: colors.seafoam,
-    marginTop: 2,
+    // marginTop: 2,
     textAlign: 'center' as 'center',
   },
   swipeMenu: {
@@ -370,20 +412,18 @@ const style = {
   nav: {
     width,
     zIndex: 1,
-    borderTopWidth: 1,
   },
-  navMenu: {
+  navbar: {
     width,
     flexDirection: 'row' as 'row',
     justifyContent: 'space-around' as 'space-around',
     alignItems: 'flex-end' as 'flex-end',
-    overflow: 'hidden' as 'hidden',
+    // overflow: 'hidden' as 'hidden',
   },
   iconWrapper: {
-    // width: width / 3,
     flex: 1,
     flexGrow: 1,
-    height: ifIphoneX(77, 58),
+    height: navHeight,
     paddingTop: 12,
     paddingBottom: ifIphoneX(27, 8),
     justifyContent: 'center' as 'center',

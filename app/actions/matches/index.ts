@@ -19,6 +19,20 @@ export const PUSH_CHAT_MATCH = 'PUSH_CHAT_MATCH'
 export const PUSH_MATCHED_CHAT = 'PUSH_MATCHED_CHAT'
 export const PUSH_ENQUEUED_CHAT = 'PUSH_ENQUEUED_CHAT'
 
+export const POPULATE_MATCH_FEED = 'POPULATE_MATCH_FEED' // Got new Matches
+
+export const DENY_MATCH = 'DENY_MATCH'
+export const ACCEPT_MATCH = 'ACCEPT_MATCH'
+
+export const REQUEUE_MATCH = 'REQUEUE_MATCH' // Match Denied, then back-tracked
+
+export const ENQUEUE_WHEEL = 'ENQUEUE_WHEEL' // Match Accepted, Wheel needs spun
+export const ENQUEUE_MATCH = 'ENQUEUE_MATCH' // Match Accepted but wheel not spu
+
+export const INVITE_TO_DATE = 'INVITE_TO_DATE' // Match Accepted, wheel spun
+
+export const ENQUEUE_MATCHES = 'ENQUEUE_MATCHES' // Socket Sent multiple items, for refilling feed on-the-fly
+
 import { ApiResponse } from 'apisauce'
 import { push } from 'connected-react-router'
 import { ThunkDispatch } from 'redux-thunk'

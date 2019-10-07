@@ -69,7 +69,7 @@ const style = {
   imageContainerEnqueued: {
     width: 67,
     height: 67,
-    borderRadius: 67/2,
+    borderRadius: 31,
     overflow: 'hidden' as 'hidden',
     borderWidth: 1,
     borderColor: colors.cloud,
@@ -78,7 +78,7 @@ const style = {
   image: {
     width: 67,
     height: 67,
-    borderRadius: 67/2,
+    borderRadius: 31,
     overflow: 'hidden' as 'hidden',
   },
 }

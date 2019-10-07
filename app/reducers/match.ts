@@ -1,21 +1,54 @@
 import {
-  CLEAR_CHAT,
   PUSH_CHAT,
   PUSH_CHAT_MATCH,
   PUSH_ENQUEUE,
   PUSH_ENQUEUED_CHAT,
-  PUSH_MATCH,
   PUSH_MATCHED_CHAT,
   PUSH_MATCHES,
   PUSH_UNINITIALIZED,
-  RESET_MATCHES,
-  SET_MATCH_MESSAGE,
   REPLACE_ACTIVE_MESSAGE,
   REPLACE_MESSAGE,
+  RESET_MATCHES,
+  SET_MATCH_MESSAGE,
+
+  POPULATE_MATCH_FEED,
+  ACCEPT_MATCH,
+  DENY_MATCH,
+  REQUEUE_MATCH,
+  ENQUEUE_WHEEL,
+  ENQUEUE_MATCH,
+  INVITE_TO_DATE,
+  ENQUEUE_MATCHES
 } from '../actions/matches'
 
 import { AnyAction } from 'redux';
 import { ReduxStore } from '../types/models';
+
+const initialFeed: ReduxStore.Match[] = []
+export const feed = (state = initialEnqueuedMatches, action: AnyAction) => {
+  switch(action.type) {
+    case ACCEPT_MATCH:
+    case DENY_MATCH: return state.filter((v, i, arr) => v._id !== action.match._id)
+    case POPULATE_MATCH_FEED: return action.matches
+    case REQUEUE_MATCH: return [action.match, ...state]
+    default: return [...state]
+  }
+}
+// export const feedLastUpdated = (state = Date.now(), action: AnyAction) => {
+//   switch(action.type) {
+
+//   }
+// }
+
+// const initialFeedRecycleBin: ReduxStore.Match[] = []
+// export const feedRecycleBin = (state = initialFeedRecycleBin, action: AnyAction) => {
+//   switch(action.type) {
+//     case ACCEPT_MATCH:
+//     case DENY_MATCH: return []
+//   }
+// }
+
+// const initialWheelQueue:
 
 const initialEnqueuedMatches: ReduxStore.Match[] = []
 export const enqueuedMatches = (state = initialEnqueuedMatches, action: AnyAction) => {

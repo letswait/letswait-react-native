@@ -19,6 +19,8 @@ import { isIphoneX } from 'react-native-iphone-x-helper'
 import { colors, type } from '../../../../new_foundation'
 
 import LinearGradient from 'react-native-linear-gradient'
+import { acceptMatch } from 'app/actions/matches/feed';
+import { ReduxStore } from 'app/types/models';
 
 const { width, height } = Dimensions.get('window')
 
@@ -32,6 +34,7 @@ interface IProps {
   currentRoute: any,
   // disablePrerender?: boolean
   locationServicesEnabled: boolean,
+  queue: ReduxStore.Match[]
   onGeolocation: () => any
   revealSpinner: (spinner: {
     match: any,
@@ -52,12 +55,13 @@ interface IProps {
   }) => any,
   onScrollUp: () => any
   onScrollDown: () => any
+  acceptMatch: (suitorId: ReduxStore.ObjectId) => any
+  denyMatch: (suitorId: ReduxStore.ObjectId) => any
 }
 interface IState {
   feed: any[]
   prerendered: boolean
   activeCard: number
-  matchMap?: ObjectOf<string>,
   tintColor: Animated.Value,
   cardSize: {
     width: number | undefined,
@@ -73,7 +77,6 @@ export default class FeedComponent extends React.PureComponent<IProps, IState> {
     feed: [],
     activeCard: 0,
     prerendered: false,
-    matchMap: undefined,
     cardSize: {
       width: undefined,
       height: undefined,
@@ -102,41 +105,41 @@ export default class FeedComponent extends React.PureComponent<IProps, IState> {
       } else {
         this.setState({
           feed: res.data.feed,
-          matchMap: res.data.matchMap,
           feedMessage: 'No More Matches\n\nPlease Check Again Later',
         })
       }
     })
   }
-  // public shouldComponentUpdate() {
-  //   if(!this.state.prerendered && !this.props.disablePrerender) {
-  //     this.setState({ prerendered: true })
-  //     return true
-  //   }
-  //   return !!this.props.shouldUpdate
+  // public postAction(candidate: any, action: 'rejected' | 'accepted') {
+    // const matchId = this.state.matchMap[userId]
+    // this.incrementCard()
+
+    // if(action === 'accepted') {
+    //   this.props.acceptMatch(candidate._id)
+    // } else {
+    //   this.props.denyMatch(candidate)
+    // }
+
+    // authedApi.post('/api/matches/post-match', { matchId, action }).then((res: ApiResponse<any>) => {
+    //   if(res.ok) {
+    //     if(res.data) {
+    //       if(!res.data.continue) {
+    //         if(res.data.wheel) {
+    //           this.props.revealSpinner({
+    //             candidate,
+    //             match: res.data.match,
+    //             user: this.props.user,
+    //             wheel: res.data.wheel,
+    //           })
+    //         }
+    //       }
+    //       console.log(res.data)
+    //     }
+    //   }
+    // })
   // }
-  public postAction(candidate: any, userId: string, action: 'rejected' | 'accepted') {
-    if(!this.state.matchMap) return
-    const matchId = this.state.matchMap[userId]
-    this.incrementCard()
-    authedApi.post('/api/matches/post-match', { matchId, action }).then((res: ApiResponse<any>) => {
-      if(res.ok) {
-        if(res.data) {
-          if(!res.data.continue) {
-            if(res.data.wheel) {
-              this.props.revealSpinner({
-                candidate,
-                match: res.data.match,
-                user: this.props.user,
-                wheel: res.data.wheel,
-              })
-            }
-          }
-          console.log(res.data)
-        }
-      }
-    })
-  }
+  public acceptMatch = (candidate: ReduxStore.IMatchUser) => this.props.acceptMatch(candidate._id)
+  public denyMatch = (candidate: ReduxStore.IMatchUser) => this.props.denyMatch(candidate._id)
   public incrementCard() {
     // Alert.alert(`incrementing card: ${this.state.activeCard} ${this.state.activeCard + 1}`)
     this.setState({ activeCard: this.state.activeCard + 1 })
@@ -145,8 +148,6 @@ export default class FeedComponent extends React.PureComponent<IProps, IState> {
   }
   public decrementCard() {
     if(this.state.activeCard) this.setState({ activeCard: this.state.activeCard - 1 })
-  }
-  public returnColor() {
   }
   public growCard(value: number) {
     if(!!this.nextCard) {
@@ -210,8 +211,10 @@ export default class FeedComponent extends React.PureComponent<IProps, IState> {
             }}
             // ref={this.updateNextCardBound}
             layout={this.state.cardSize}
-            onLeft={(id: string, candidate: any) => this.postAction(candidate, id, 'rejected')}
-            onRight={(id: string, candidate: any) => this.postAction(candidate, id, 'accepted')}
+            // onLeft={(candidate: any) => this.postAction(candidate, 'rejected')}
+            onLeft={this.acceptMatch}
+            onRight={this.denyMatch}
+            // onRight={(candidate: any) => this.postAction(candidate, 'accepted')}
             onScrollUp={() => this.props.onScrollUp()}
             onScrollDown={() => this.props.onScrollDown()}
           />

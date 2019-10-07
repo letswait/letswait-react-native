@@ -24,6 +24,8 @@ import { colors, type } from '../../../../new_foundation'
 import { ifIphoneX } from 'react-native-iphone-x-helper';
 
 import CardSection from './CardSection'
+import DynamicListContainer from 'app/components/DynamicListContainer';
+import { ReduxStore } from 'app/types/models';
 
 interface IProps {
   _id: string,
@@ -43,8 +45,8 @@ interface IProps {
     y: number | undefined,
   },
   cardSwipe: any,
-  onLeft?: (id: string, candidate: any) => any,
-  onRight?: (id: string, candidate: any) => any,
+  onLeft?: (candidate: ReduxStore.IMatchUser) => any,
+  onRight?: (candidate: ReduxStore.IMatchUser) => any,
   onScrollUp?: () => any,
   onScrollDown?: () => any,
 }
@@ -57,6 +59,8 @@ interface IState {
 }
 export default class Card extends React.PureComponent<IProps, IState> {
   public getNode: Function | undefined
+  public recentScrollPosition: number = 0
+  private cardSections: ObjectOf<CardSection> = {}
   constructor(props: IProps) {
     super(props)
   }
@@ -68,23 +72,13 @@ export default class Card extends React.PureComponent<IProps, IState> {
     scrolling: false,
   }
   public _panResponder = PanResponder.create({
-    onMoveShouldSetPanResponder: (evt, gestureState) => {
-      if(gestureState.dx === 0 && gestureState.dy === 0) {
-        this.swipeDirection = null
-        return false
+    onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
+      if(Math.abs(gestureState.dx) > Math.abs(gestureState.dy)) {
+        this.swipeDirection = 'horizontal'
+        return true
       }
-      if(!this.swipeDirection) { // swipeDirection unset
-        if(Math.abs(gestureState.dx) > Math.abs(gestureState.dy)) {
-          this.swipeDirection = 'horizontal'
-          return true
-        }
-        // if(gestureState.dy < 0) {
-        // } else {
-        // }
-        this.swipeDirection = 'vertical'
-        return false
-      }
-      return this.swipeDirection === 'horizontal'
+      this.swipeDirection = 'vertical'
+      return false
     },
     onPanResponderMove: (evt, gestureState) => {
       if(this.swipeDirection === 'horizontal') {
@@ -114,7 +108,6 @@ export default class Card extends React.PureComponent<IProps, IState> {
       useNativeDriver: true,
     }).start(() => {
       return this.props.onRight!(
-        this.props._id,
         {
           _id: this.props._id,
           name: this.props.name,
@@ -129,7 +122,6 @@ export default class Card extends React.PureComponent<IProps, IState> {
         },
       )
     })
-    // }).start(() => setTimeout(() => this.animateBack(), 500))
   }
   private animateLeft({ vx, dx }: any) {
     const x = width * 2
@@ -140,7 +132,6 @@ export default class Card extends React.PureComponent<IProps, IState> {
       useNativeDriver: true,
     }).start(() => {
       return this.props.onLeft!(
-        this.props._id,
         {
           _id: this.props._id,
           name: this.props.name,
@@ -155,16 +146,13 @@ export default class Card extends React.PureComponent<IProps, IState> {
         },
       )
     })
-    // }).start(() => setTimeout(() => this.animateBack(), 500))
   }
   private animateBack() {
     Animated.timing(this.state.swipeAnimation, {
       toValue: 0,
       duration: 120,
-      // easing: Easing.elastic(1),
       useNativeDriver: true,
     }).start()
-    // this.state.swipeAnimation
   }
   public resetCard() {
     this.state.swipeAnimation.setValue(0)
@@ -176,12 +164,6 @@ export default class Card extends React.PureComponent<IProps, IState> {
   private scrollView: ScrollView | null = null
   private swipeDirection: 'vertical' | 'horizontal' | null = null
   public render() {
-    // const images = this.props.profile.images.reverse()
-    const imageProps = { style: {
-      width,
-      height: width,
-      marginTop: 1,
-    }}
     const transform = this.state.touchEnabled ? [
       { translateX: this.state.swipeAnimation },
       { rotate: this.state.swipeAnimation.interpolate({
@@ -219,9 +201,11 @@ export default class Card extends React.PureComponent<IProps, IState> {
         <ScrollView
           style={style.cardWrapper}
           contentContainerStyle={style.cardContainer}
-          bounces={false}
+          bounces={true}
+          bouncesZoom
           showsVerticalScrollIndicator={false}
           scrollEventThrottle={50}
+          // decelerationRate="fast"
           ref={(c: ScrollView) => {
             this.scrollView = c
           }}
@@ -229,22 +213,40 @@ export default class Card extends React.PureComponent<IProps, IState> {
           onScrollBeginDrag={event => this.setState({ lastScrollLoc: event.nativeEvent.contentOffset.y, scrolling: true })}
           onScrollEndDrag={event => this.setState({ scrolling: false })}
           onScroll={(event) => {
-
             const diff = event.nativeEvent.contentOffset.y - this.state.lastScrollLoc
-            if(diff > 50) {
+            const v = event.nativeEvent.contentOffset.y - this.recentScrollPosition
+            this.recentScrollPosition = event.nativeEvent.contentOffset.y + 0
+
+            const existingSections = Object.keys(this.cardSections).length
+            let foundItems = v > 0 ? existingSections : 0
+            for(const r in this.cardSections) {
+              if(this.cardSections[r]) {
+                const decay = foundItems * foundItems/existingSections
+                this.cardSections[r].onScroll(
+                  foundItems * v ,
+                  10 * decay,
+                )
+                v > 0 ? foundItems++ : foundItems--
+              }
+            }
+
+            if(diff > 100 || v > 30) {
               if(this.state.scrolling) this.props.onScrollDown!()
-            } else if(diff < -50) {
+            } else if(diff < -100 || v < -30) {
               if(this.state.scrolling) this.props.onScrollUp!()
             } else {
               return
             }
-            this.setState({ lastScrollLoc: event.nativeEvent.contentOffset.y })
+
+            if(Math.abs(diff) > 100) {
+              this.setState({ lastScrollLoc: event.nativeEvent.contentOffset.y })
+            }
           }}
         >
           <CardSection
-            // title?: string,
             source={{ uri: this.props.profile.images[0] }}
-            customHeight={height - ifIphoneX(77, 58) - 76}
+            customHeight={height - ifIphoneX(84, 64) - 76}
+            ref={c => c ? this.cardSections.section1 = c : null}
           >
             <View style={titleContainer}>
               <Text style={style.titleText}>
@@ -255,8 +257,14 @@ export default class Card extends React.PureComponent<IProps, IState> {
               <Text style={style.profileBioText}>{this.props.profile.aboutMe}</Text>
             </View>
           </CardSection>
-          <CardSection source={{ uri: this.props.profile.images[1] }}/>
-          <CardSection source={{ uri: this.props.profile.images[2] }}/>
+          <CardSection
+            ref={c => c ? this.cardSections.section2 = c : null}
+            source={{ uri: this.props.profile.images[1] }}
+          />
+          <CardSection
+            ref={c => c ? this.cardSections.section3 = c : null}
+            source={{ uri: this.props.profile.images[2] }}
+          />
           {this.props.profile.images[3] && <CardSection source={{ uri: this.props.profile.images[3] }}/>}
           {this.props.profile.images[4] && <CardSection source={{ uri: this.props.profile.images[4] }}/>}
           {this.props.profile.images[5] && <CardSection source={{ uri: this.props.profile.images[5] }}/>}

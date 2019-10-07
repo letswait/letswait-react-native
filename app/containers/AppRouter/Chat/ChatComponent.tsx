@@ -10,6 +10,9 @@ import {
   Text,
   View,
   Keyboard,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+  ViewToken,
 } from 'react-native'
 import FastImage from 'react-native-fast-image'
 
@@ -28,7 +31,10 @@ import FeatherButton from '../../../components/Camera/CameraButton'
 import DateInvite from '../../../components/Chat/DateInvite';
 import { IMediaReference } from '../../../types/photos'
 
+import DynamicListContainer from '../../../components/DynamicListContainer'
+
 import LinearGradient from 'react-native-linear-gradient'
+import { ObjectOf } from 'app/types/helpers';
 
 // import { presentLocalNotification } from '../../../lib/NotificationService'
 
@@ -45,9 +51,17 @@ interface IState {
   refresh: boolean
 }
 export default class MatchesComponent extends React.PureComponent<IProps, IState> {
+  public scrollPosition: number = 0
+  public scrollVelocity: number = 0
+  private messages: ObjectOf<DynamicListContainer> = {}
   public state: IState = {
     keyboardVisible: new Animated.Value(0),
     refresh: false,
+  }
+  constructor(props: IProps) {
+    super(props)
+    this.handleChatDelay = this.handleChatDelay.bind(this)
+    this.handleChatScroll = this.handleChatScroll.bind(this)
   }
   public componentDidUpdate(prevProps: IProps, prevState: IState) {
     if(prevState.refresh !== this.state.refresh) {
@@ -75,6 +89,37 @@ export default class MatchesComponent extends React.PureComponent<IProps, IState
       toValue: 0,
       duration: 300,
     }).start()
+  }
+  public handleChatScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
+    this.scrollVelocity = e.nativeEvent.contentOffset.y - this.scrollPosition
+    this.scrollPosition = e.nativeEvent.contentOffset.y
+    const velocity = Math.abs(this.scrollPosition - (this.offset || 0))
+    this.offset = this.scrollPosition;
+    // tslint:disable-next-line: no-unused-expression
+    velocity > 15 && Keyboard.dismiss()
+  }
+  public handleChatDelay({
+    viewableItems,
+    changed,
+  }: {
+    viewableItems: ViewToken[],
+    changed: ViewToken[],
+  }) {
+    let foundItems = 0
+    const viewableItemCount = viewableItems.length
+    for(let i = viewableItemCount; i--;) {
+      const foundMessage = this.messages[viewableItems[i].item._id]
+      if(!!foundMessage) {
+        const position = Math.min(15, this.scrollVelocity > 0 ? viewableItemCount - foundItems : foundItems)
+        const decay = position * position/15
+        foundMessage.onScroll(
+          decay * this.scrollVelocity,
+          decay * 3,
+          250,
+        )
+        foundItems++
+      }
+    }
   }
   public offset: number | undefined
   public scrollView: any = null
@@ -117,13 +162,6 @@ export default class MatchesComponent extends React.PureComponent<IProps, IState
             {this.props.match &&
               <FlatList
                 keyboardDismissMode="none"
-                onScroll={(e) => {
-                  const currentOffset = e.nativeEvent.contentOffset.y;
-                  const velocity = Math.abs(currentOffset - (this.offset || 0))
-                  this.offset = currentOffset;
-                  // tslint:disable-next-line: no-unused-expression
-                  velocity > 15 && Keyboard.dismiss()
-                }}
                 scrollEventThrottle={16}
                 keyboardShouldPersistTaps={'always'}
                 style={style.matchScroll}
@@ -132,16 +170,26 @@ export default class MatchesComponent extends React.PureComponent<IProps, IState
                 ListHeaderComponent={<View style={{ height: 8 }}/>}
                 inverted
                 data={chatData}
+                keyExtractor={(item, index) => item._id}
+                extraData={this.state.refresh}
+                onViewableItemsChanged={this.handleChatDelay}
+                onScroll={this.handleChatScroll}
                 renderItem={({ item, index }) => {
                   if(item.message.location) {
                     const date = this.props.match!.dates[0]
                     return (
-                      <DateInvite
-                        {...date}
-                        largeMargins={this.props.match!.chat.length <= 1}
-                        userName={this.props.user.name}
-                        matchName={this.props.match!.userProfiles[0].name}
-                      />
+                      <DynamicListContainer
+                        vertical={true}
+                        ref={c => c ? this.messages[item._id] = c : null}
+                        maxOffset={16}
+                      >
+                        <DateInvite
+                          {...date}
+                          largeMargins={this.props.match!.chat.length <= 1}
+                          userName={this.props.user.name}
+                          matchName={this.props.match!.userProfiles[0].name}
+                        />
+                      </DynamicListContainer>
                     )
                   }
                   const lastDirection = `${lastDir || ''}`
@@ -159,25 +207,28 @@ export default class MatchesComponent extends React.PureComponent<IProps, IState
                   lastTime = moment(item.sentTimestamp || lastTime).toDate()
                   const loading = !item.sentTimestamp
                   return  (
-                    <Message
-                      {...item}
-                      key={item._id}
-                      direction={direction}
-                      lastDirection={lastDirection as any}
-                      nextTimestamp={nextTimestamp}
-                      lastTimestamp={lastTimestamp}
-                      loading={loading}
-                      source={direction === 'right' ? {
-                        uri: this.props.user.profile.images[0],
-                      } : {
-                        uri: matchedUser!.profile.images[0],
-                      }}
-                    />
+                    <DynamicListContainer
+                        vertical={true}
+                        ref={c => c ? this.messages[item._id] = c : null}
+                        maxOffset={16}
+                    >
+                      <Message
+                        {...item}
+                        key={item._id}
+                        direction={direction}
+                        lastDirection={lastDirection as any}
+                        nextTimestamp={nextTimestamp}
+                        lastTimestamp={lastTimestamp}
+                        loading={loading}
+                        source={direction === 'right' ? {
+                          uri: this.props.user.profile.images[0],
+                        } : {
+                          uri: matchedUser!.profile.images[0],
+                        }}
+                      />
+                    </DynamicListContainer>
                   )
                 }}
-
-                keyExtractor={(item, index) => item._id}
-                extraData={this.state.refresh}
               />
             }
           </BoundedContentView>
