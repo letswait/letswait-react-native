@@ -2,12 +2,11 @@ import {
   ACCEPT_MATCH,
   DENY_MATCH,
   ENQUEUE_WHEEL,
+  POPULATE_MATCH_FEED,
+  REQUEST_FEED,
 } from './index'
 
-import { push } from 'connected-react-router'
-import { ThunkDispatch } from 'redux-thunk'
-
-import { ReduxStore } from '../../types/models';
+import { ReduxStore, SocketReturnTypes } from '../../types/models';
 
 export const acceptMatch = (suitorId: ReduxStore.IMatchUser) => ({
   suitorId,
@@ -20,7 +19,17 @@ export const denyMatch = (suitorId: ReduxStore.IMatchUser) => ({
 })
 
 // Add Spinnable Match to Wheel Queue
-export const enqueueWheel = (spinner: any) => ({
+export const enqueueWheel = (spinner: SocketReturnTypes.SpinnerInfo) => ({
   spinner,
   type: ENQUEUE_WHEEL,
+})
+
+export const requestFeed = (searchSettings: ReduxStore.SearchSettings) => ({
+  searchSettings,
+  type: REQUEST_FEED,
+})
+export const populateFeed = (feed: ReduxStore.Match[], searchSettings: ReduxStore.SearchSettings) => ({
+  searchSettings,
+  feed,
+  type: POPULATE_MATCH_FEED,
 })

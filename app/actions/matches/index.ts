@@ -19,6 +19,7 @@ export const PUSH_CHAT_MATCH = 'PUSH_CHAT_MATCH'
 export const PUSH_MATCHED_CHAT = 'PUSH_MATCHED_CHAT'
 export const PUSH_ENQUEUED_CHAT = 'PUSH_ENQUEUED_CHAT'
 
+export const REQUEST_FEED = 'REQUEST_FEED'
 export const POPULATE_MATCH_FEED = 'POPULATE_MATCH_FEED' // Got new Matches
 
 export const DENY_MATCH = 'DENY_MATCH'

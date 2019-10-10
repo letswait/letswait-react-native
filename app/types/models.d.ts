@@ -44,6 +44,15 @@ declare namespace ReduxStore {
     radius: number
     ageRange: [number, number]
   }
+  export type SearchSettings = {
+    sexualPreference: 'male' | 'female' | 'everyone'
+    radius: number,
+    ageRange: [number, number],
+    goal: 'exclusive' | 'unsure' | 'casual' | 'serious',
+    // tags: {
+
+    // },
+  }
 
   export type Match = {
     _id: ObjectId,
@@ -121,4 +130,36 @@ declare namespace ReduxStore {
   }
 
   export type ObjectId = any
+}
+
+declare namespace SocketReturnTypes {
+  export type AcceptMatch = {
+    matchId?: ReduxStore.ObjectId
+    preloadedDate?: 'sponsored' | 'event' | 'premiumMatch' | 'recommendation'
+    preloadedSource?: string
+    preloadedSpinner?: string
+
+    match?: ReduxStore.Match
+    // When got spinner data, send it down. client should catch it and incorporate it into match
+    wheel?: Wheel,
+  }
+  export type SpinnerInfo = {
+    wheel: SocketReturnTypes.Wheel,
+    match: ReduxStore.Match | null,
+    candidate: ReduxStore.IMatchUser | null,
+    user: any,
+  }
+  export type Wheel = {
+    segments: Array<{
+      label: string,
+      venueName?: string
+      logo?: string,
+      venueId?: any,
+      campaignId?: any,
+      priceLevel?: 0 | 1 | 2 | 3 | 4,
+      message?: string,
+      code?: string,
+    }>,
+    chosenSegment: number,
+  }
 }

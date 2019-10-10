@@ -19,13 +19,16 @@ import { authedApi } from '../../lib/api'
 import { storeToken } from '../../lib/asyncStorage';
 
 import { Alert } from 'react-native';
-import { ReduxStore } from '../../types/models';
+import { ReduxStore, SocketReturnTypes } from '../../types/models';
 import { pushMessage, replaceChatMessage } from '../matches/chat';
-import { showModal } from '../navigation/modal'
+import { showModal, pushSpinner, resetSpinner } from '../navigation/modal'
 
 import { Action, AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux'
 import io from 'socket.io-client'
 import config from '../../../config'
+import { populateFeed } from '../matches/feed';
+
+// tslint:disable: no-shadowed-variable
 
 export default function socketClientMiddleware() {
   return (storeAPI: MiddlewareAPI) => { // Put our logic within storeAPI to easily dispatch actions
@@ -100,10 +103,11 @@ export default function socketClientMiddleware() {
           dispatch(pushMessage(matchId, newMessage))
           socket.emit(
             'message',
-            encodeURIComponent(JSON.stringify(socketData)),
-            (data: ReduxStore.IChat | null) => {
+            _encode(socketData),
+            (data: string | null) => {
               if(data && activeChat) {
-                dispatch(replaceChatMessage(activeChat._id, data))
+                const sentMessage: ReduxStore.IChat = _decode(data)
+                dispatch(replaceChatMessage(activeChat._id, sentMessage))
               } else {
                 console.log('something went wrong submitting message')
                 const errorMessage = Object.assign({}, newMessage, { error: Date.now() })
@@ -116,69 +120,87 @@ export default function socketClientMiddleware() {
         case ACCEPT_MATCH: {
           try {
             const {
-              // tslint:disable-next-line: no-shadowed-variable
               suitorId,
             }: {
               suitorId: ReduxStore.ObjectId,
             } = action as any
-            const { feed }: { feed: ReduxStore.Match[] } = getState()
-            // tslint:disable-next-line: no-shadowed-variable
-            let matchId = null
-            for(let i = 0; i <= feed.length; i++) {
-              if(feed[i].userProfiles[0]._id.toString() === suitorId.toString()) {
-                matchId = feed[i]._id.toString()
-                break;
-              }
-            }
-            if(matchId) {
-              socket.emit('acceptMatch', matchId, (data: {
-                matchId?: ReduxStore.ObjectId
-                preloadedDate?: 'sponsored' | 'event' | 'premiumMatch' | 'recommendation'
-                preloadedSource?: string
-                preloadedSpinner?: string
-
-                match?: ReduxStore.Match
-                // When got spinner data, send it down. client should catch it and incorporate it into match
-                wheel?: any,
-              }) => {
-                Alert.alert('Accepted Match Response', encodeURIComponent(JSON.stringify(data)))
-              })
-            } else {
-              throw new Error('Could not communicate with server')
-            }
+            socket.emit(
+              'acceptMatch',
+              _encode(suitorId),
+              (_data: SocketReturnTypes.AcceptMatch) => {
+                console.log('firing acceptMatch callback!')
+                if(_data) {
+                  const data = _decode(_data)
+                  if(data.matchId) {
+                    console.log('firing match accepted')
+                    dispatch(resetSpinner(user, data.match.userProfiles[0]))
+                    dispatch(showModal('spinner'))
+                  } else if(data.match && data.wheel) {
+                    // Inject Wheel, Allow Wheel date invite to be made
+                    console.log('got response for match/ wheel data')
+                    const spinner: SocketReturnTypes.SpinnerInfo = {
+                      user,
+                      match: data.match,
+                      wheel: data.wheel,
+                      candidate: data.match.userProfiles[0],
+                    }
+                    dispatch(pushSpinner(spinner))
+                  } else {
+                    // tslint:disable-next-line: no-unused-expression
+                    throw new Error('error accepting match')
+                  }
+                }
+              },
+            )
           } catch(e) {
             // tslint:disable-next-line: no-unused-expression
             __DEV__ && console.log(e)
             Alert.alert((e as Error).message)
+            action.suitorId = null // Suitor Id May be Compromised, fallback to kicking out the first feed array
+                                   // elements. slightly less reliable but safe.
+          } finally {
+            // tslint:disable-next-line: no-unsafe-finally
+            return next(action)
           }
         }
 
         case DENY_MATCH: {
-          const {
-            // tslint:disable-next-line: no-shadowed-variable
-            matchId,
-          }: {
-            matchId: ReduxStore.ObjectId,
-          } = action as any
-          return next(action)
+          try {
+            const {
+              suitorId,
+            }: {
+              suitorId: ReduxStore.ObjectId,
+            } = action as any
+            socket.emit('denyMatch', _encode(suitorId))
+          } catch(e) {
+            // tslint:disable-next-line: no-unused-expression
+            __DEV__ && console.log(e)
+            Alert.alert((e as Error).message)
+            action.suitorId = null // Suitor Id May be Compromised, fallback to kicking out the first feed array
+                                   // elements. slightly less reliable but safe.
+          } finally {
+            // tslint:disable-next-line: no-unsafe-finally
+            return next(action)
+          }
         }
 
         case REQUEST_FEED: {
           const {
             searchSettings,
           }: {
-            searchSettings: {
-              sexualPreference: 'men' | 'women' | 'everyone'
-              radius: number,
-              ageRange: [number, number],
-              goal: 'exclusive' | 'unsure' | 'casual' | 'serious',
-              // tags: {
-
-              // },
-            },
+            searchSettings: ReduxStore.SearchSettings,
           } = action as any
           const { feed } = getState()
-          socket.emit('')
+          socket.emit('requestFeed', _encode(searchSettings), (_data: string | null) => {
+            if(_data) {
+              const data = _decode(_data) as ReduxStore.Match[]
+              if(data.length) {
+                dispatch(populateFeed(data, searchSettings))
+              }
+            } else {
+              Alert.alert('Could not get feed, try again later')
+            }
+          })
         }
 
         default: return next(action)
@@ -200,7 +222,7 @@ export default function socketClientMiddleware() {
         // potentially better alternative...
         // if(activeChat && activeChat._id && typeof activeChat._id !== 'string') {
         if(activeChat._id !== '00000000') {
-          socket.emit('joinchat', activeChat._id)
+          socket.emit('joinchat', _encode(activeChat._id))
         }
       })
 
@@ -225,3 +247,8 @@ export default function socketClientMiddleware() {
     }
   }
 }
+
+// tslint:disable-next-line: function-name
+function _decode(data: any) { return JSON.parse(decodeURIComponent(data)) }
+// tslint:disable-next-line: function-name
+function _encode(data: any) { return encodeURIComponent(JSON.stringify(data)) }

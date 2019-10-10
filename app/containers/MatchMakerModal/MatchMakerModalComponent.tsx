@@ -1,6 +1,7 @@
 import * as React from 'react'
 import {
   ActivityIndicator,
+  Alert,
   Animated,
   Dimensions,
   Easing,
@@ -11,7 +12,6 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  Alert,
 } from 'react-native'
 
 import Date from '../../components/DateInvite/Date'
@@ -24,6 +24,7 @@ import { colors, type } from '../../../new_foundation'
 import { authedApi } from '../../lib/api';
 
 import { ApiResponse } from 'apisauce';
+import { SocketReturnTypes, ReduxStore } from 'app/types/models'
 import FastImage from 'react-native-fast-image';
 
 const { width, height } = Dimensions.get('window')
@@ -31,23 +32,7 @@ const { width, height } = Dimensions.get('window')
 interface IProps {
   dismiss: () => any
   pushChat: (matchId: any, candidate: any) => any,
-  spinner?: {
-    match: any,
-    user: any,
-    candidate: any,
-    wheel: {
-      segments: Array<{
-        logo: string,
-        name: string,
-        venueId?: any,
-        campaignId?: any,
-        priceLevel?: 0 | 1 | 2 | 3 | 4,
-        message?: string,
-        code?: string,
-      }>,
-      chosenSegment: number,
-    },
-  }
+  spinner?: SocketReturnTypes.SpinnerInfo
 }
 interface IState {
   paging: 0 | 1
@@ -82,7 +67,7 @@ export default class MatchMakerModal extends React.PureComponent<IProps, IState>
     authedApi.post('/api/matches/post-wheel', {
       wheel: this.props.spinner!.wheel,
       message: '',
-      matchId: this.props.spinner!.match._id,
+      matchId: this.props.spinner!.match!._id,
     }).then((res: ApiResponse<any>) => {
       // Alert.alert(res.data.match)
       if(res.ok && res.data.match) {
@@ -101,7 +86,6 @@ export default class MatchMakerModal extends React.PureComponent<IProps, IState>
       500)
   }
   public render() {
-    console.log(this.props.spinner)
     if(this.props.spinner) {
       const { user, candidate, wheel } = this.props.spinner
       const pageStyle = {
@@ -136,7 +120,7 @@ export default class MatchMakerModal extends React.PureComponent<IProps, IState>
               {'ITS A MATCH!'}
             </Text>
             <Date
-              sources={[user.profile.images[0], candidate.profile.images[0]]}
+              sources={[user.profile.images[0], candidate!.profile.images[0]]}
             />
             <Spinner
               onSpin={() => this.proxyResponse()}
@@ -177,7 +161,7 @@ export default class MatchMakerModal extends React.PureComponent<IProps, IState>
                   maxWidth: 275,
                 }}
               >
-                {`Check your messages for details.\nMessage ${this.props.spinner.candidate.name} and set your date at:`}
+                {`Check your messages for details.\nMessage ${this.props.spinner.candidate!.name} and set your date at:`}
               </Text>
               <FastImage
                 source={{ uri: this.props.spinner.wheel.segments[this.props.spinner.wheel.chosenSegment].logo }}

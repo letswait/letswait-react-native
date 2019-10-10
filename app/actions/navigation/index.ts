@@ -9,6 +9,7 @@ export type IStatusBarTheme = 'dark-content' | 'light-content' | 'default'
 export const SHOW_MODAL = 'SHOW_MODAL'
 export const DISMISS_MODAL = 'DISMISS_MODAL'
 export const PUSH_SPINNER = 'PUSH_SPINNER'
+export const RESET_SPINNER = 'RESET_SPINNER'
 
 export const IS_LOADING = 'IS_LOADING'
 export const TOGGLE_LOADING = 'TOGGLE_LOADING'

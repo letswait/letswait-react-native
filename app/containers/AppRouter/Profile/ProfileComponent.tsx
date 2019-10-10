@@ -75,8 +75,6 @@ interface IState {
   photoProgress: number[]
   settings: {
     profile: ReduxStore.IUserProfile,
-    // searchSettings: ReduxStore.IUserSearchSettings,
-    // hideUser: boolean,
   }
 }
 export default class ProfileComponent extends React.Component<IProps, IState> {

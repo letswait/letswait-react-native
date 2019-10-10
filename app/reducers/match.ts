@@ -18,7 +18,8 @@ import {
   ENQUEUE_WHEEL,
   ENQUEUE_MATCH,
   INVITE_TO_DATE,
-  ENQUEUE_MATCHES
+  ENQUEUE_MATCHES,
+  REQUEST_FEED,
 } from '../actions/matches'
 
 import { AnyAction } from 'redux';
@@ -28,12 +29,26 @@ const initialFeed: ReduxStore.Match[] = []
 export const feed = (state = initialEnqueuedMatches, action: AnyAction) => {
   switch(action.type) {
     case ACCEPT_MATCH:
-    case DENY_MATCH: return state.filter((v, i, arr) => v._id !== action.match._id)
-    case POPULATE_MATCH_FEED: return action.matches
+    case DENY_MATCH: {
+      if(action.suitorId) {
+        return state.filter((v, i, arr) => v._id !== action.suitorId)
+      }
+      return [...state.slice(1, state.length)]
+    }
+    case POPULATE_MATCH_FEED: return action.feed || []
+    case REQUEST_FEED: return []
     case REQUEUE_MATCH: return [action.match, ...state]
     default: return [...state]
   }
 }
+
+export const matchedSearchPreferences = (state: any = null, action: AnyAction) => {
+  switch(action.type) {
+    case POPULATE_MATCH_FEED: return action.searchSettings
+    default: return state ? { ...state } : null
+  }
+}
+
 // export const feedLastUpdated = (state = Date.now(), action: AnyAction) => {
 //   switch(action.type) {
 
@@ -108,6 +123,7 @@ export const chatMatches = (state = initialChatMatches, action: AnyAction) => {
 export const matchMessage = (state = 'Loading Matches...', action: AnyAction) => {
   switch(action.type) {
     case SET_MATCH_MESSAGE: return action.message
+    case REQUEST_FEED: return 'Getting Matches...'
     default: return `${state}`
   }
 }

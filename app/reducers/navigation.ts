@@ -8,9 +8,12 @@ import {
   IS_LOADING,
   NOT_LOADING,
   PUSH_SPINNER,
+  RESET_SPINNER,
   SHOW_MODAL,
   TOGGLE_LOADING,
 } from '../actions/navigation'
+
+import { SocketReturnTypes } from 'app/types/models';
 
 const initialStatusBarState = {
   color: '',
@@ -44,8 +47,31 @@ export const modal = (state = null, action: AnyAction) => {
   }
 }
 
-export const spinner = (state: any | null = null, action: AnyAction) => {
+const defaultSpinner: SocketReturnTypes.SpinnerInfo = {
+  wheel: {
+    segments: [
+      { label: 'SUSHI' },
+      { label: 'COMEDY' },
+      { label: 'PIZZA' },
+      { label: 'CHINESE' },
+      { label: 'JAPANESE' },
+      { label: 'MUSIC' },
+      { label: 'COFFEE' },
+      { label: 'MEXICAN' },
+      { label: 'MOVIES' },
+      { label: 'OUTDOOR' },
+      { label: 'ITALIAN' },
+      { label: 'AMERICAN' },
+    ],
+    chosenSegment: -1,
+  },
+  match: null,
+  candidate: null,
+  user: null,
+}
+export const spinner = (state = defaultSpinner , action: AnyAction) => {
   switch(action.type) {
+    case RESET_SPINNER: return Object.assign({}, defaultSpinner, { user: action.user, candidate: action.candidate })
     case PUSH_SPINNER: return action.spinner
     default: return state !== null ? { ...state } : null
   }
